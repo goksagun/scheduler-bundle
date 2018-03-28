@@ -1,0 +1,30 @@
+{
+    "name": "goksagun/scheduler-bundle",
+    "description": "Scheduled task bundle",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Burak Bolat",
+            "email": "brkblt@gmail.com"
+        }
+    ],
+    "keywords": [
+        "scheduler task bundle"
+    ],
+    "license": [
+        "MIT"
+    ],
+    "require": {
+        "mtdowling/cron-expression": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Goksagun\\SchedulerBundle\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.0.1-dev"
+        }
+    }
+}
