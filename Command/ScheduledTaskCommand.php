@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  *      * * * * * php /path-to-your-project/bin/console scheduler:run >> /dev/null 2>&1
  *
- * This Cron will call the Laravel command scheduler every minute. When the scheduler:run
+ * This Cron will call the command scheduler every minute. When the scheduler:run
  * command is executed, application will evaluate your scheduled tasks and runs the tasks that are due.
  */
 class ScheduledTaskCommand extends ContainerAwareCommand
