@@ -2,10 +2,10 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use AppBundle\Entity\ScheduledTask;
-use AppBundle\Utils\Helper;
 use Cron\CronExpression;
+use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
@@ -35,7 +35,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     /**
      * @var array
      */
-    private $config;
+    private $tasks;
 
     /**
      * @var \Doctrine\ORM\EntityManager
@@ -45,14 +45,14 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     /**
      * ScheduledTaskCommand constructor.
      * @param bool $enable
-     * @param array $config
+     * @param array $tasks
      */
-    public function __construct($enable, array $config)
+    public function __construct(bool $enable, array $tasks)
     {
         parent::__construct();
 
         $this->enable = $enable;
-        $this->config = $config;
+        $this->tasks = $tasks;
     }
 
     protected function configure()
@@ -68,124 +68,83 @@ class ScheduledTaskCommand extends ContainerAwareCommand
             return;
         }
 
-        // Run scheduled tasks if is due time.
         $this->runScheduledTasks($output);
     }
 
-    protected function runScheduledTasks($output)
+    protected function runScheduledTasks(OutputInterface $output)
     {
         $scheduledTasks = $this->getScheduledTasks();
 
-        foreach ($scheduledTasks as $name => $args) {
-            $expression = is_array($args) ? $args['expression'] : $args;
+        foreach ($scheduledTasks as $scheduledTask) {
+            $name = $scheduledTask['name'] ?? null;
+            if (empty($name)) {
+                throw new \InvalidArgumentException("The task command name should be defined.");
+            }
+
+            $expression = $scheduledTask['expression'] ?? null;
+            if (empty($expression)) {
+                throw new \InvalidArgumentException("The task expression shoul be defined.");
+            }
 
             $cron = CronExpression::factory($expression);
 
-            if ($cron->isDue()) {
-                // Create new scheduled task entry.
-                $scheduledTask = $this->createScheduledTask($name);
+            if (!$cron->isDue()) {
+                continue;
+            }
 
-                $commandName = $this->getCommandName($name);
+            // Create scheduled task status as queued.
+            $scheduledTask = $this->createScheduledTask($name);
 
-                try {
-                    $command = $this->getApplication()->find($commandName);
-                } catch (CommandNotFoundException $e) {
-                    // Log error message.
-                    $this->updateScheduledTaskStatusAndMessage(
-                        $scheduledTask,
-                        ScheduledTask::STATUS_FAILED,
-                        $e->getMessage()
-                    );
+            $commandName = $this->getCommandName($name);
 
-                    continue;
-                }
+            try {
+                $command = $this->getApplication()->find($commandName);
+            } catch (CommandNotFoundException $e) {
+                // Log error message.
+                $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
 
-                try {
-                    $arguments = $this->getCommandArguments($command, $name, $args);
+                continue;
+            }
 
-                    $input = new ArrayInput($arguments);
+            try {
+                $arguments = $this->getCommandArguments($command, $name);
 
-                    $command->run($input, $output);
+                $input = new ArrayInput($arguments);
 
-                    // Update scheduled task status as executed.
-                    $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_EXECUTED);
-                } catch (\Exception $e) {
-                    // Log error message.
-                    $this->updateScheduledTaskStatusAndMessage(
-                        $scheduledTask,
-                        ScheduledTask::STATUS_FAILED,
-                        $e->getMessage()
-                    );
+                $command->run($input, $output);
 
-                    continue;
-                }
+                // Update scheduled task status as executed.
+                $this->updateScheduledTaskStatusAsExecuted($scheduledTask);
+            } catch (\Exception $e) {
+                // Log error message.
+                $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+
+                continue;
             }
         }
     }
 
-    protected function createScheduledTask($name)
+    private function getScheduledTasks()
     {
-        $scheduledTask = new ScheduledTask;
-        $scheduledTask
-            ->setName($name)
-            ->setTime(new \DateTimeImmutable);
-
-        $em = $this->getEntityManger();
-
-        $em->persist($scheduledTask);
-        $em->flush($scheduledTask);
-
-        return $scheduledTask;
+        return $this->tasks;
     }
 
-    protected function updateScheduledTaskStatusAndMessage(ScheduledTask $scheduledTask, $status, $message) {
-        $scheduledTask->setStatus($status);
-        $scheduledTask->setMessage($message);
-
-        $em = $this->getEntityManger();
-
-        $em->flush($scheduledTask);
-
-        return $scheduledTask;
-    }
-
-    protected function updateScheduledTaskStatus(ScheduledTask $scheduledTask, $status)
-    {
-        $scheduledTask->setStatus($status);
-
-        $em = $this->getEntityManger();
-
-        $em->flush($scheduledTask);
-
-        return $scheduledTask;
-    }
-
-    protected function getScheduledTasks()
-    {
-        return $this->config;
-    }
-
-    protected function getCommandName($name)
+    private function getCommandName($name)
     {
         $arguments = explode(' ', $name);
 
         return current($arguments);
     }
 
-    protected function getCommandArguments($command, $name, $arguments = null)
+    private function getCommandArguments(Command $command, $name)
     {
-        if (is_array($arguments)) {
-            unset($arguments['expression']);
-            $arguments = array_merge((array)$name, array_values($arguments));
-        } else {
-            $arguments = explode(' ', $name);
-        }
+        $arguments = explode(' ', $name);
 
         $commandName = ['command' => array_shift($arguments)];
 
         $commandOptions = [];
         foreach ($arguments as $key => $argument) {
-            if (Helper::startsWith($argument, '--')) {
+            if (static::startsWith($argument, '--')) {
                 $option = explode('=', $argument);
 
                 $commandOptions[$option[0]] = $option[1] ?? null;
@@ -209,12 +168,55 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         );
     }
 
-    protected function getEntityManger()
+    private function getEntityManger()
     {
         if (null === $this->entityManager) {
             $this->entityManager = $this->getContainer()->get('doctrine.orm.default_entity_manager');
         }
 
         return $this->entityManager;
+    }
+
+    private function createScheduledTask($name)
+    {
+        $scheduledTask = new ScheduledTask;
+        $scheduledTask->setName($name);
+
+        $em = $this->getEntityManger();
+
+        $em->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+
+        return $scheduledTask;
+    }
+
+    private function updateScheduledTaskStatus(ScheduledTask $scheduledTask, $status, $message = null)
+    {
+        $scheduledTask->setStatus($status);
+        if (null !== $message) {
+            $scheduledTask->setMessage($message);
+        }
+
+        $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+
+        return $scheduledTask;
+    }
+
+    private function updateScheduledTaskStatusAsExecuted(ScheduledTask $scheduledTask, $message = null)
+    {
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_EXECUTED, $message);
+    }
+
+    private function updateScheduledTaskStatusAsFailed(ScheduledTask $scheduledTask, $message = null)
+    {
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_FAILED, $message);
+    }
+
+    private static function startsWith($haystack, $needles)
+    {
+        foreach ((array)$needles as $needle) {
+            if ($needle != '' && strpos($haystack, $needle) === 0) return true;
+        }
+
+        return false;
     }
 }

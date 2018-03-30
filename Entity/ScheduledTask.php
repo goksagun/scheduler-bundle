@@ -1,0 +1,215 @@
+<?php
+
+namespace Goksagun\SchedulerBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ScheduledTask
+ *
+ * @ORM\Table(name="scheduled_tasks", indexes={@ORM\Index(name="search_idx", columns={"name", "created_at", "status"})})
+ * @ORM\Entity(repositoryClass="Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class ScheduledTask
+{
+    const STATUS_QUEUED = 'queued';
+    const STATUS_EXECUTED = 'executed';
+    const STATUS_FAILED = 'failed';
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255, options={"comment":"Scheduled task command name"})
+     */
+    private $name;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="status", type="string", length=255, options={"default":"queued", "comment":"Scheduled task status"})
+     */
+    private $status;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="message", type="string", length=255, nullable=true, options={"comment":"Scheduled task message"})
+     */
+    private $message;
+
+    /**
+     * @var \DateTimeImmutable
+     *
+     * @ORM\Column(name="created_at", type="datetime_immutable", options={"comment":"Scheduled task creation time"})
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTimeImmutable
+     *
+     * @ORM\Column(name="updated_at", type="datetime_immutable", nullable=true, options={"comment":"Scheduled task update time"})
+     */
+    private $updatedAt;
+
+
+    /**
+     * ScheduledTask constructor.
+     */
+    public function __construct()
+    {
+        $this->status = static::STATUS_QUEUED;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     */
+    public function updateTimestamps()
+    {
+        if (null == $this->createdAt) {
+            $this->createdAt = new \DateTimeImmutable();
+        } else {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return ScheduledTask
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set status
+     *
+     * @param string $status
+     *
+     * @return ScheduledTask
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get status
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Set message
+     *
+     * @param string $message
+     *
+     * @return ScheduledTask
+     */
+    public function setMessage($message)
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * Get message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTimeImmutable $createdAt
+     *
+     * @return ScheduledTask
+     */
+    public function setCreatedAt(\DateTimeImmutable $createdAt)
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTimeImmutable
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set updatedAt
+     *
+     * @param \DateTimeImmutable $updatedAt
+     *
+     * @return ScheduledTask
+     */
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTimeImmutable
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+}
