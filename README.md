@@ -78,10 +78,10 @@ imports:
     - { resource: scheduler.yml }
 ```
 
-Step 4: Add the Bundle log table schema
+Step 4: Add the Bundle log table schema (optional)
 ---------------------------------------
 
-Then, add the bundle log table schema and store executed task(s) to db:
+Then, if you want to track scheduled task(s) add the bundle log table schema and store executed task(s) to db:
 
 ```console
 $ php bin/console doctrine:schema:update --force

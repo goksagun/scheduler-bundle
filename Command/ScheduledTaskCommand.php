@@ -176,6 +176,15 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         );
     }
 
+    private static function startsWith($haystack, $needles)
+    {
+        foreach ((array)$needles as $needle) {
+            if ($needle != '' && strpos($haystack, $needle) === 0) return true;
+        }
+
+        return false;
+    }
+
     private function getEntityManger()
     {
         if (null === $this->entityManager) {
@@ -190,9 +199,9 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         $scheduledTask = new ScheduledTask;
         $scheduledTask->setName($name);
 
-        $em = $this->getEntityManger();
-
-        $em->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+        if ($this->checkTableExists()) {
+            $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+        }
 
         return $scheduledTask;
     }
@@ -204,7 +213,9 @@ class ScheduledTaskCommand extends ContainerAwareCommand
             $scheduledTask->setMessage($message);
         }
 
-        $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+        if ($this->checkTableExists()) {
+            $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+        }
 
         return $scheduledTask;
     }
@@ -219,12 +230,12 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_FAILED, $message);
     }
 
-    private static function startsWith($haystack, $needles)
+    private function checkTableExists()
     {
-        foreach ((array)$needles as $needle) {
-            if ($needle != '' && strpos($haystack, $needle) === 0) return true;
-        }
+        $em = $this->getEntityManger();
 
-        return false;
+        $tableName = $em->getClassMetadata('SchedulerBundle:ScheduledTask')->getTableName();
+
+        return $em->getConnection()->getSchemaManager()->tablesExist((array)$tableName);
     }
 }
