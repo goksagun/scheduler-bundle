@@ -25,8 +25,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ScheduledTaskCommand extends ContainerAwareCommand
 {
-    const TIME_FORMAT = 'Y-m-d H:i';
-
     /**
      * @var bool
      */
