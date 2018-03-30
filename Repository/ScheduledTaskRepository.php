@@ -18,7 +18,9 @@ class ScheduledTaskRepository extends \Doctrine\ORM\EntityRepository
      */
     public function save(ScheduledTask $scheduledTask)
     {
-        $this->getEntityManager()->persist($scheduledTask);
+        if (null === $scheduledTask->getId()) {
+            $this->getEntityManager()->persist($scheduledTask);
+        }
         $this->getEntityManager()->flush();
     }
 }
