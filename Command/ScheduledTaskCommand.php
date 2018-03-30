@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Command scheduler allows you to fluently and expressively define your command
  * schedule within application itself. When using the scheduler, only a single
  * Cron entry is needed on your server. Your task schedule is defined in the
- * SCHEDULED_TASKS const. When using the scheduler, you only need to add the
+ * scheduler.yml file. When using the scheduler, you only need to add the
  * following Cron entry to your server:
  *
  *      * * * * * php /path-to-your-project/bin/console scheduler:run >> /dev/null 2>&1
@@ -33,6 +33,11 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     private $enable;
 
     /**
+     * @var bool
+     */
+    private $log;
+
+    /**
      * @var array
      */
     private $tasks;
@@ -45,13 +50,15 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     /**
      * ScheduledTaskCommand constructor.
      * @param bool $enable
+     * @param bool $log
      * @param array $tasks
      */
-    public function __construct(bool $enable, array $tasks)
+    public function __construct(bool $enable, bool $log, array $tasks)
     {
         parent::__construct();
 
         $this->enable = $enable;
+        $this->log = $log;
         $this->tasks = $tasks;
     }
 
@@ -100,16 +107,22 @@ class ScheduledTaskCommand extends ContainerAwareCommand
                 continue;
             }
 
-            // Create scheduled task status as queued.
-            $scheduledTask = $this->createScheduledTask($name);
+            if ($this->log) {
+                // Create scheduled task status as queued.
+                $scheduledTask = $this->createScheduledTask($name);
+            }
 
             $commandName = $this->getCommandName($name);
 
             try {
                 $command = $this->getApplication()->find($commandName);
             } catch (CommandNotFoundException $e) {
-                // Log error message.
-                $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+                if ($this->log) {
+                    // Log error message.
+                    $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+                }
+
+                $output->writeln("The '{$name}' task failed!");
 
                 continue;
             }
@@ -121,11 +134,19 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
                 $command->run($input, $output);
 
-                // Update scheduled task status as executed.
-                $this->updateScheduledTaskStatusAsExecuted($scheduledTask);
+                if ($this->log) {
+                    // Update scheduled task status as executed.
+                    $this->updateScheduledTaskStatusAsExecuted($scheduledTask);
+                }
+
+                $output->writeln("The '{$name}' completed!");
             } catch (\Exception $e) {
-                // Log error message.
-                $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+                if ($this->log) {
+                    // Log error message.
+                    $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+                }
+
+                $output->writeln("The '{$name}'  failed!");
 
                 continue;
             }

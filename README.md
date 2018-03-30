@@ -65,6 +65,7 @@ Then, add the bundle configuration yml file `scheduler.yml` into `app/config` di
 ```yml
 scheduler:
     enable: true
+    log: true
     tasks:
          - { name: command:name argument --option, expression: "* * * * *" }
          - { name: another-command:name, expression: "@hourly" }
