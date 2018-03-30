@@ -48,16 +48,16 @@ class ScheduledTask
     private $message;
 
     /**
-     * @var \DateTimeImmutable
+     * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime_immutable", options={"comment":"Scheduled task creation time"})
+     * @ORM\Column(name="created_at", type="datetime", options={"comment":"Scheduled task creation time"})
      */
     private $createdAt;
 
     /**
-     * @var \DateTimeImmutable
+     * @var \DateTime
      *
-     * @ORM\Column(name="updated_at", type="datetime_immutable", nullable=true, options={"comment":"Scheduled task update time"})
+     * @ORM\Column(name="updated_at", type="datetime", nullable=true, options={"comment":"Scheduled task update time"})
      */
     private $updatedAt;
 
@@ -77,9 +77,9 @@ class ScheduledTask
     public function updateTimestamps()
     {
         if (null == $this->createdAt) {
-            $this->createdAt = new \DateTimeImmutable();
+            $this->createdAt = new \DateTime();
         } else {
-            $this->updatedAt = new \DateTimeImmutable();
+            $this->updatedAt = new \DateTime();
         }
     }
 
@@ -168,11 +168,11 @@ class ScheduledTask
     /**
      * Set createdAt
      *
-     * @param \DateTimeImmutable $createdAt
+     * @param \DateTime $createdAt
      *
      * @return ScheduledTask
      */
-    public function setCreatedAt(\DateTimeImmutable $createdAt)
+    public function setCreatedAt(\DateTime $createdAt)
     {
         $this->createdAt = $createdAt;
 
@@ -182,7 +182,7 @@ class ScheduledTask
     /**
      * Get createdAt
      *
-     * @return \DateTimeImmutable
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -192,11 +192,11 @@ class ScheduledTask
     /**
      * Set updatedAt
      *
-     * @param \DateTimeImmutable $updatedAt
+     * @param \DateTime $updatedAt
      *
      * @return ScheduledTask
      */
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt)
+    public function setUpdatedAt(\DateTime $updatedAt)
     {
         $this->updatedAt = $updatedAt;
 
@@ -206,7 +206,7 @@ class ScheduledTask
     /**
      * Get updatedAt
      *
-     * @return \DateTimeImmutable
+     * @return \DateTime
      */
     public function getUpdatedAt()
     {
