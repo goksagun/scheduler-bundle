@@ -98,7 +98,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
             $expression = $scheduledTask['expression'] ?? null;
             if (empty($expression)) {
-                throw new \InvalidArgumentException("The task expression shoul be defined.");
+                throw new \InvalidArgumentException("The task expression should be defined.");
             }
 
             $cron = CronExpression::factory($expression);
