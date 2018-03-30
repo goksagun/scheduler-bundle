@@ -24,12 +24,10 @@
         "mtdowling/cron-expression": "^1.2"
     },
     "autoload": {
-        "psr-4": {
-            "Goksagun\\SchedulerBundle\\": "",
-            "exclude-from-classmap": [
-                "/Tests/"
-            ]
-        }
+        "psr-4": { "Goksagun\\SchedulerBundle\\": "" },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
     },
     "extra": {
         "branch-alias": {
