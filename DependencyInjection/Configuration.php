@@ -26,7 +26,7 @@ class Configuration implements ConfigurationInterface
             ->end()
             ->children()
                 ->arrayNode('tasks')
-                    ->arrayPrototype()
+                    ->prototype('array')
                         ->children()
                             ->scalarNode('name')->end()
                             ->scalarNode('expression')->end()
