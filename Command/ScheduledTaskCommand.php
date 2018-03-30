@@ -70,6 +70,12 @@ class ScheduledTaskCommand extends ContainerAwareCommand
             return;
         }
 
+        if (!$this->tasks) {
+            $output->writeln('There is no task scheduled. You should add task in scheduler.yml config file.');
+
+            return;
+        }
+
         $this->runScheduledTasks($output);
     }
 

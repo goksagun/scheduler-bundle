@@ -70,6 +70,14 @@ scheduler:
          - { name: another-command:name, expression: "@hourly" }
 ```
 
+Import new config file to `config.yml` into `app/config` directory
+
+```yml
+imports:
+    ...
+    - { resource: scheduler.yml }
+```
+
 Step 4: Add the Bundle log table schema
 ---------------------------------------
 
