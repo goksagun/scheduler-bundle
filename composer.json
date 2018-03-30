@@ -16,6 +16,8 @@
     ],
     "require": {
         "php" : "^7.0",
+        "doctrine/doctrine-bundle": "^1.6",
+        "doctrine/orm": "^2.5",
         "symfony/framework-bundle": "~2.7|~3.0",
         "symfony/console": "~2.7|~3.0",
         "symfony/yaml": "~2.7|~3.0",
@@ -23,7 +25,10 @@
     },
     "autoload": {
         "psr-4": {
-            "Goksagun\\SchedulerBundle\\": ""
+            "Goksagun\\SchedulerBundle\\": "",
+            "exclude-from-classmap": [
+                "/Tests/"
+            ]
         }
     },
     "extra": {
