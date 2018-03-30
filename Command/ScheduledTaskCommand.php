@@ -65,13 +65,15 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!$this->enable) {
+            $output->writeln('Scheduled task(s) disabled. You should enable in scheduler.yml config before running this command.');
+
             return;
         }
 
         $this->runScheduledTasks($output);
     }
 
-    protected function runScheduledTasks(OutputInterface $output)
+    private function runScheduledTasks(OutputInterface $output)
     {
         $scheduledTasks = $this->getScheduledTasks();
 
