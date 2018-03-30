@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * ScheduledTask
  *
- * @ORM\Table(name="scheduled_tasks", indexes={@ORM\Index(name="search_idx", columns={"name", "created_at", "status"})})
+ * @ORM\Table(name="scheduled_tasks", indexes={@ORM\Index(name="search_idx", columns={"name", "status", "created_at"})})
  * @ORM\Entity(repositoryClass="Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository")
  * @ORM\HasLifecycleCallbacks()
  */
