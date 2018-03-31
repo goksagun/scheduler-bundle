@@ -16,11 +16,13 @@ class ScheduledTaskRepository extends \Doctrine\ORM\EntityRepository
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function save(ScheduledTask $scheduledTask)
+    public function save(ScheduledTask $scheduledTask = null)
     {
-        if (null === $scheduledTask->getId()) {
-            $this->getEntityManager()->persist($scheduledTask);
+        $em = $this->getEntityManager();
+
+        if (null !== $scheduledTask) {
+            $em->persist($scheduledTask);
         }
-        $this->getEntityManager()->flush();
+        $em->flush();
     }
 }

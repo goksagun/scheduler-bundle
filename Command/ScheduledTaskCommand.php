@@ -233,7 +233,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         }
 
         if ($this->checkTableExists()) {
-            $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+            $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save();
         }
 
         return $scheduledTask;
