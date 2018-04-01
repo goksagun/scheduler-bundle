@@ -64,13 +64,15 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     {
         $this
             ->setName('scheduler:run')
-            ->setDescription('Checks scheduled tasks and execute them');
+            ->setDescription('Checks scheduled tasks and execute if exists any');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!$this->enable) {
-            $output->writeln('Scheduled task(s) disabled. You should enable in scheduler.yml config before running this command.');
+            $output->writeln(
+                'Scheduled task(s) disabled. You should enable in scheduler.yml config before running this command.'
+            );
 
             return;
         }
@@ -120,7 +122,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
                     $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
                 }
 
-                $output->writeln("The '{$name}' task failed!");
+                $output->writeln("The '{$name}' task not found!");
 
                 continue;
             }
