@@ -71,7 +71,7 @@ scheduler:
          - { name: another-command:name, expression: "@hourly" }
 ```
 
-Import new config file to `config.yml` into `app/config` directory
+Import new config file to `config.yml` into `app/config` directory:
 
 ```yml
 imports:
