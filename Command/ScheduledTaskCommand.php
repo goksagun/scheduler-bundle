@@ -181,15 +181,31 @@ class ScheduledTaskCommand extends ContainerAwareCommand
             }
         }
 
-        $definition = $command->getDefinition();
-
         $commandArguments = [];
         if ($arguments) {
-            $argumentNames = array_slice(array_keys($definition->getArguments()), 0, count($arguments));
+            // Remove "command" argument index
+            $argumentNames = array_filter(
+                array_keys($command->getDefinition()->getArguments()),
+                function ($argument) {
+                    return 'command' !== $argument;
+                }
+            );
 
-            $commandArguments = array_combine($argumentNames, $arguments);
+            $commandArguments = array_combine(
+                array_slice($argumentNames, 0, count($arguments)),
+                $arguments
+            );
         }
 
+        /**
+         * [
+         *      'command' => 'command-name'
+         *      'argument-one' => 'argument-one-value',
+         *      'argument-two' => 'argument-two-value',
+         *      '--option-one' => 'option-one-value-if-exists-else-null',
+         *      '--option-two' => 'option-two-value-if-exists-else-null',
+         * ]
+         */
         return array_merge(
             $commandName,
             $commandArguments,
