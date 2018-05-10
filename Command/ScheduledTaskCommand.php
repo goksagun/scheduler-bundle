@@ -4,6 +4,7 @@ namespace Goksagun\SchedulerBundle\Command;
 
 use Cron\CronExpression;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
+use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
@@ -103,6 +104,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
             $cron = CronExpression::factory($expression);
 
+            // TRUE if the cron is due to run or FALSE if not.
             if (!$cron->isDue()) {
                 continue;
             }
@@ -158,68 +160,64 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         return $this->tasks;
     }
 
+    private function parseName($name)
+    {
+        return explode(' ', preg_replace('!\s+!', ' ', $name));
+    }
+
     private function getCommandName($name)
     {
-        $arguments = explode(' ', $name);
+        $parts = $this->parseName($name);
 
-        return current($arguments);
+        return current($parts);
     }
 
     private function getCommandArguments(Command $command, $name)
     {
-        $arguments = explode(' ', $name);
+        // Get parts from full task name.
+        // First part is the command name the others arguments and options.
+        $parts = $this->parseName($name);
 
-        $commandName = ['command' => array_shift($arguments)];
+        // Shift command name from arguments.
+        $arguments = [
+            'command' => array_shift($parts)
+        ];
 
-        $commandOptions = [];
-        foreach ($arguments as $key => $argument) {
-            if (static::startsWith($argument, '--')) {
-                $option = explode('=', $argument);
+        foreach ($parts as $key => $part) {
+            if (StringHelper::startsWith($part, '--')) {
+                $option = explode('=', $part);
 
-                $commandOptions[$option[0]] = $option[1] ?? null;
-                unset($arguments[$key]);
+                $arguments[$option[0]] = $option[1] ?? null;
+
+                unset($parts[$key]);
             }
         }
 
-        $commandArguments = [];
-        if ($arguments) {
+        if ($parts) {
             // Remove "command" argument index
             $argumentNames = array_filter(
                 array_keys($command->getDefinition()->getArguments()),
-                function ($argument) {
-                    return 'command' !== $argument;
+                function ($argumentName) {
+                    return 'command' !== $argumentName;
                 }
             );
 
-            $commandArguments = array_combine(
-                array_slice($argumentNames, 0, count($arguments)),
-                $arguments
-            );
+            $arguments = array_merge($arguments, array_combine(
+                array_slice($argumentNames, 0, count($parts)),
+                $parts
+            ));
         }
 
-        /**
+        /*
          * [
          *      'command' => 'command-name'
          *      'argument-one' => 'argument-one-value',
          *      'argument-two' => 'argument-two-value',
-         *      '--option-one' => 'option-one-value-if-exists-else-null',
-         *      '--option-two' => 'option-two-value-if-exists-else-null',
+         *      '--option-one' => 'option-one-value',
+         *      '--option-two' => null,
          * ]
          */
-        return array_merge(
-            $commandName,
-            $commandArguments,
-            $commandOptions
-        );
-    }
-
-    private static function startsWith($haystack, $needles)
-    {
-        foreach ((array)$needles as $needle) {
-            if ($needle != '' && strpos($haystack, $needle) === 0) return true;
-        }
-
-        return false;
+        return $arguments;
     }
 
     private function getEntityManger()
