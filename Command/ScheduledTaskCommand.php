@@ -10,7 +10,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\PhpExecutableFinder;
+use Symfony\Component\Process\Process;
 
 /**
  * Command scheduler allows you to fluently and expressively define your command
@@ -65,7 +68,9 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     {
         $this
             ->setName('scheduler:run')
-            ->setDescription('Checks scheduled tasks and execute if exists any');
+            ->setDescription('Checks scheduled tasks and execute if exists any')
+            ->addOption('async', 'a', InputOption::VALUE_NONE, 'Run task(s) asynchronously')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -84,14 +89,16 @@ class ScheduledTaskCommand extends ContainerAwareCommand
             return;
         }
 
-        $this->runScheduledTasks($output);
+        $this->runScheduledTasks($input, $output);
     }
 
-    private function runScheduledTasks(OutputInterface $output)
+    private function runScheduledTasks(InputInterface $input, OutputInterface $output)
     {
+        $isAsync = $input->getOption('async');
+
         $scheduledTasks = $this->getScheduledTasks();
 
-        foreach ($scheduledTasks as $scheduledTask) {
+        foreach ($scheduledTasks as $i => $scheduledTask) {
             $name = $scheduledTask['name'] ?? null;
             if (empty($name)) {
                 throw new \InvalidArgumentException("The task command name should be defined.");
@@ -106,6 +113,9 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
             // TRUE if the cron is due to run or FALSE if not.
             if (!$cron->isDue()) {
+                // Remove task from the list.
+                unset($scheduledTasks[$i]);
+
                 continue;
             }
 
@@ -126,15 +136,31 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
                 $output->writeln("The '{$name}' task not found!");
 
+                // Remove task from the list.
+                unset($scheduledTasks[$i]);
+
                 continue;
             }
 
             try {
-                $arguments = $this->getCommandArguments($command, $name);
+                if ($isAsync) {
+                    $phpBinaryFinder = new PhpExecutableFinder();
+                    $phpBinaryPath = $phpBinaryFinder->find();
 
-                $input = new ArrayInput($arguments);
+                    $projectRoot = $this->getContainer()->get('kernel')->getProjectDir();
 
-                $command->run($input, $output);
+                    $asyncCommand = [$phpBinaryPath, $projectRoot . '/bin/console', $name];
+
+                    ${'process'.$i} = new Process($asyncCommand);
+
+                    ${'process'.$i}->start();
+                } else {
+                    $arguments = $this->getCommandArguments($command, $name);
+
+                    $input = new ArrayInput($arguments);
+
+                    $command->run($input, $output);
+                }
 
                 if ($this->log) {
                     // Update scheduled task status as executed.
@@ -150,7 +176,17 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
                 $output->writeln("The '{$name}'  failed!");
 
+                // Remove task from the list.
+                unset($scheduledTasks[$i]);
+
                 continue;
+            }
+        }
+
+        // Complete task(s) if is async.
+        if ($isAsync) {
+            foreach ($scheduledTasks as $j => $scheduledTask) {
+                ${'process'.$j}->wait();
             }
         }
     }
