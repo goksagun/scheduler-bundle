@@ -12,6 +12,7 @@ following Cron entry to your server:
 
 This Cron will call the command scheduler every minute. When the `scheduler:run`
 command is executed, application will evaluate your scheduled tasks and runs the tasks that are due.
+If you want to run task(s) as asynchronously call the command scheduler with async flag `scheduler:run --async`.
 
 Installation
 ============
