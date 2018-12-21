@@ -1,11 +1,12 @@
 parameters:
     enable: true
-    log: true
+    async: ~
+    log: ~
     tasks: ~
 
 services:
     scheduler.command.scheduled_task:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskCommand
-        arguments: ["%enable%", "%log%","%tasks%"]
+        arguments: ["%enable%", "%async%", "%log%","%tasks%"]
         tags:
             - { name: 'console.command', command: 'scheduler:run' }
