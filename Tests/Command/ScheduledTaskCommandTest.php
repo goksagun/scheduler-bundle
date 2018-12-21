@@ -14,7 +14,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $kernel = self::bootKernel();
         $application = new Application($kernel);
 
-        $application->add(new ScheduledTaskCommand(false, false, []));
+        $application->add(new ScheduledTaskCommand(false, false, false, []));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
@@ -35,7 +35,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $kernel = self::bootKernel();
         $application = new Application($kernel);
 
-        $application->add(new ScheduledTaskCommand(true, false, []));
+        $application->add(new ScheduledTaskCommand(true, false, false, []));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
@@ -56,7 +56,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $kernel = self::bootKernel();
         $application = new Application($kernel);
 
-        $application->add(new ScheduledTaskCommand(true, false, [
+        $application->add(new ScheduledTaskCommand(true, false, false, [
             ['name' => 'invalid:command', 'expression' => '* * * * *']
         ]));
 

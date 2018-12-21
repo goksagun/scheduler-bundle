@@ -37,6 +37,11 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     /**
      * @var bool
      */
+    private $async;
+
+    /**
+     * @var bool
+     */
     private $log;
 
     /**
@@ -52,14 +57,16 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     /**
      * ScheduledTaskCommand constructor.
      * @param bool $enable
+     * @param bool $async
      * @param bool $log
      * @param array $tasks
      */
-    public function __construct(bool $enable, bool $log, array $tasks)
+    public function __construct(bool $enable, $async, $log, array $tasks)
     {
         parent::__construct();
 
         $this->enable = $enable;
+        $this->async = $async;
         $this->log = $log;
         $this->tasks = $tasks;
     }
@@ -69,7 +76,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         $this
             ->setName('scheduler:run')
             ->setDescription('Checks scheduled tasks and execute if exists any')
-            ->addOption('async', 'a', InputOption::VALUE_NONE, 'Run task(s) asynchronously')
+            ->addOption('async', 'a', InputOption::VALUE_OPTIONAL, 'Run task(s) asynchronously')
         ;
     }
 
@@ -95,6 +102,11 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     private function runScheduledTasks(InputInterface $input, OutputInterface $output)
     {
         $isAsync = $input->getOption('async');
+
+        // Override is async property is set.
+        if (null !== $this->async) {
+            $isAsync = $this->async;
+        }
 
         $scheduledTasks = $this->getScheduledTasks();
 

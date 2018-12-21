@@ -12,6 +12,7 @@
 #   +------------------------- min (0 - 59)
 scheduler:
     enable: true
-    log: true
+    async: ~
+    log: ~
     tasks:
         #- { name: example:command arg --option, expression: "* * * * *" }
