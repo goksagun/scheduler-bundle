@@ -155,20 +155,34 @@ class ScheduledTaskCommand extends ContainerAwareCommand
             }
 
             try {
+                $arguments = $this->getCommandArguments($command, $name);
+
                 if ($isAsync) {
                     $phpBinaryFinder = new PhpExecutableFinder();
                     $phpBinaryPath = $phpBinaryFinder->find();
 
                     $projectRoot = $this->getContainer()->get('kernel')->getProjectDir();
 
-                    $asyncCommand = [$phpBinaryPath, $projectRoot . '/bin/console', $name];
+                    $asyncCommand = [$phpBinaryPath, $projectRoot . '/bin/console'];
+
+                    // Add scheduled task command arguments to async process command.
+                    foreach ($arguments as $key => $value) {
+                        $commandArgument = $value;
+                        if (StringHelper::startsWith($key, '--')) {
+                            if (null !== $value) {
+                                $commandArgument = $key.'='.$value;
+                            } else {
+                                $commandArgument = $key;
+                            }
+                        }
+
+                        array_push($asyncCommand, $commandArgument);
+                    }
 
                     ${'process'.$i} = new Process($asyncCommand);
 
                     ${'process'.$i}->start();
                 } else {
-                    $arguments = $this->getCommandArguments($command, $name);
-
                     $input = new ArrayInput($arguments);
 
                     $command->run($input, $output);
