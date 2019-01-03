@@ -4,6 +4,7 @@ namespace Goksagun\SchedulerBundle\Command;
 
 use Cron\CronExpression;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
+use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
@@ -50,6 +51,11 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     private $tasks;
 
     /**
+     * @var ProcessInfo[]
+     */
+    private $processes = [];
+
+    /**
      * @var \Doctrine\ORM\EntityManager
      */
     private $entityManager;
@@ -84,14 +90,14 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     {
         if (!$this->enable) {
             $output->writeln(
-                'Scheduled task(s) disabled. You should enable in scheduler.yml config before running this command.'
+                'Scheduled task(s) disabled. You should enable in scheduler.yml (or scheduler.yaml) config before running this command.'
             );
 
             return;
         }
 
         if (!$this->tasks) {
-            $output->writeln('There is no task scheduled. You should add task in scheduler.yml config file.');
+            $output->writeln('There is no task scheduled. You should add task in scheduler.yml (or scheduler.yaml) config file.');
 
             return;
         }
@@ -108,49 +114,19 @@ class ScheduledTaskCommand extends ContainerAwareCommand
             $isAsync = $this->async;
         }
 
-        $scheduledTasks = $this->getScheduledTasks();
+        foreach ($this->getTasks() as $i => $task) {
+            $this->validateTask($task);
 
-        foreach ($scheduledTasks as $i => $scheduledTask) {
-            $name = $scheduledTask['name'] ?? null;
-            if (empty($name)) {
-                throw new \InvalidArgumentException("The task command name should be defined.");
-            }
-
-            $expression = $scheduledTask['expression'] ?? null;
-            if (empty($expression)) {
-                throw new \InvalidArgumentException("The task expression should be defined.");
-            }
-
-            $cron = CronExpression::factory($expression);
-
-            // TRUE if the cron is due to run or FALSE if not.
-            if (!$cron->isDue()) {
-                // Remove task from the list.
-                unset($scheduledTasks[$i]);
-
+            if (!$this->isTaskDue($task)) {
                 continue;
             }
 
-            if ($this->log) {
-                // Create scheduled task status as queued.
-                $scheduledTask = $this->createScheduledTask($name);
-            }
+            $name = $task['name'];
 
-            $commandName = $this->getCommandName($name);
+            // Create scheduled task status as queued.
+            $scheduledTask = $this->createScheduledTask($name);
 
-            try {
-                $command = $this->getApplication()->find($commandName);
-            } catch (CommandNotFoundException $e) {
-                if ($this->log) {
-                    // Log error message.
-                    $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
-                }
-
-                $output->writeln("The '{$name}' task not found!");
-
-                // Remove task from the list.
-                unset($scheduledTasks[$i]);
-
+            if (!$command = $this->validateCommand($output, $name, $scheduledTask)) {
                 continue;
             }
 
@@ -179,47 +155,57 @@ class ScheduledTaskCommand extends ContainerAwareCommand
                         array_push($asyncCommand, $commandArgument);
                     }
 
-                    ${'process'.$i} = new Process($asyncCommand);
+                    $process = new Process($asyncCommand, null, null, null, null);
 
-                    ${'process'.$i}->start();
+                    $process->start();
+
+                    $this->processes[] = new ProcessInfo($process, $scheduledTask);
+
+                    $output->writeln("{$i} - Started async process: {$process->getCommandLine()}");
                 } else {
                     $input = new ArrayInput($arguments);
 
                     $command->run($input, $output);
-                }
 
-                if ($this->log) {
                     // Update scheduled task status as executed.
                     $this->updateScheduledTaskStatusAsExecuted($scheduledTask);
-                }
 
-                $output->writeln("The '{$name}' completed!");
-            } catch (\Exception $e) {
-                if ($this->log) {
-                    // Log error message.
-                    $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+                    $output->writeln("The '{$name}' completed!");
                 }
+            } catch (\Exception $e) {
+                // Log error message.
+                $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
 
                 $output->writeln("The '{$name}'  failed!");
-
-                // Remove task from the list.
-                unset($scheduledTasks[$i]);
 
                 continue;
             }
         }
 
-        // Complete task(s) if is async.
+        // Finish task(s) if is async.
         if ($isAsync) {
-            foreach ($scheduledTasks as $j => $scheduledTask) {
-                ${'process'.$j}->wait();
-            }
+            $this->finishAsyncProcesses($output);
         }
     }
 
-    private function getScheduledTasks()
+    private function validateTask($task)
     {
-        return $this->tasks;
+        $name = $task['name'] ?? null;
+        if (empty($name)) {
+            throw new \InvalidArgumentException("The task command name should be defined.");
+        }
+
+        $expression = $task['expression'] ?? null;
+        if (empty($expression)) {
+            throw new \InvalidArgumentException("The task expression should be defined.");
+        }
+    }
+
+    private function getTasks()
+    {
+        foreach ($this->tasks as $task) {
+            yield $task;
+        }
     }
 
     private function parseName($name)
@@ -294,6 +280,11 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     private function createScheduledTask($name)
     {
         $scheduledTask = new ScheduledTask;
+
+        if (!$this->log) {
+            return $scheduledTask;
+        }
+
         $scheduledTask->setName($name);
 
         if ($this->checkTableExists()) {
@@ -303,11 +294,19 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         return $scheduledTask;
     }
 
-    private function updateScheduledTaskStatus(ScheduledTask $scheduledTask, $status, $message = null)
+    private function updateScheduledTaskStatus(ScheduledTask $scheduledTask, $status, $message = null, $output = null)
     {
+        if (!$this->log) {
+            return $scheduledTask;
+        }
+
         $scheduledTask->setStatus($status);
         if (null !== $message) {
-            $scheduledTask->setMessage($message);
+            $scheduledTask->setMessage(StringHelper::limit($message, 252));
+        }
+
+        if (null !== $output) {
+            $scheduledTask->setOutput($output);
         }
 
         if ($this->checkTableExists()) {
@@ -317,14 +316,14 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         return $scheduledTask;
     }
 
-    private function updateScheduledTaskStatusAsExecuted(ScheduledTask $scheduledTask, $message = null)
+    private function updateScheduledTaskStatusAsExecuted(ScheduledTask $scheduledTask, $message = null, $output = null)
     {
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_EXECUTED, $message);
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_EXECUTED, $message, $output);
     }
 
-    private function updateScheduledTaskStatusAsFailed(ScheduledTask $scheduledTask, $message = null)
+    private function updateScheduledTaskStatusAsFailed(ScheduledTask $scheduledTask, $message = null, $output = null)
     {
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_FAILED, $message);
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_FAILED, $message, $output);
     }
 
     private function checkTableExists()
@@ -334,5 +333,77 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         $tableName = $em->getClassMetadata('SchedulerBundle:ScheduledTask')->getTableName();
 
         return $em->getConnection()->getSchemaManager()->tablesExist((array)$tableName);
+    }
+
+    private function isTaskDue($task)
+    {
+        $expression = $task['expression'];
+
+        $cron = CronExpression::factory($expression);
+
+        // TRUE if the cron is due to run or FALSE if not.
+        return $cron->isDue();
+    }
+
+    private function validateCommand(OutputInterface $output, string $name, ScheduledTask $scheduledTask)
+    {
+        $commandName = $this->getCommandName($name);
+
+        try {
+            return $this->getApplication()->find($commandName);
+        } catch (CommandNotFoundException $e) {
+            // Log error message.
+            $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+
+            $output->writeln("The '{$name}' task not found!");
+        }
+
+        return null;
+    }
+
+    private function finishAsyncProcesses(OutputInterface $output)
+    {
+        do {
+            // Loop active process and remove if successful.
+            foreach ($this->processes as $j => $processInfo) {
+                $process = $processInfo->getProcess();
+
+                if ($process->isRunning()) {
+                    continue;
+                }
+
+                $scheduledTask = $processInfo->getScheduledTask();
+
+                if (!$process->isSuccessful()) {
+                    $this->updateScheduledTaskStatusAsFailed($scheduledTask, null, $process->getErrorOutput());
+
+                    $output->writeln(
+                        [
+                            "{$j} - Failed process: {$process->getCommandLine()}",
+                            '========== Error ==========',
+                            $process->getErrorOutput(),
+                        ]
+                    );
+
+                    continue;
+                }
+
+                $this->updateScheduledTaskStatusAsExecuted($scheduledTask, null, $process->getOutput());
+
+                $output->writeln(
+                    [
+                        "{$j} - Successful process: {$process->getCommandLine()}",
+                        '========== Output ==========',
+                        $process->getOutput(),
+                    ]
+                );
+
+                // Remove finished process from active processes list.
+                unset($this->processes[$j]);
+            }
+
+            // Check every second.
+            sleep(1);
+        } while (count($this->processes));
     }
 }
