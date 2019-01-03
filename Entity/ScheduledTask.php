@@ -48,6 +48,13 @@ class ScheduledTask
     private $message;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="output", type="text", nullable=true, options={"comment":"Scheduled task output message"})
+     */
+    private $output;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime", options={"comment":"Scheduled task creation time"})
@@ -163,6 +170,30 @@ class ScheduledTask
     public function getMessage()
     {
         return $this->message;
+    }
+
+    /**
+     * Set output
+     *
+     * @param string $output
+     *
+     * @return ScheduledTask
+     */
+    public function setOutput($output)
+    {
+        $this->output = $output;
+
+        return $this;
+    }
+
+    /**
+     * Get output
+     *
+     * @return string
+     */
+    public function getOutput()
+    {
+        return $this->output;
     }
 
     /**
