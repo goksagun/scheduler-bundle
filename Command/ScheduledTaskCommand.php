@@ -301,11 +301,11 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         }
 
         $scheduledTask->setStatus($status);
-        if (null !== $message) {
+        if (!empty($message)) {
             $scheduledTask->setMessage(StringHelper::limit($message, 252));
         }
 
-        if (null !== $output) {
+        if (!empty($output)) {
             $scheduledTask->setOutput($output);
         }
 
