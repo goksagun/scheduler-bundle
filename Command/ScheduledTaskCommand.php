@@ -5,6 +5,7 @@ namespace Goksagun\SchedulerBundle\Command;
 use Cron\CronExpression;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
+use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
@@ -115,16 +116,26 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         }
 
         foreach ($this->getTasks() as $i => $task) {
-            $this->validateTask($task);
+            $errors = $this->validateTask($task);
+
+            if (!empty($errors)) {
+                $output->writeln(sprintf('The task "%s" has errors:', $i));
+                foreach ($errors as $error) {
+                    $output->writeln(sprintf('  - %s', $error));
+                }
+
+                continue;
+            }
 
             if (!$this->isTaskDue($task)) {
                 continue;
             }
 
             $name = $task['name'];
+            $times = $task['times'];
 
             // Create scheduled task status as queued.
-            $scheduledTask = $this->createScheduledTask($name);
+            $scheduledTask = $this->createScheduledTask($name, $times);
 
             if (!$command = $this->validateCommand($output, $name, $scheduledTask)) {
                 continue;
@@ -190,15 +201,46 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
     private function validateTask($task)
     {
-        $name = $task['name'] ?? null;
-        if (empty($name)) {
-            throw new \InvalidArgumentException("The task command name should be defined.");
+        $errors = [];
+
+        if (!isset($task['name'])) {
+            $errors['name'] = "The task command name should be defined.";
         }
 
-        $expression = $task['expression'] ?? null;
-        if (empty($expression)) {
-            throw new \InvalidArgumentException("The task expression should be defined.");
+        if (!isset($task['expression'])) {
+            $errors['expression'] = "The task command expression should be defined.";
         }
+
+        $times = $task['times'] ?? null;
+        if (!empty($times)) {
+            if (!is_int($times)) {
+                $errors['times'] = "The times should be integer.";
+            }
+        }
+
+        $start = $task['start'] ?? null;
+        if (!empty($start)
+            && !(DateHelper::isDateValid($start) || DateHelper::isDateValid($start, DateHelper::DATETIME_FORMAT))
+        ) {
+            $errors['start'] = sprintf(
+                'The start should be date (%s) or datetime (%s).',
+                DateHelper::DATE_FORMAT,
+                DateHelper::DATETIME_FORMAT
+            );
+        }
+
+        $end = $task['end'] ?? null;
+        if (!empty($end)
+            && !(DateHelper::isDateValid($end) || DateHelper::isDateValid($end, DateHelper::DATETIME_FORMAT))
+        ) {
+            $errors['end'] = sprintf(
+                'The end should be date (%s) or datetime (%s).',
+                DateHelper::DATE_FORMAT,
+                DateHelper::DATETIME_FORMAT
+            );
+        }
+
+        return $errors;
     }
 
     private function getTasks()
@@ -277,7 +319,25 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         return $this->entityManager;
     }
 
-    private function createScheduledTask($name)
+    private function getLatestScheduledTask($name, $status = null)
+    {
+        $criteria = [
+            'name' => $name,
+        ];
+
+        if (null !== $status) {
+            $criteria['status'] = $status;
+        }
+
+        return $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->findOneBy(
+            $criteria,
+            [
+                'id' => 'desc'
+            ]
+        );
+    }
+
+    private function createScheduledTask($name, $times = null)
     {
         $scheduledTask = new ScheduledTask;
 
@@ -286,6 +346,13 @@ class ScheduledTaskCommand extends ContainerAwareCommand
         }
 
         $scheduledTask->setName($name);
+        $scheduledTask->setRemaining($times);
+
+        if ($latestExecutedScheduledTask = $this->getLatestScheduledTask($name)) {
+            $scheduledTask->setRemaining(
+                $latestExecutedScheduledTask->getRemaining()
+            );
+        }
 
         if ($this->checkTableExists()) {
             $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
@@ -318,6 +385,10 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
     private function updateScheduledTaskStatusAsExecuted(ScheduledTask $scheduledTask, $message = null, $output = null)
     {
+        if ($scheduledTask->getRemaining()) {
+            $scheduledTask->decreaseRemaining();
+        }
+
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_EXECUTED, $message, $output);
     }
 
@@ -337,6 +408,35 @@ class ScheduledTaskCommand extends ContainerAwareCommand
 
     private function isTaskDue($task)
     {
+        // Check remaining.
+        if ($this->log) {
+            $scheduledTask = $this->getLatestScheduledTask($task['name']);
+
+            if ($scheduledTask instanceof ScheduledTask && $scheduledTask->isRemainingZero()) {
+                return false;
+            }
+        }
+
+        $now = new \DateTime();
+
+        // Check start date.
+        if (null !== $task['start']) {
+            $start = new \DateTime($task['start']);
+
+            if ($start > $now) {
+                return false;
+            }
+        }
+
+        // Check start date.
+        if (null !== $task['end']) {
+            $end = new \DateTime($task['end']);
+
+            if ($end < $now) {
+                return false;
+            }
+        }
+
         $expression = $task['expression'];
 
         $cron = CronExpression::factory($expression);
