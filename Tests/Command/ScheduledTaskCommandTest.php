@@ -15,8 +15,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 {
     private function getApplication()
     {
-        $kernel = self::bootKernel();
-        $application = new Application($kernel->getName());
+        $application = new Application();
 
         return $application;
     }
