@@ -7,7 +7,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * ScheduledTask
  *
- * @ORM\Table(name="scheduled_tasks", indexes={@ORM\Index(name="search_idx", columns={"name", "status", "created_at"})})
+ * @ORM\Table(
+ *     name="scheduled_tasks",
+ *     indexes={
+ *         @ORM\Index(name="name_idx", columns={"name"}),
+ *         @ORM\Index(name="search_idx", columns={"name", "status", "created_at"})
+ *     }
+ * )
  * @ORM\Entity(repositoryClass="Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository")
  * @ORM\HasLifecycleCallbacks()
  */
@@ -53,6 +59,13 @@ class ScheduledTask
      * @ORM\Column(name="output", type="text", nullable=true, options={"comment":"Scheduled task output message"})
      */
     private $output;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="remaining", type="smallint", nullable=true, options={"comment":"Scheduled task remaining execution"})
+     */
+    private $remaining;
 
     /**
      * @var \DateTime
@@ -149,6 +162,16 @@ class ScheduledTask
     }
 
     /**
+     * Is task executed
+     *
+     * @return bool
+     */
+    public function isExecuted()
+    {
+        return self::STATUS_EXECUTED === $this->status;
+    }
+
+    /**
      * Set message
      *
      * @param string $message
@@ -194,6 +217,52 @@ class ScheduledTask
     public function getOutput()
     {
         return $this->output;
+    }
+
+    /**
+     * Set remaining
+     *
+     * @param int $remaining
+     *
+     * @return ScheduledTask
+     */
+    public function setRemaining($remaining)
+    {
+        $this->remaining = $remaining;
+
+        return $this;
+    }
+
+    /**
+     * Get remaining
+     *
+     * @return int
+     */
+    public function getRemaining()
+    {
+        return $this->remaining;
+    }
+
+    /**
+     * Decrease remaining
+     *
+     * @return ScheduledTask
+     */
+    public function decreaseRemaining()
+    {
+        --$this->remaining;
+
+        return $this;
+    }
+
+    /**
+     * Is remaining zero
+     *
+     * @return bool
+     */
+    public function isRemainingZero()
+    {
+        return 0 === $this->remaining;
     }
 
     /**
