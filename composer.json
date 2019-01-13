@@ -38,5 +38,8 @@
             "allow-contrib": "true"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "require-dev": {
+        "symfony/phpunit-bridge": "*"
+    }
 }
