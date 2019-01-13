@@ -7,13 +7,14 @@ use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -29,8 +30,10 @@ use Symfony\Component\Process\Process;
  * This Cron will call the command scheduler every minute. When the scheduler:run
  * command is executed, application will evaluate your scheduled tasks and runs the tasks that are due.
  */
-class ScheduledTaskCommand extends ContainerAwareCommand
+class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     /**
      * @var bool
      */
@@ -148,7 +151,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
                     $phpBinaryFinder = new PhpExecutableFinder();
                     $phpBinaryPath = $phpBinaryFinder->find();
 
-                    $projectRoot = $this->getContainer()->get('kernel')->getProjectDir();
+                    $projectRoot = $this->container->get('kernel')->getProjectDir();
 
                     $asyncCommand = [$phpBinaryPath, $projectRoot . '/bin/console'];
 
@@ -313,7 +316,7 @@ class ScheduledTaskCommand extends ContainerAwareCommand
     private function getEntityManger()
     {
         if (null === $this->entityManager) {
-            $this->entityManager = $this->getContainer()->get('doctrine.orm.default_entity_manager');
+            $this->entityManager = $this->container->get('doctrine.orm.default_entity_manager');
         }
 
         return $this->entityManager;
