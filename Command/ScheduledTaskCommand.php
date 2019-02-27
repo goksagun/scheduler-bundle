@@ -412,7 +412,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
     private function isTaskDue($task)
     {
         // Check remaining.
-        if ($this->log) {
+        if ($this->log && null !== $task['times']) {
             $scheduledTask = $this->getLatestScheduledTask($task['name']);
 
             if ($scheduledTask instanceof ScheduledTask && $scheduledTask->isRemainingZero()) {
