@@ -169,7 +169,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
                         array_push($asyncCommand, $commandArgument);
                     }
 
-                    $process = new Process($asyncCommand, null, null, null, null);
+                    $process = new Process($asyncCommand, null, null, null, $timeout = 3600);
 
                     $process->start();
 
@@ -475,6 +475,9 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
                     continue;
                 }
 
+                // Remove finished process from active processes list.
+                unset($this->processes[$j]);
+
                 $scheduledTask = $processInfo->getScheduledTask();
 
                 if (!$process->isSuccessful()) {
@@ -500,9 +503,6 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
                         $process->getOutput(),
                     ]
                 );
-
-                // Remove finished process from active processes list.
-                unset($this->processes[$j]);
             }
 
             // Check every second.
