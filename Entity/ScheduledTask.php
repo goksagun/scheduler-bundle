@@ -20,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
 class ScheduledTask
 {
     const STATUS_QUEUED = 'queued';
+    const STATUS_STARTED = 'started';
     const STATUS_EXECUTED = 'executed';
     const STATUS_FAILED = 'failed';
 

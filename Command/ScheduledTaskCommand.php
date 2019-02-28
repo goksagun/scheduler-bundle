@@ -173,6 +173,9 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
                     $process->start();
 
+                    // Update scheduled task status as started.
+                    $this->updateScheduledTaskStatusAsStarted($scheduledTask);
+
                     $this->processes[] = new ProcessInfo($process, $scheduledTask);
 
                     $output->writeln("{$i} - Started async process: {$process->getCommandLine()}");
@@ -384,6 +387,11 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         }
 
         return $scheduledTask;
+    }
+
+    private function updateScheduledTaskStatusAsStarted(ScheduledTask $scheduledTask, $message = null, $output = null)
+    {
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_STARTED, $message, $output);
     }
 
     private function updateScheduledTaskStatusAsExecuted(ScheduledTask $scheduledTask, $message = null, $output = null)
