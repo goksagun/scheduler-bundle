@@ -7,6 +7,7 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
 use Tests\Fixtures\FooBundle\Command\GreetingSayGoodbyeCommand;
 use Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
 use Tests\Fixtures\FooBundle\Command\NoOutputCommand;
@@ -287,6 +288,27 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $this->assertContains(
             "Goodbye John",
+            $output
+        );
+    }
+
+    public function testScheduleAnnotatedTaskCommand()
+    {
+        $application = $this->getApplication();
+
+        $application->add(new AnnotatedCommand());
+        $application->add(new ScheduledTaskCommand(true, false, false, []));
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([
+            'command' => $command->getName(),
+        ]);
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertContains(
+            "Hello from schedule by annotation",
             $output
         );
     }
