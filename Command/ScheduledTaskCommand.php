@@ -3,6 +3,7 @@
 namespace Goksagun\SchedulerBundle\Command;
 
 use Cron\CronExpression;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
@@ -90,8 +91,10 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output)
     {
+        $this->setAnnotatedTasks();
+
         if (!$this->enable) {
             $output->writeln(
                 'Scheduled task(s) disabled. You should enable in scheduler.yml (or scheduler.yaml) config before running this command.'
@@ -105,7 +108,10 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
             return;
         }
+    }
 
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $this->runScheduledTasks($input, $output);
     }
 
@@ -247,6 +253,26 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         }
 
         return $errors;
+    }
+
+    private function setAnnotatedTasks()
+    {
+        $commands = $this->getApplication()->all();
+
+        $reader = new AnnotationReader();
+
+        foreach ($commands as $command) {
+            $annotation = $reader->getClassAnnotation(
+                new \ReflectionClass(get_class($command)),
+                'Goksagun\SchedulerBundle\Annotation\Schedule'
+            );
+
+            if (!$annotation) {
+                continue;
+            }
+
+            array_push($this->tasks, (array)$annotation);
+        }
     }
 
     private function getTasks()
