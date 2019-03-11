@@ -4,6 +4,7 @@ namespace Goksagun\SchedulerBundle\Command;
 
 use Cron\CronExpression;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Goksagun\SchedulerBundle\Annotation\Schedule;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
@@ -262,16 +263,17 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         $reader = new AnnotationReader();
 
         foreach ($commands as $command) {
-            $annotation = $reader->getClassAnnotation(
-                new \ReflectionClass(get_class($command)),
-                'Goksagun\SchedulerBundle\Annotation\Schedule'
-            );
+            $annotations = $reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
 
-            if (!$annotation) {
+            if (!$annotations) {
                 continue;
             }
 
-            array_push($this->tasks, (array)$annotation);
+            foreach ($annotations as $annotation) {
+                if ($annotation instanceof Schedule) {
+                    array_push($this->tasks, (array)$annotation);
+                }
+            }
         }
     }
 
