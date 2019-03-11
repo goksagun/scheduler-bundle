@@ -311,5 +311,10 @@ class ScheduledTaskCommandTest extends KernelTestCase
             "Hello from schedule by annotation",
             $output
         );
+
+        $this->assertContains(
+            "This is an foo: bar",
+            $output
+        );
     }
 }
