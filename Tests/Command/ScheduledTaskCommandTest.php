@@ -317,4 +317,31 @@ class ScheduledTaskCommandTest extends KernelTestCase
             $output
         );
     }
+
+    public function testScheduleTaskListOption()
+    {
+        $application = $this->getApplication();
+
+        $application->add(new AnnotatedCommand());
+        $application->add(new ScheduledTaskCommand(true, false, false, []));
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([
+            'command' => $command->getName(),
+            '--list' => null,
+        ]);
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertContains(
+            "Name",
+            $output
+        );
+
+        $this->assertContains(
+            "Expression",
+            $output
+        );
+    }
 }
