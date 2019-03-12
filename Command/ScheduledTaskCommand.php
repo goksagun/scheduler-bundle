@@ -11,6 +11,7 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -89,6 +90,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             ->setName('scheduler:run')
             ->setDescription('Checks scheduled tasks and execute if exists any')
             ->addOption('async', 'a', InputOption::VALUE_OPTIONAL, 'Run task(s) asynchronously')
+            ->addOption('list', 'l', InputOption::VALUE_NONE, 'List all task(s)')
         ;
     }
 
@@ -113,6 +115,10 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if ($this->handleTaskList($input, $output)) {
+            return;
+        }
+
         $this->runScheduledTasks($input, $output);
     }
 
@@ -544,5 +550,34 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             // Check every second.
             sleep(1);
         } while (count($this->processes));
+    }
+
+    private function handleTaskList(InputInterface $input, OutputInterface $output): bool
+    {
+        $list = $input->getOption('list');
+
+        if (!$list) {
+            return false;
+        }
+
+        $i = 0;
+        $rows = array_map(
+            function ($row) use (&$i) {
+                ++$i;
+
+                return array_merge(['index' => $i], $row);
+            },
+            $this->tasks
+        );
+
+        if ($list) {
+            $table = new Table($output);
+            $table
+                ->setHeaders(['#', 'Name', 'Expression', 'Times', 'Start', 'End'])
+                ->setRows($rows);
+            $table->render();
+        }
+
+        return true;
     }
 }
