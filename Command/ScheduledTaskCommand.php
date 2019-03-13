@@ -277,7 +277,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
             foreach ($annotations as $annotation) {
                 if ($annotation instanceof Schedule) {
-                    array_push($this->tasks, (array)$annotation);
+                    array_push($this->tasks, $annotation->toArray());
                 }
             }
         }

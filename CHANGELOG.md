@@ -1,3 +1,6 @@
+## 0.3.1 (March 13, 2019)
+  - Fix annotation partial cron expression divided by backslash
+
 ## 0.3.0 (March 12, 2019)
   - Add scheduled command task list option
 
