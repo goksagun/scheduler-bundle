@@ -79,4 +79,18 @@ class Schedule
     {
         return $this->end;
     }
+
+    public function toArray()
+    {
+        return array_map(
+            function ($value) {
+                if (null === $value) {
+                    return $value;
+                }
+
+                return preg_replace('/\\\\/', '', $value);
+            },
+            (array)$this
+        );
+    }
 }
