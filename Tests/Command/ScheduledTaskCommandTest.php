@@ -339,6 +339,8 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
+        $this->assertContains("3", $output);
+
         $this->assertContains(
             "Name",
             $output

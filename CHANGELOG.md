@@ -1,3 +1,6 @@
+## 0.3.3 (March 14, 2019)
+  - Fix list command missing argument bug
+
 ## 0.3.2 (March 14, 2019)
   - Seperate command list argument as a new command
 
