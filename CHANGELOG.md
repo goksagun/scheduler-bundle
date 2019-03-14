@@ -1,3 +1,6 @@
+## 0.3.2 (March 14, 2019)
+  - Seperate command list argument as a new command
+
 ## 0.3.1 (March 13, 2019)
   - Fix annotation partial cron expression divided by backslash
 

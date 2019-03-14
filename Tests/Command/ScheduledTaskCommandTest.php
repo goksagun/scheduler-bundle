@@ -3,6 +3,7 @@
 namespace Goksagun\SchedulerBundle\Tests\Command;
 
 use Goksagun\SchedulerBundle\Command\ScheduledTaskCommand;
+use Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
@@ -323,13 +324,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $application = $this->getApplication();
 
         $application->add(new AnnotatedCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, []));
+        $application->add(new ScheduledTaskListCommand([
+            [
+                'name' => 'schedule:annotate --foo=baz',
+                'expression' => '*/10 * * * *'
+            ]
+        ]));
 
-        $command = $application->find('scheduler:run');
+        $command = $application->find('scheduler:list');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
             'command' => $command->getName(),
-            '--list' => null,
         ]);
 
         $output = $commandTester->getDisplay();

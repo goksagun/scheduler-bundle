@@ -2,7 +2,7 @@ parameters:
     enable: true
     async: ~
     log: ~
-    tasks: ~
+    tasks: []
 
 services:
     scheduler.command.scheduled_task:
@@ -10,3 +10,9 @@ services:
         arguments: ["%enable%", "%async%", "%log%","%tasks%"]
         tags:
             - { name: 'console.command', command: 'scheduler:run' }
+
+    scheduler.command.scheduled_task_list:
+        class: Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand
+        arguments: ["%tasks%"]
+        tags:
+            - { name: 'console.command', command: 'scheduler:list' }
