@@ -3,15 +3,12 @@
 namespace Goksagun\SchedulerBundle\Command;
 
 use Cron\CronExpression;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Goksagun\SchedulerBundle\Annotation\Schedule;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -35,7 +32,7 @@ use Symfony\Component\Process\Process;
  */
 class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 {
-    use ContainerAwareTrait;
+    use ContainerAwareTrait, AnnotatedCommandTrait;
 
     /**
      * @var bool
@@ -67,13 +64,6 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
      */
     private $entityManager;
 
-    /**
-     * ScheduledTaskCommand constructor.
-     * @param bool $enable
-     * @param bool $async
-     * @param bool $log
-     * @param array $tasks
-     */
     public function __construct(bool $enable, $async, $log, array $tasks)
     {
         parent::__construct();
@@ -90,8 +80,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             ->setName('scheduler:run')
             ->setDescription('Checks scheduled tasks and execute if exists any')
             ->addOption('async', 'a', InputOption::VALUE_OPTIONAL, 'Run task(s) asynchronously')
-            ->addOption('list', 'l', InputOption::VALUE_NONE, 'List all task(s)')
-        ;
+            ->addOption('list', 'l', InputOption::VALUE_NONE, 'List all task(s)');
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output)
@@ -107,7 +96,9 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         }
 
         if (!$this->tasks) {
-            $output->writeln('There is no task scheduled. You should add task in scheduler.yml (or scheduler.yaml) config file.');
+            $output->writeln(
+                'There is no task scheduled. You should add task in scheduler.yml (or scheduler.yaml) config file.'
+            );
 
             return;
         }
@@ -115,10 +106,6 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->handleTaskList($input, $output)) {
-            return;
-        }
-
         $this->runScheduledTasks($input, $output);
     }
 
@@ -166,7 +153,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
                     $projectRoot = $this->container->get('kernel')->getProjectDir();
 
-                    $asyncCommand = [$phpBinaryPath, $projectRoot . '/bin/console'];
+                    $asyncCommand = [$phpBinaryPath, $projectRoot.'/bin/console'];
 
                     // Add scheduled task command arguments to async process command.
                     foreach ($arguments as $key => $value) {
@@ -262,27 +249,6 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         return $errors;
     }
 
-    private function setAnnotatedTasks()
-    {
-        $commands = $this->getApplication()->all();
-
-        $reader = new AnnotationReader();
-
-        foreach ($commands as $command) {
-            $annotations = $reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
-
-            if (!$annotations) {
-                continue;
-            }
-
-            foreach ($annotations as $annotation) {
-                if ($annotation instanceof Schedule) {
-                    array_push($this->tasks, $annotation->toArray());
-                }
-            }
-        }
-    }
-
     private function getTasks()
     {
         foreach ($this->tasks as $task) {
@@ -310,7 +276,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
         // Shift command name from arguments.
         $arguments = [
-            'command' => array_shift($parts)
+            'command' => array_shift($parts),
         ];
 
         foreach ($parts as $key => $part) {
@@ -332,10 +298,13 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
                 }
             );
 
-            $arguments = array_merge($arguments, array_combine(
-                array_slice($argumentNames, 0, count($parts)),
-                $parts
-            ));
+            $arguments = array_merge(
+                $arguments,
+                array_combine(
+                    array_slice($argumentNames, 0, count($parts)),
+                    $parts
+                )
+            );
         }
 
         /*
@@ -347,6 +316,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
          *      '--option-two' => null,
          * ]
          */
+
         return $arguments;
     }
 
@@ -372,7 +342,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         return $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->findOneBy(
             $criteria,
             [
-                'id' => 'desc'
+                'id' => 'desc',
             ]
         );
     }
@@ -550,34 +520,5 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             // Check every second.
             sleep(1);
         } while (count($this->processes));
-    }
-
-    private function handleTaskList(InputInterface $input, OutputInterface $output): bool
-    {
-        $list = $input->getOption('list');
-
-        if (!$list) {
-            return false;
-        }
-
-        $i = 0;
-        $rows = array_map(
-            function ($row) use (&$i) {
-                ++$i;
-
-                return array_merge(['index' => $i], $row);
-            },
-            $this->tasks
-        );
-
-        if ($list) {
-            $table = new Table($output);
-            $table
-                ->setHeaders(['#', 'Name', 'Expression', 'Times', 'Start', 'End'])
-                ->setRows($rows);
-            $table->render();
-        }
-
-        return true;
     }
 }
