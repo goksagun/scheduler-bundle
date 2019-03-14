@@ -2,7 +2,7 @@ parameters:
     enable: true
     async: ~
     log: ~
-    tasks: []
+    tasks: ~
 
 services:
     scheduler.command.scheduled_task:

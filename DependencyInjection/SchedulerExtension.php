@@ -30,6 +30,9 @@ class SchedulerExtension extends Extension
         $scheduledTaskCommandDefinition->replaceArgument(1, $config['async']);
         $scheduledTaskCommandDefinition->replaceArgument(2, $config['log']);
         $scheduledTaskCommandDefinition->replaceArgument(3, $config['tasks']);
+
+        $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.command.scheduled_task_list');
+        $scheduledTaskCommandDefinition->replaceArgument(0, $config['tasks']);
     }
 
     public function getAlias()
