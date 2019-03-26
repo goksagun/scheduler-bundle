@@ -34,6 +34,8 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 {
     use ContainerAwareTrait, AnnotatedCommandTrait;
 
+    const PROCESS_TIMEOUT = 3600 * 24; // 24 hours
+
     /**
      * @var bool
      */
@@ -169,7 +171,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
                         array_push($asyncCommand, $commandArgument);
                     }
 
-                    $process = new Process($asyncCommand, null, null, null, $timeout = 3600);
+                    $process = new Process($asyncCommand, null, null, null, $timeout = static::PROCESS_TIMEOUT);
 
                     $process->start();
 
