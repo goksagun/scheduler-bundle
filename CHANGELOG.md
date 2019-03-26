@@ -1,3 +1,6 @@
+## 0.3.4 (March 26, 2019)
+  - Async process timeout configured as 24 hours (1 day)
+
 ## 0.3.3 (March 14, 2019)
   - Fix list command missing argument bug
 
