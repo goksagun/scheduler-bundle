@@ -3,6 +3,10 @@
 namespace Goksagun\SchedulerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
+use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\DateHelper;
+use Goksagun\SchedulerBundle\Utils\HashHelper;
 
 /**
  * ScheduledTask
@@ -11,25 +15,23 @@ use Doctrine\ORM\Mapping as ORM;
  *     name="scheduled_tasks",
  *     indexes={
  *         @ORM\Index(name="name_idx", columns={"name"}),
- *         @ORM\Index(name="search_idx", columns={"name", "status", "created_at"})
+ *         @ORM\Index(name="status_idx", columns={"status"})
  *     }
  * )
  * @ORM\Entity(repositoryClass="Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository")
  * @ORM\HasLifecycleCallbacks()
  */
-class ScheduledTask
+class ScheduledTask implements StatusInterface
 {
-    const STATUS_QUEUED = 'queued';
-    const STATUS_STARTED = 'started';
-    const STATUS_EXECUTED = 'executed';
-    const STATUS_FAILED = 'failed';
+    const EXCLUDED_PROPS = ['createdAt', 'updatedAt'];
 
     /**
      * @var int
      *
-     * @ORM\Column(name="id", type="integer")
+     * @ORM\Column(name="id", type="string")
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="CUSTOM")
+     * @ORM\CustomIdGenerator(class="Goksagun\SchedulerBundle\Doctrine\ORM\Id\HashIdGenerator")
      */
     private $id;
 
@@ -43,30 +45,37 @@ class ScheduledTask
     /**
      * @var string
      *
-     * @ORM\Column(name="status", type="string", length=255, options={"default":"queued", "comment":"Scheduled task status"})
+     * @ORM\Column(name="expression", type="string", length=255, nullable=true, options={"comment":"Scheduled task expression"})
+     */
+    private $expression;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="times", type="smallint", nullable=true, options={"comment":"Scheduled task execution count"})
+     */
+    private $times;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="start", type="datetime", nullable=true, options={"comment":"Scheduled task start date and time"})
+     */
+    private $start;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="stop", type="datetime", nullable=true, options={"comment":"Scheduled task stop date and time"})
+     */
+    private $stop;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="status", type="string", length=255, options={"default":"active", "comment":"Scheduled task status"})
      */
     private $status;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="message", type="string", length=255, nullable=true, options={"comment":"Scheduled task message"})
-     */
-    private $message;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="output", type="text", nullable=true, options={"comment":"Scheduled task output message"})
-     */
-    private $output;
-
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="remaining", type="smallint", nullable=true, options={"comment":"Scheduled task remaining execution"})
-     */
-    private $remaining;
 
     /**
      * @var \DateTime
@@ -88,20 +97,40 @@ class ScheduledTask
      */
     public function __construct()
     {
-        $this->status = static::STATUS_QUEUED;
+        $this->status = static::STATUS_ACTIVE;
     }
 
     /**
      * @ORM\PrePersist()
+     */
+    public function prePersist()
+    {
+        $this->createdAt = DateHelper::date();
+    }
+
+    /**
      * @ORM\PreUpdate()
      */
-    public function updateTimestamps()
+    public function preUpdate()
     {
-        if (null == $this->createdAt) {
-            $this->createdAt = new \DateTime();
-        } else {
-            $this->updatedAt = new \DateTime();
-        }
+        $this->id = HashHelper::generateIdFromProps(
+            ArrayHelper::only(get_object_vars($this), HashHelper::GENERATED_PROPS)
+        );
+
+        $this->updatedAt = DateHelper::date();
+    }
+
+    /**
+     * @param array $props
+     * @return array
+     */
+    public function toArray(array $props = [])
+    {
+        $allProps = get_object_vars($this);
+
+        return empty($props)
+            ? ArrayHelper::except($allProps, static::EXCLUDED_PROPS)
+            : ArrayHelper::only($allProps, $props);
     }
 
     /**
@@ -139,6 +168,102 @@ class ScheduledTask
     }
 
     /**
+     * Set expression.
+     *
+     * @param string|null $expression
+     *
+     * @return ScheduledTask
+     */
+    public function setExpression($expression = null)
+    {
+        $this->expression = $expression;
+
+        return $this;
+    }
+
+    /**
+     * Get expression.
+     *
+     * @return string|null
+     */
+    public function getExpression()
+    {
+        return $this->expression;
+    }
+
+    /**
+     * Set times.
+     *
+     * @param int|null $times
+     *
+     * @return ScheduledTask
+     */
+    public function setTimes($times = null)
+    {
+        $this->times = $times;
+
+        return $this;
+    }
+
+    /**
+     * Get times.
+     *
+     * @return int|null
+     */
+    public function getTimes()
+    {
+        return $this->times;
+    }
+
+    /**
+     * Set start.
+     *
+     * @param \DateTime|null $start
+     *
+     * @return ScheduledTask
+     */
+    public function setStart($start = null)
+    {
+        $this->start = $start;
+
+        return $this;
+    }
+
+    /**
+     * Get start.
+     *
+     * @return \DateTime|null
+     */
+    public function getStart()
+    {
+        return $this->start;
+    }
+
+    /**
+     * Set stop.
+     *
+     * @param \DateTime|null $stop
+     *
+     * @return ScheduledTask
+     */
+    public function setStop($stop = null)
+    {
+        $this->stop = $stop;
+
+        return $this;
+    }
+
+    /**
+     * Get stop.
+     *
+     * @return \DateTime|null
+     */
+    public function getStop()
+    {
+        return $this->stop;
+    }
+
+    /**
      * Set status
      *
      * @param string $status
@@ -160,110 +285,6 @@ class ScheduledTask
     public function getStatus()
     {
         return $this->status;
-    }
-
-    /**
-     * Is task executed
-     *
-     * @return bool
-     */
-    public function isExecuted()
-    {
-        return self::STATUS_EXECUTED === $this->status;
-    }
-
-    /**
-     * Set message
-     *
-     * @param string $message
-     *
-     * @return ScheduledTask
-     */
-    public function setMessage($message)
-    {
-        $this->message = $message;
-
-        return $this;
-    }
-
-    /**
-     * Get message
-     *
-     * @return string
-     */
-    public function getMessage()
-    {
-        return $this->message;
-    }
-
-    /**
-     * Set output
-     *
-     * @param string $output
-     *
-     * @return ScheduledTask
-     */
-    public function setOutput($output)
-    {
-        $this->output = $output;
-
-        return $this;
-    }
-
-    /**
-     * Get output
-     *
-     * @return string
-     */
-    public function getOutput()
-    {
-        return $this->output;
-    }
-
-    /**
-     * Set remaining
-     *
-     * @param int $remaining
-     *
-     * @return ScheduledTask
-     */
-    public function setRemaining($remaining)
-    {
-        $this->remaining = $remaining;
-
-        return $this;
-    }
-
-    /**
-     * Get remaining
-     *
-     * @return int
-     */
-    public function getRemaining()
-    {
-        return $this->remaining;
-    }
-
-    /**
-     * Decrease remaining
-     *
-     * @return ScheduledTask
-     */
-    public function decreaseRemaining()
-    {
-        --$this->remaining;
-
-        return $this;
-    }
-
-    /**
-     * Is remaining zero
-     *
-     * @return bool
-     */
-    public function isRemainingZero()
-    {
-        return 0 === $this->remaining;
     }
 
     /**

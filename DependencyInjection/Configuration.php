@@ -2,6 +2,7 @@
 
 namespace Goksagun\SchedulerBundle\DependencyInjection;
 
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -22,7 +23,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->booleanNode('enable')->defaultValue(true)->end()
+                ->booleanNode('enabled')->defaultValue(true)->end()
             ->end()
             ->children()
                 ->scalarNode('async')->defaultValue(null)->end()
@@ -38,7 +39,8 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('expression')->end()
                             ->scalarNode('times')->defaultNull()->end()
                             ->scalarNode('start')->defaultNull()->end()
-                            ->scalarNode('end')->defaultNull()->end()
+                            ->scalarNode('stop')->defaultNull()->end()
+                            ->scalarNode('status')->defaultValue(StatusInterface::STATUS_ACTIVE)->end()
                         ->end()
                     ->end()
                 ->end()
