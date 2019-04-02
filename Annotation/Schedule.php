@@ -4,12 +4,14 @@ namespace Goksagun\SchedulerBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
+use Goksagun\SchedulerBundle\Utils\ArrayHelper;
 
 /**
  * @Annotation
  * @Target("CLASS")
  */
-class Schedule
+class Schedule implements StatusInterface
 {
     /**
      * @Required()
@@ -38,7 +40,12 @@ class Schedule
     /**
      * @var string
      */
-    public $end;
+    public $stop;
+
+    /**
+     * @var string
+     */
+    public $status = self::STATUS_ACTIVE;
 
     /**
      * @return string
@@ -75,22 +82,35 @@ class Schedule
     /**
      * @return string
      */
-    public function getEnd(): string
+    public function getStop(): string
     {
-        return $this->end;
+        return $this->stop;
     }
 
-    public function toArray()
+    /**
+     * @return string
+     */
+    public function getStatus(): string
     {
-        return array_map(
+        return $this->status;
+    }
+
+    public function toArray(array $props = [])
+    {
+        $allProps = array_map(
             function ($value) {
                 if (null === $value) {
                     return $value;
                 }
 
+                // Cleanup expression backslashes like: "*\/10 * * * *" to: "*/10 * * * *".
                 return preg_replace('/\\\\/', '', $value);
             },
-            (array)$this
+            get_object_vars($this)
         );
+
+        return empty($props)
+            ? $allProps
+            : ArrayHelper::only($allProps, $props);
     }
 }

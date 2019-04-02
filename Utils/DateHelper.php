@@ -13,4 +13,9 @@ final class DateHelper
 
         return $d && $d->format($format) === $date;
     }
+
+    public static function date($time = 'now', \DateTimeZone $timezone = null)
+    {
+        return new \DateTime($time, $timezone);
+    }
 }

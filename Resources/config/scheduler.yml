@@ -11,7 +11,7 @@
 #   |    +-------------------- hour (0 - 23)
 #   +------------------------- min (0 - 59)
 scheduler:
-    enable: true
+    enabled: true
     async: ~
     log: ~
     tasks:

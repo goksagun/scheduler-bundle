@@ -3,18 +3,20 @@
 namespace Goksagun\SchedulerBundle\Command;
 
 use Cron\CronExpression;
-use Goksagun\SchedulerBundle\Entity\ScheduledTask;
+use Doctrine\ORM\EntityManagerInterface;
+use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
+use Goksagun\SchedulerBundle\Enum\ResourceInterface;
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -30,50 +32,43 @@ use Symfony\Component\Process\Process;
  * This Cron will call the command scheduler every minute. When the scheduler:run
  * command is executed, application will evaluate your scheduled tasks and runs the tasks that are due.
  */
-class ScheduledTaskCommand extends Command implements ContainerAwareInterface
+class ScheduledTaskCommand extends Command
 {
-    use ContainerAwareTrait, AnnotatedCommandTrait;
+    use ConfiguredCommandTrait, AnnotatedCommandTrait, DatabasedCommandTrait;
 
     const PROCESS_TIMEOUT = 3600 * 24; // 24 hours
 
     /**
-     * @var bool
-     */
-    private $enable;
-
-    /**
-     * @var bool
-     */
-    private $async;
-
-    /**
-     * @var bool
-     */
-    private $log;
-
-    /**
      * @var array
      */
-    private $tasks;
-
-    /**
-     * @var ProcessInfo[]
-     */
-    private $processes = [];
+    private $config = [];
 
     /**
      * @var \Doctrine\ORM\EntityManager
      */
     private $entityManager;
 
-    public function __construct(bool $enable, $async, $log, array $tasks)
+    /**
+     * @var string
+     */
+    private $projectDir;
+
+    /**
+     * @var array
+     */
+    private $tasks = [];
+
+    /**
+     * @var ProcessInfo[]
+     */
+    private $processes = [];
+
+    public function __construct(array $config, EntityManagerInterface $entityManager)
     {
         parent::__construct();
 
-        $this->enable = $enable;
-        $this->async = $async;
-        $this->log = $log;
-        $this->tasks = $tasks;
+        $this->config = $config;
+        $this->entityManager = $entityManager;
     }
 
     protected function configure()
@@ -82,14 +77,30 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             ->setName('scheduler:run')
             ->setDescription('Checks scheduled tasks and execute if exists any')
             ->addOption('async', 'a', InputOption::VALUE_OPTIONAL, 'Run task(s) asynchronously')
-            ->addOption('list', 'l', InputOption::VALUE_NONE, 'List all task(s)');
+            ->addOption(
+                'resource',
+                'r',
+                InputOption::VALUE_REQUIRED,
+                'Run task(s) by resource. [values: "config|annotation|database"]'
+            );
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->setAnnotatedTasks();
+        $resource = $input->getOption('resource');
 
-        if (!$this->enable) {
+        if (!is_null($resource) && !in_array($resource, ResourceInterface::RESOURCES)) {
+            throw new RuntimeException(
+                sprintf(
+                    'The option "resource" should be valid. [values: "%s"]',
+                    implode('|', ResourceInterface::RESOURCES)
+                )
+            );
+        }
+
+        $this->setTasks($resource);
+
+        if (!$this->config['enabled']) {
             $output->writeln(
                 'Scheduled task(s) disabled. You should enable in scheduler.yml (or scheduler.yaml) config before running this command.'
             );
@@ -111,20 +122,27 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         $this->runScheduledTasks($input, $output);
     }
 
+    private function setTasks($resource)
+    {
+        $this->setConfiguredTasks(StatusInterface::STATUS_ACTIVE, $resource);
+        $this->setAnnotatedTasks(StatusInterface::STATUS_ACTIVE, $resource);
+        $this->setDatabasedTasks(StatusInterface::STATUS_ACTIVE, $resource);
+    }
+
     private function runScheduledTasks(InputInterface $input, OutputInterface $output)
     {
         $isAsync = $input->getOption('async');
 
         // Override is async property is set.
-        if (null !== $this->async) {
-            $isAsync = $this->async;
+        if (null !== $this->config['async']) {
+            $isAsync = $this->config['async'];
         }
 
         foreach ($this->getTasks() as $i => $task) {
             $errors = $this->validateTask($task);
 
             if (!empty($errors)) {
-                $output->writeln(sprintf('The task "%s" has errors:', $i));
+                $output->writeln(" - The task '{$task['name']}' has errors:");
                 foreach ($errors as $error) {
                     $output->writeln(sprintf('  - %s', $error));
                 }
@@ -140,9 +158,9 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             $times = $task['times'];
 
             // Create scheduled task status as queued.
-            $scheduledTask = $this->createScheduledTask($name, $times);
+            $scheduledTask = $this->createScheduledTaskLog($name, $times);
 
-            if (!$command = $this->validateCommand($output, $name, $scheduledTask)) {
+            if (!$command = $this->validateCommand($output, $i, $name, $scheduledTask)) {
                 continue;
             }
 
@@ -150,10 +168,8 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
                 $arguments = $this->getCommandArguments($command, $name);
 
                 if ($isAsync) {
-                    $phpBinaryFinder = new PhpExecutableFinder();
-                    $phpBinaryPath = $phpBinaryFinder->find();
-
-                    $projectRoot = $this->container->get('kernel')->getProjectDir();
+                    $phpBinaryPath = $this->getPhpBinaryPath();
+                    $projectRoot = $this->getProjectDir();
 
                     $asyncCommand = [$phpBinaryPath, $projectRoot.'/bin/console'];
 
@@ -180,7 +196,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
                     $this->processes[] = new ProcessInfo($process, $scheduledTask);
 
-                    $output->writeln("{$i} - Started async process: {$process->getCommandLine()}");
+                    $output->writeln(" - Started async process: {$process->getCommandLine()}");
                 } else {
                     $input = new ArrayInput($arguments);
 
@@ -237,12 +253,12 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             );
         }
 
-        $end = $task['end'] ?? null;
-        if (!empty($end)
-            && !(DateHelper::isDateValid($end) || DateHelper::isDateValid($end, DateHelper::DATETIME_FORMAT))
+        $stop = $task['stop'] ?? null;
+        if (!empty($stop)
+            && !(DateHelper::isDateValid($stop) || DateHelper::isDateValid($stop, DateHelper::DATETIME_FORMAT))
         ) {
-            $errors['end'] = sprintf(
-                'The end should be date (%s) or datetime (%s).',
+            $errors['stop'] = sprintf(
+                'The stop should be date (%s) or datetime (%s).',
                 DateHelper::DATE_FORMAT,
                 DateHelper::DATETIME_FORMAT
             );
@@ -322,16 +338,12 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         return $arguments;
     }
 
-    private function getEntityManger()
+    private function getEntityManager()
     {
-        if (null === $this->entityManager) {
-            $this->entityManager = $this->container->get('doctrine.orm.default_entity_manager');
-        }
-
         return $this->entityManager;
     }
 
-    private function getLatestScheduledTask($name, $status = null)
+    private function getLatestScheduledTaskLog($name, $status = null)
     {
         $criteria = [
             'name' => $name,
@@ -341,7 +353,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             $criteria['status'] = $status;
         }
 
-        return $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->findOneBy(
+        return $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTaskLog')->findOneBy(
             $criteria,
             [
                 'id' => 'desc',
@@ -349,33 +361,37 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         );
     }
 
-    private function createScheduledTask($name, $times = null)
+    private function createScheduledTaskLog($name, $times = null)
     {
-        $scheduledTask = new ScheduledTask;
+        $scheduledTask = new ScheduledTaskLog;
 
-        if (!$this->log) {
+        if (!$this->config['log']) {
             return $scheduledTask;
         }
 
         $scheduledTask->setName($name);
         $scheduledTask->setRemaining($times);
 
-        if ($latestExecutedScheduledTask = $this->getLatestScheduledTask($name)) {
+        if ($latestExecutedScheduledTask = $this->getLatestScheduledTaskLog($name)) {
             $scheduledTask->setRemaining(
                 $latestExecutedScheduledTask->getRemaining()
             );
         }
 
         if ($this->checkTableExists()) {
-            $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+            $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTaskLog')->save($scheduledTask);
         }
 
         return $scheduledTask;
     }
 
-    private function updateScheduledTaskStatus(ScheduledTask $scheduledTask, $status, $message = null, $output = null)
-    {
-        if (!$this->log) {
+    private function updateScheduledTaskStatus(
+        ScheduledTaskLog $scheduledTask,
+        $status,
+        $message = null,
+        $output = null
+    ) {
+        if (!$this->config['log']) {
             return $scheduledTask;
         }
 
@@ -389,36 +405,42 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         }
 
         if ($this->checkTableExists()) {
-            $this->getEntityManger()->getRepository('SchedulerBundle:ScheduledTask')->save();
+            $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTaskLog')->save();
         }
 
         return $scheduledTask;
     }
 
-    private function updateScheduledTaskStatusAsStarted(ScheduledTask $scheduledTask, $message = null, $output = null)
-    {
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_STARTED, $message, $output);
+    private function updateScheduledTaskStatusAsStarted(
+        ScheduledTaskLog $scheduledTask,
+        $message = null,
+        $output = null
+    ) {
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_STARTED, $message, $output);
     }
 
-    private function updateScheduledTaskStatusAsExecuted(ScheduledTask $scheduledTask, $message = null, $output = null)
-    {
+    private function updateScheduledTaskStatusAsExecuted(
+        ScheduledTaskLog $scheduledTask,
+        $message = null,
+        $output = null
+    ) {
         if ($scheduledTask->getRemaining()) {
             $scheduledTask->decreaseRemaining();
         }
 
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_EXECUTED, $message, $output);
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_EXECUTED, $message, $output);
     }
 
-    private function updateScheduledTaskStatusAsFailed(ScheduledTask $scheduledTask, $message = null, $output = null)
+    private function updateScheduledTaskStatusAsFailed(ScheduledTaskLog $scheduledTask, $message = null, $output = null)
     {
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTask::STATUS_FAILED, $message, $output);
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_FAILED, $message, $output);
     }
 
     private function checkTableExists()
     {
-        $em = $this->getEntityManger();
+        $em = $this->getEntityManager();
 
-        $tableName = $em->getClassMetadata('SchedulerBundle:ScheduledTask')->getTableName();
+        $tableName = $em->getClassMetadata('SchedulerBundle:ScheduledTaskLog')->getTableName();
 
         return $em->getConnection()->getSchemaManager()->tablesExist((array)$tableName);
     }
@@ -426,19 +448,19 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
     private function isTaskDue($task)
     {
         // Check remaining.
-        if ($this->log && null !== $task['times']) {
-            $scheduledTask = $this->getLatestScheduledTask($task['name']);
+        if ($this->config['log'] && null !== $task['times']) {
+            $scheduledTask = $this->getLatestScheduledTaskLog($task['name']);
 
-            if ($scheduledTask instanceof ScheduledTask && $scheduledTask->isRemainingZero()) {
+            if ($scheduledTask instanceof ScheduledTaskLog && $scheduledTask->isRemainingZero()) {
                 return false;
             }
         }
 
-        $now = new \DateTime();
+        $now = DateHelper::date();
 
         // Check start date.
         if (null !== $task['start']) {
-            $start = new \DateTime($task['start']);
+            $start = DateHelper::date($task['start']);
 
             if ($start > $now) {
                 return false;
@@ -446,10 +468,10 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         }
 
         // Check start date.
-        if (null !== $task['end']) {
-            $end = new \DateTime($task['end']);
+        if (null !== $task['stop']) {
+            $stop = DateHelper::date($task['stop']);
 
-            if ($end < $now) {
+            if ($stop < $now) {
                 return false;
             }
         }
@@ -462,7 +484,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
         return $cron->isDue();
     }
 
-    private function validateCommand(OutputInterface $output, string $name, ScheduledTask $scheduledTask)
+    private function validateCommand(OutputInterface $output, int $i, string $name, ScheduledTaskLog $scheduledTask)
     {
         $commandName = $this->getCommandName($name);
 
@@ -472,10 +494,31 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
             // Log error message.
             $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
 
-            $output->writeln("The '{$name}' task not found!");
+            $output->writeln(" - The '{$name}' task not found!");
         }
 
         return null;
+    }
+
+    public function setProjectDir(string $projectDir)
+    {
+        $this->projectDir = $projectDir;
+    }
+
+    public function getProjectDir(): string
+    {
+        return $this->projectDir;
+    }
+
+    private function getPhpBinaryPath(): string
+    {
+        $phpBinaryFinder = new PhpExecutableFinder();
+
+        if (!$phpBinaryPath = $phpBinaryFinder->find()) {
+            throw new RuntimeException('PHP binary path not found.');
+        }
+
+        return $phpBinaryPath;
     }
 
     private function finishAsyncProcesses(OutputInterface $output)
@@ -492,14 +535,14 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
                 // Remove finished process from active processes list.
                 unset($this->processes[$j]);
 
-                $scheduledTask = $processInfo->getScheduledTask();
+                $scheduledTask = $processInfo->getScheduledTaskLog();
 
                 if (!$process->isSuccessful()) {
                     $this->updateScheduledTaskStatusAsFailed($scheduledTask, null, $process->getErrorOutput());
 
                     $output->writeln(
                         [
-                            "{$j} - Failed process: {$process->getCommandLine()}",
+                            " - Failed process: {$process->getCommandLine()}",
                             '========== Error ==========',
                             $process->getErrorOutput(),
                         ]
@@ -512,7 +555,7 @@ class ScheduledTaskCommand extends Command implements ContainerAwareInterface
 
                 $output->writeln(
                     [
-                        "{$j} - Successful process: {$process->getCommandLine()}",
+                        " - Successful process: {$process->getCommandLine()}",
                         '========== Output ==========',
                         $process->getOutput(),
                     ]

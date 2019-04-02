@@ -1,18 +1,35 @@
 parameters:
-    enable: true
-    async: ~
-    log: ~
-    tasks: ~
+    scheduler:
+        enabled: true
+        async: ~
+        log: ~
+        tasks: ~
 
 services:
     scheduler.command.scheduled_task:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskCommand
-        arguments: ["%enable%", "%async%", "%log%","%tasks%"]
+        arguments: ['%scheduler%', '@doctrine.orm.entity_manager']
+        calls:
+            - method: setProjectDir
+              arguments:
+                  - '%kernel.project_dir%'
         tags:
             - { name: 'console.command', command: 'scheduler:run' }
 
     scheduler.command.scheduled_task_list:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand
-        arguments: ["%tasks%"]
+        arguments: ['%scheduler%', '@doctrine.orm.entity_manager']
         tags:
             - { name: 'console.command', command: 'scheduler:list' }
+
+    scheduler.command.scheduled_task_add:
+        class: Goksagun\SchedulerBundle\Command\SchedulerTaskAddCommand
+        arguments: ['@doctrine.orm.entity_manager']
+        tags:
+            - { name: 'console.command', command: 'scheduler:add' }
+
+    scheduler.command.scheduled_task_edit:
+        class: Goksagun\SchedulerBundle\Command\SchedulerTaskEditCommand
+        arguments: ['@doctrine.orm.entity_manager']
+        tags:
+            - { name: 'console.command', command: 'scheduler:edit' }

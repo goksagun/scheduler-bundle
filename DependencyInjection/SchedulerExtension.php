@@ -26,13 +26,10 @@ class SchedulerExtension extends Extension
         $loader->load('services.yml');
 
         $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.command.scheduled_task');
-        $scheduledTaskCommandDefinition->replaceArgument(0, $config['enable']);
-        $scheduledTaskCommandDefinition->replaceArgument(1, $config['async']);
-        $scheduledTaskCommandDefinition->replaceArgument(2, $config['log']);
-        $scheduledTaskCommandDefinition->replaceArgument(3, $config['tasks']);
+        $scheduledTaskCommandDefinition->replaceArgument(0, $config);
 
         $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.command.scheduled_task_list');
-        $scheduledTaskCommandDefinition->replaceArgument(0, $config['tasks']);
+        $scheduledTaskCommandDefinition->replaceArgument(0, $config);
     }
 
     public function getAlias()
