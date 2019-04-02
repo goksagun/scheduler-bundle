@@ -2,13 +2,17 @@
 
 namespace Goksagun\SchedulerBundle\Tests\Command;
 
+use Doctrine\ORM\EntityManager;
 use Goksagun\SchedulerBundle\Command\ScheduledTaskCommand;
 use Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand;
+use Goksagun\SchedulerBundle\Entity\ScheduledTask;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
+use Tests\Fixtures\FooBundle\Command\DatabasedCommand;
 use Tests\Fixtures\FooBundle\Command\GreetingSayGoodbyeCommand;
 use Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
 use Tests\Fixtures\FooBundle\Command\NoOutputCommand;
@@ -24,15 +28,19 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testDisabledCommand()
     {
+        $config = $this->createConfigMock(false);
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
-        $application->add(new ScheduledTaskCommand(false, false, false, []));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -44,15 +52,19 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testEmptyTaskCommand()
     {
+        $config = $this->createConfigMock();
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
-        $application->add(new ScheduledTaskCommand(true, false, false, []));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -64,17 +76,32 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testInvalidTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'invalid:command',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            ['name' => 'invalid:command', 'expression' => '* * * * *', 'start' => null, 'end' => null, 'times' => null]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -86,39 +113,75 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testNoOutputTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'no:output',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new NoOutputCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            ['name' => 'no:output', 'expression' => '* * * * *', 'start' => null, 'end' => null, 'times' => null]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
-        $this->assertSame("The 'no:output' completed!\n", $output);
+        $this->assertContains("The 'no:output' completed!\n", $output);
     }
 
     public function testGreetingSayHelloWithArgumentTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'greeting:say-hello John Alaska',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+                [
+                    'name' => 'greeting:say-hello Jane Alaska',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new GreetingSayHelloCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            ['name' => 'greeting:say-hello John Alaska', 'expression' => '* * * * *', 'start' => null, 'end' => null, 'times' => null],
-            ['name' => 'greeting:say-hello Jane Alaska', 'expression' => '* * * * *', 'start' => null, 'end' => null, 'times' => null],
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -130,18 +193,33 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testGreetingSayHelloWithArgumentAndOptionTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'greeting:say-hello John --twice',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new GreetingSayHelloCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            ['name' => 'greeting:say-hello John --twice', 'expression' => '* * * * *', 'start' => null, 'end' => null, 'times' => null]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -153,24 +231,33 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testGreetingSayGoodbyeWithStartDateOptionTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'greeting:say-goodbye John',
+                    'expression' => '* * * * *',
+                    'start' => (new \DateTime('now'))->format(DateHelper::DATETIME_FORMAT),
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new GreetingSayGoodbyeCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            [
-                'name' => 'greeting:say-goodbye John',
-                'expression' => '* * * * *',
-                'start' => (new \DateTime('now'))->format(DateHelper::DATETIME_FORMAT),
-                'end' => null,
-                'times' => null
-            ]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -182,56 +269,74 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testGreetingSayGoodbyeWithWrongOptionsTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'greeting:say-goodbye John',
+                    'expression' => '* * * * *',
+                    'start' => (new \DateTime('now'))->format('Y/m/d H:i'),
+                    'stop' => strtotime('now'),
+                    'times' => 'integer',
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new GreetingSayGoodbyeCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            [
-                'name' => 'greeting:say-goodbye John',
-                'expression' => '* * * * *',
-                'start' => (new \DateTime('now'))->format('Y/m/d H:i'),
-                'end' => strtotime('now'),
-                'times' => 'integer'
-            ]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
         $this->assertSame(
-            "The task \"0\" has errors:
+            " - The task 'greeting:say-goodbye John' has errors:
   - The times should be integer.
   - The start should be date (Y-m-d) or datetime (Y-m-d H:i).
-  - The end should be date (Y-m-d) or datetime (Y-m-d H:i).\n",
+  - The stop should be date (Y-m-d) or datetime (Y-m-d H:i).\n",
             $output
         );
     }
 
     public function testGreetingSayGoodbyeWithStartDateValidateTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'greeting:say-goodbye John',
+                    'expression' => '* * * * *',
+                    'start' => (new \DateTime('+1 hour'))->format(DateHelper::DATETIME_FORMAT),
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new GreetingSayGoodbyeCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            [
-                'name' => 'greeting:say-goodbye John',
-                'expression' => '* * * * *',
-                'start' => (new \DateTime('+1 hour'))->format(DateHelper::DATETIME_FORMAT),
-                'end' => null,
-                'times' => null
-            ]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -240,24 +345,33 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testGreetingSayGoodbyeWithEndDateValidateTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'greeting:say-goodbye John',
+                    'expression' => '* * * * *',
+                    'start' => (new \DateTime('-1 hour'))->format(DateHelper::DATETIME_FORMAT),
+                    'stop' => (new \DateTime('now'))->format(DateHelper::DATETIME_FORMAT),
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new GreetingSayGoodbyeCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            [
-                'name' => 'greeting:say-goodbye John',
-                'expression' => '* * * * *',
-                'start' => (new \DateTime('-1 hour'))->format(DateHelper::DATETIME_FORMAT),
-                'end' => (new \DateTime('now'))->format(DateHelper::DATETIME_FORMAT),
-                'times' => null
-            ]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -266,24 +380,33 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testGreetingSayGoodbyeWithStartAndEndDateValidateTaskCommand()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'greeting:say-goodbye John',
+                    'expression' => '* * * * *',
+                    'start' => (new \DateTime('-1 hour'))->format(DateHelper::DATETIME_FORMAT),
+                    'stop' => (new \DateTime('+1 hour'))->format(DateHelper::DATETIME_FORMAT),
+                    'times' => null,
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new GreetingSayGoodbyeCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, [
-            [
-                'name' => 'greeting:say-goodbye John',
-                'expression' => '* * * * *',
-                'start' => (new \DateTime('-1 hour'))->format(DateHelper::DATETIME_FORMAT),
-                'end' => (new \DateTime('+1 hour'))->format(DateHelper::DATETIME_FORMAT),
-                'times' => null
-            ]
-        ]));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -295,16 +418,20 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     public function testScheduleAnnotatedTaskCommand()
     {
+        $config = $this->createConfigMock();
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new AnnotatedCommand());
-        $application->add(new ScheduledTaskCommand(true, false, false, []));
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -319,23 +446,65 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
     }
 
+    public function testScheduleDatabasedTaskCommand()
+    {
+        $config = $this->createConfigMock();
+        $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock(
+            [
+                [
+                    'name' => 'schedule:database',
+                    'expression' => '* * * * *',
+                    'resource' => 'database',
+                ],
+            ]
+        );
+
+        $application->add(new DatabasedCommand());
+        $application->add(new ScheduledTaskCommand($config, $entityManager));
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertContains(
+            "Hello from schedule by database",
+            $output
+        );
+    }
+
     public function testScheduleTaskListOption()
     {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'schedule:annotate --foo=baz',
+                    'expression' => '*/10 * * * *',
+                ],
+            ]
+        );
         $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
 
         $application->add(new AnnotatedCommand());
-        $application->add(new ScheduledTaskListCommand([
-            [
-                'name' => 'schedule:annotate --foo=baz',
-                'expression' => '*/10 * * * *'
-            ]
-        ]));
+        $application->add(new ScheduledTaskListCommand($config, $entityManager));
 
         $command = $application->find('scheduler:list');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
-            'command' => $command->getName(),
-        ]);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
 
         $output = $commandTester->getDisplay();
 
@@ -350,5 +519,47 @@ class ScheduledTaskCommandTest extends KernelTestCase
             "Expression",
             $output
         );
+
+        $this->assertContains(
+            "Resource",
+            $output
+        );
+    }
+
+    private function createConfigMock($enabled = true, $async = false, $log = false, $tasks = [])
+    {
+        return ['enabled' => $enabled, 'async' => $async, 'log' => $log, 'tasks' => $tasks];
+    }
+
+    private function createEntityManagerMock($data = [])
+    {
+        $scheduledTasks = [];
+        foreach ($data as $datum) {
+            $scheduledTask = new ScheduledTask();
+            $scheduledTask->setName($datum['name']);
+            $scheduledTask->setExpression($datum['expression']);
+            $scheduledTask->setTimes($datum['times'] ?? null);
+            $scheduledTask->setStart($datum['start'] ?? null);
+            $scheduledTask->setStop($datum['stop'] ?? null);
+            $scheduledTask->setStatus($datum['status'] ?? ScheduledTask::STATUS_ACTIVE);
+
+            array_push($scheduledTasks, $scheduledTask);
+        }
+
+        // Now, mock the repository so it returns the mock of the employee
+        $scheduledTaskRepository = $this->createMock(ScheduledTaskRepository::class);
+        $scheduledTaskRepository->expects($this->any())
+            ->method('findAll')
+            ->willReturn($scheduledTasks);
+
+        // Last, mock the EntityManager to return the mock of the repository
+        $entityManager = $this->createMock(EntityManager::class);
+        // use getMock() on PHPUnit 5.3 or below
+        // $entityManager = $this->getMock(ObjectManager::class);
+        $entityManager->expects($this->any())
+            ->method('getRepository')
+            ->willReturn($scheduledTaskRepository);
+
+        return $entityManager;
     }
 }

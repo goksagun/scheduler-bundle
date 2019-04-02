@@ -2,18 +2,18 @@
 
 namespace Goksagun\SchedulerBundle\Process;
 
-use Goksagun\SchedulerBundle\Entity\ScheduledTask;
+use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Symfony\Component\Process\Process;
 
 class ProcessInfo
 {
     private $process;
-    private $scheduledTask;
+    private $scheduledTaskLog;
 
-    public function __construct(Process $process, ScheduledTask $scheduledTask)
+    public function __construct(Process $process, ScheduledTaskLog $scheduledTaskLog)
     {
         $this->process = $process;
-        $this->scheduledTask = $scheduledTask;
+        $this->scheduledTaskLog = $scheduledTaskLog;
     }
 
     public function getProcess(): Process
@@ -26,13 +26,13 @@ class ProcessInfo
         $this->process = $process;
     }
 
-    public function getScheduledTask(): ScheduledTask
+    public function getScheduledTaskLog(): ScheduledTaskLog
     {
-        return $this->scheduledTask;
+        return $this->scheduledTaskLog;
     }
 
-    public function setScheduledTask(ScheduledTask $scheduledTask)
+    public function setScheduledTaskLog(ScheduledTaskLog $scheduledTaskLog)
     {
-        $this->scheduledTask = $scheduledTask;
+        $this->scheduledTaskLog = $scheduledTaskLog;
     }
 }
