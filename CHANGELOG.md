@@ -1,3 +1,6 @@
+## 0.4.0 (April 02, 2019)
+  - Add database as a resource for scheduled tasks
+
 ## 0.3.4 (March 26, 2019)
   - Async process timeout configured as 24 hours (1 day)
 
