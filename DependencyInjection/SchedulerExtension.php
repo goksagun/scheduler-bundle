@@ -25,6 +25,9 @@ class SchedulerExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
+        $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.service.scheduled_task');
+        $scheduledTaskCommandDefinition->replaceArgument(0, $config);
+
         $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.command.scheduled_task');
         $scheduledTaskCommandDefinition->replaceArgument(0, $config);
 

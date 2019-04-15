@@ -18,4 +18,15 @@ trait CrudTrait
         }
         $em->flush();
     }
+
+    /**
+     * @param $entity
+     */
+    public function delete($entity)
+    {
+        $em = $this->getEntityManager();
+
+        $em->remove($entity);
+        $em->flush();
+    }
 }

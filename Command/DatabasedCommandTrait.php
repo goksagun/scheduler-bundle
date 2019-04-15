@@ -19,9 +19,13 @@ trait DatabasedCommandTrait
             return;
         }
 
-        $repository = $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTask');
+        if (method_exists($this, 'getEntityManager')) {
+            $repository = $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTask');
+        } else {
+            $repository = $this->getRepository();
+        }
 
-        $databases = $repository->findAll($status);
+        $databases = $repository->findAll();
 
         foreach ($databases as $database) {
             $databaseTask = $database->toArray();
