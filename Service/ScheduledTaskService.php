@@ -100,7 +100,7 @@ class ScheduledTaskService
 
     public function delete($id)
     {
-        $scheduledTask = $this->repository->find($id);
+        $scheduledTask = $this->container->get('scheduler.repository.scheduled_task')->find($id);
 
         if (!$scheduledTask instanceof ScheduledTask) {
             throw new NotFoundHttpException(sprintf('The task by id "%s" is not found', $id));
