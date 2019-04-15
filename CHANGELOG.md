@@ -1,3 +1,6 @@
+## 0.4.3 (April 15, 2019)
+  - Fix service non-defined repository
+
 ## 0.4.2 (April 15, 2019)
   - Fix on a non-existent parameter "console.command.ids" bug
 
