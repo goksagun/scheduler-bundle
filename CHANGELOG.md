@@ -1,3 +1,6 @@
+## 0.4.2 (April 15, 2019)
+  - Fix on a non-existent parameter "console.command.ids" bug
+
 ## 0.4.1 (April 15, 2019)
   - Add service layer and access repository as a service
 
