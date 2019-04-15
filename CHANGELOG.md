@@ -1,3 +1,6 @@
+## 0.4.1 (April 15, 2019)
+  - Add service layer and access repository as a service
+
 ## 0.4.0 (April 02, 2019)
   - Add database as a resource for scheduled tasks
 
