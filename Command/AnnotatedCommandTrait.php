@@ -28,7 +28,7 @@ trait AnnotatedCommandTrait
                 function ($id) {
                     return $this->getContainer()->get($id);
                 },
-                $this->commands
+                $this->getContainer()->getParameter('console.command.ids')
             );
         }
 

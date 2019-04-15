@@ -22,7 +22,7 @@ trait DatabasedCommandTrait
         if (method_exists($this, 'getEntityManager')) {
             $repository = $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTask');
         } else {
-            $repository = $this->getRepository();
+            $repository = $this->getContainer()->get('scheduler.repository.scheduled_task');
         }
 
         $databases = $repository->findAll();
