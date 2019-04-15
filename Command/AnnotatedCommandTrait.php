@@ -21,7 +21,16 @@ trait AnnotatedCommandTrait
             return;
         }
 
-        $commands = $this->getApplication()->all();
+        if (method_exists($this, 'getApplication')) {
+            $commands = $this->getApplication()->all();
+        } else {
+            $commands = array_map(
+                function ($id) {
+                    return $this->getContainer()->get($id);
+                },
+                $this->commands
+            );
+        }
 
         $reader = new AnnotationReader();
 

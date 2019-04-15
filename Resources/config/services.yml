@@ -33,3 +33,15 @@ services:
         arguments: ['@doctrine.orm.entity_manager']
         tags:
             - { name: 'console.command', command: 'scheduler:edit' }
+
+    scheduler.service.scheduled_task:
+        class: Goksagun\SchedulerBundle\Service\ScheduledTaskService
+        arguments: ['%scheduler%', '%console.command.ids%', '@service_container', '@scheduler.repository.scheduled_task']
+
+    scheduler.repository.scheduled_task:
+        class: Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository
+        arguments: ['@Doctrine\Common\Persistence\ManagerRegistry']
+
+    scheduler.repository.scheduled_task_log:
+        class: Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository
+        arguments: ['@Doctrine\Common\Persistence\ManagerRegistry']
