@@ -19,8 +19,8 @@ trait DatabasedCommandTrait
             return;
         }
 
-        if (method_exists($this, 'getEntityManager')) {
-            $repository = $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTask');
+        if (method_exists($this, 'getRepository')) {
+            $repository = $this->getRepository();
         } else {
             $repository = $this->getContainer()->get('scheduler.repository.scheduled_task');
         }
