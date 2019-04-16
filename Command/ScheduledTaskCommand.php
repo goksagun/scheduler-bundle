@@ -8,6 +8,8 @@ use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Symfony\Component\Console\Command\Command;
@@ -49,6 +51,16 @@ class ScheduledTaskCommand extends Command
     private $entityManager;
 
     /**
+     * @var ScheduledTaskRepository
+     */
+    private $repository;
+
+    /**
+     * @var ScheduledTaskLogRepository
+     */
+    private $logRepository;
+
+    /**
      * @var string
      */
     private $projectDir;
@@ -63,12 +75,14 @@ class ScheduledTaskCommand extends Command
      */
     private $processes = [];
 
-    public function __construct(array $config, EntityManagerInterface $entityManager)
+    public function __construct(array $config, EntityManagerInterface $entityManager, ScheduledTaskRepository $repository, ScheduledTaskLogRepository $logRepository)
     {
         parent::__construct();
 
         $this->config = $config;
         $this->entityManager = $entityManager;
+        $this->repository = $repository;
+        $this->logRepository = $logRepository;
     }
 
     protected function configure()
@@ -343,6 +357,16 @@ class ScheduledTaskCommand extends Command
         return $this->entityManager;
     }
 
+    private function getRepository()
+    {
+        return $this->repository;
+    }
+
+    private function getLogRepository()
+    {
+        return $this->logRepository;
+    }
+
     private function getLatestScheduledTaskLog($name, $status = null)
     {
         $criteria = [
@@ -353,7 +377,7 @@ class ScheduledTaskCommand extends Command
             $criteria['status'] = $status;
         }
 
-        return $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTaskLog')->findOneBy(
+        return $this->getLogRepository()->findOneBy(
             $criteria,
             [
                 'id' => 'desc',
@@ -379,7 +403,7 @@ class ScheduledTaskCommand extends Command
         }
 
         if ($this->checkTableExists()) {
-            $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTaskLog')->save($scheduledTask);
+            $this->getLogRepository()->save($scheduledTask);
         }
 
         return $scheduledTask;
@@ -405,7 +429,7 @@ class ScheduledTaskCommand extends Command
         }
 
         if ($this->checkTableExists()) {
-            $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTaskLog')->save();
+            $this->getLogRepository()->save();
         }
 
         return $scheduledTask;
