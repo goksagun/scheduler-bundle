@@ -2,7 +2,7 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Doctrine\ORM\EntityManagerInterface;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,16 +26,16 @@ class ScheduledTaskListCommand extends Command
     private $tasks = [];
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var ScheduledTaskRepository
      */
-    private $entityManager;
+    private $repository;
 
-    public function __construct(array $config, EntityManagerInterface $entityManager)
+    public function __construct(array $config, ScheduledTaskRepository $repository)
     {
         parent::__construct();
 
         $this->config = $config;
-        $this->entityManager = $entityManager;
+        $this->repository = $repository;
     }
 
     protected function configure()
@@ -99,9 +99,9 @@ class ScheduledTaskListCommand extends Command
         return $this->tasks;
     }
 
-    private function getEntityManager()
+    private function getRepository()
     {
-        return $this->entityManager;
+        return $this->repository;
     }
 
     private function setTasks($status, $resource, $props = [])

@@ -57,7 +57,7 @@ class SchedulerTaskEditCommand extends SchedulerTaskAddCommand
 
     private function updateTask($id, $name, $expression, $times = null, $start = null, $stop = null, $status = null)
     {
-        $repository = $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTask');
+        $repository = $this->getRepository();
 
         $scheduledTask = $repository->find($id);
 

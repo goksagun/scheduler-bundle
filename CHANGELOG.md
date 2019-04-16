@@ -1,3 +1,6 @@
+## 0.4.4 (April 16, 2019)
+  - Fix service not exists error for repository by 'doctrine.service_repository' tag
+
 ## 0.4.3 (April 15, 2019)
   - Fix service non-defined repository
 

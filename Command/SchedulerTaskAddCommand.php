@@ -2,9 +2,9 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Component\Console\Command\Command;
@@ -17,15 +17,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SchedulerTaskAddCommand extends Command
 {
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var ScheduledTaskRepository
      */
-    protected $entityManager;
+    protected $repository;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(ScheduledTaskRepository $repository)
     {
         parent::__construct();
 
-        $this->entityManager = $entityManager;
+        $this->repository = $repository;
     }
 
     protected function configure()
@@ -91,7 +91,7 @@ class SchedulerTaskAddCommand extends Command
             $scheduledTask->setStatus($status);
         }
 
-        $this->getEntityManager()->getRepository('SchedulerBundle:ScheduledTask')->save($scheduledTask);
+        $this->getRepository()->save($scheduledTask);
 
         return $scheduledTask;
     }
@@ -112,9 +112,9 @@ class SchedulerTaskAddCommand extends Command
         return $this->storeTask($name, $expression, $times, $start, $stop, $status);
     }
 
-    protected function getEntityManager()
+    protected function getRepository()
     {
-        return $this->entityManager;
+        return $this->repository;
     }
 
     protected function validateOptions(array $options)
