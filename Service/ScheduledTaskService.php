@@ -2,6 +2,7 @@
 
 namespace Goksagun\SchedulerBundle\Service;
 
+use Cron\CronExpression;
 use Goksagun\SchedulerBundle\Command\AnnotatedCommandTrait;
 use Goksagun\SchedulerBundle\Command\ConfiguredCommandTrait;
 use Goksagun\SchedulerBundle\Command\DatabasedCommandTrait;
@@ -107,6 +108,11 @@ class ScheduledTaskService
         }
 
         $this->container->get('scheduler.repository.scheduled_task')->delete($scheduledTask);
+    }
+
+    public function isValidExpression($expression)
+    {
+        return CronExpression::isValidExpression($expression);
     }
 
     private function setTasks($status = null, $resource = null, $props = [])
