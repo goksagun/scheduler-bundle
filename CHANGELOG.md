@@ -1,3 +1,6 @@
+## 0.4.5 (April 18, 2019)
+  - Add expression validation to service
+
 ## 0.4.4 (April 16, 2019)
   - Fix service not exists error for repository by 'doctrine.service_repository' tag
 
