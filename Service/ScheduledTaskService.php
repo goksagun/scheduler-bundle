@@ -8,8 +8,11 @@ use Goksagun\SchedulerBundle\Command\ConfiguredCommandTrait;
 use Goksagun\SchedulerBundle\Command\DatabasedCommandTrait;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
+use Goksagun\SchedulerBundle\Utils\TaskHelper;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class ScheduledTaskService
 {
@@ -17,13 +20,15 @@ class ScheduledTaskService
 
     private $config;
     private $container;
+    private $application;
 
     private $tasks = [];
 
-    public function __construct(array $config, ContainerInterface $container)
+    public function __construct(array $config, ContainerInterface $container, KernelInterface $kernel)
     {
         $this->config = $config;
         $this->container = $container;
+        $this->application = new Application($kernel);
     }
 
     public function list($status = null, $resource = null, $props = [])
@@ -108,6 +113,11 @@ class ScheduledTaskService
         }
 
         $this->container->get('scheduler.repository.scheduled_task')->delete($scheduledTask);
+    }
+
+    public function isValidName($name)
+    {
+        return $this->application->has(TaskHelper::getCommandName($name));
     }
 
     public function isValidExpression($expression)
