@@ -46,7 +46,7 @@ services:
 
     scheduler.service.scheduled_task:
         class: Goksagun\SchedulerBundle\Service\ScheduledTaskService
-        arguments: ['%scheduler%', '@service_container']
+        arguments: ['%scheduler%', '@service_container', '@kernel']
 
     scheduler.repository.scheduled_task:
         class: Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository
