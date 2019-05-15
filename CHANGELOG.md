@@ -1,3 +1,6 @@
+## 0.4.6 (May 15, 2019)
+  - Add command name validation helper
+
 ## 0.4.5 (April 18, 2019)
   - Add expression validation to service
 
