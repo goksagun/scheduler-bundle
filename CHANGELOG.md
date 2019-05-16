@@ -1,3 +1,6 @@
+## 0.4.7 (May 16, 2019)
+  - Fix command name parser by quoted single or double
+
 ## 0.4.6 (May 15, 2019)
   - Add command name validation helper
 
