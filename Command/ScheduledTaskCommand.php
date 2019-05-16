@@ -12,6 +12,7 @@ use Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
+use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\RuntimeException;
@@ -288,23 +289,11 @@ class ScheduledTaskCommand extends Command
         }
     }
 
-    private function parseName($name)
-    {
-        return explode(' ', preg_replace('!\s+!', ' ', $name));
-    }
-
-    private function getCommandName($name)
-    {
-        $parts = $this->parseName($name);
-
-        return current($parts);
-    }
-
     private function getCommandArguments(Command $command, $name)
     {
         // Get parts from full task name.
         // First part is the command name the others arguments and options.
-        $parts = $this->parseName($name);
+        $parts = TaskHelper::parseName($name);
 
         // Shift command name from arguments.
         $arguments = [
@@ -510,7 +499,7 @@ class ScheduledTaskCommand extends Command
 
     private function validateCommand(OutputInterface $output, int $i, string $name, ScheduledTaskLog $scheduledTask)
     {
-        $commandName = $this->getCommandName($name);
+        $commandName = TaskHelper::getCommandName($name);
 
         try {
             return $this->getApplication()->find($commandName);
