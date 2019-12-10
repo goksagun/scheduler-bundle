@@ -27,7 +27,7 @@ use Symfony\Component\Process\Process;
  * Command scheduler allows you to fluently and expressively define your command
  * schedule within application itself. When using the scheduler, only a single
  * Cron entry is needed on your server. Your task schedule is defined in the
- * scheduler.yml file. When using the scheduler, you only need to add the
+ * scheduler.yaml file. When using the scheduler, you only need to add the
  * following Cron entry to your server:
  *
  *      * * * * * php /path-to-your-project/bin/console scheduler:run >> /dev/null 2>&1
@@ -117,7 +117,7 @@ class ScheduledTaskCommand extends Command
 
         if (!$this->config['enabled']) {
             $output->writeln(
-                'Scheduled task(s) disabled. You should enable in scheduler.yml (or scheduler.yaml) config before running this command.'
+                'Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.'
             );
 
             return;
@@ -125,7 +125,7 @@ class ScheduledTaskCommand extends Command
 
         if (!$this->tasks) {
             $output->writeln(
-                'There is no task scheduled. You should add task in scheduler.yml (or scheduler.yaml) config file.'
+                'There is no task scheduled. You should add task in scheduler.yaml config file.'
             );
 
             return;
@@ -135,6 +135,8 @@ class ScheduledTaskCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->runScheduledTasks($input, $output);
+
+        return 0;
     }
 
     private function setTasks($resource)

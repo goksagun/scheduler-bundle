@@ -4,7 +4,7 @@ namespace Goksagun\SchedulerBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * This custom Doctrine repository contains some methods which are useful when
@@ -20,7 +20,7 @@ class ScheduledTaskLogRepository extends ServiceEntityRepository
 {
     use CrudTrait;
 
-    public function __construct(RegistryInterface $registry)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ScheduledTaskLog::class);
     }

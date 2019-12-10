@@ -29,6 +29,8 @@ class GreetingSayGoodbyeCommand extends Command
         }
 
         $output->writeln("Goodbye {$name}");
+
+        return 0;
     }
 
 }
