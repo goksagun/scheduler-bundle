@@ -6,11 +6,22 @@ class TaskHelper
 {
     public static function parseName($name)
     {
-        $parts = explode(' ', preg_replace('!\s+!', ' ', $name));
+        $name = preg_replace('/\'/', '"', $name);
+        $found = preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $name, $matches);
+
+        if (!$found) {
+            return [];
+        }
+
+        $parts = $matches[0];
 
         $temp = [];
         foreach ($parts as $i => $part) {
-            if (static::contains($part, ['"', '\''])) {
+            if (StringHelper::startsWith($part, ['"', '\'']) && StringHelper::endsWith($part, ['"', '\''])) {
+                continue;
+            }
+
+            if (StringHelper::contains($part, ['"', '\''])) {
                 array_push($temp, $part);
 
                 unset($parts[$i]);
@@ -22,6 +33,13 @@ class TaskHelper
         foreach ($chunk as $item) {
             array_push($parts, implode(' ', $item));
         }
+
+        $parts = array_map(
+            function ($part) {
+                return preg_replace('/\"/', '', $part);
+            },
+            $parts
+        );
 
         return array_values($parts);
     }
@@ -40,14 +58,4 @@ class TaskHelper
         return reset($matches);
     }
 
-    public static function contains($haystack, $needles)
-    {
-        foreach ((array)$needles as $needle) {
-            if ($needle !== '' && mb_strpos($haystack, $needle) !== false) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }
