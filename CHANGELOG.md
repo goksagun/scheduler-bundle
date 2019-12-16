@@ -1,3 +1,6 @@
+## 0.4.8 (December 16, 2019)
+  - Fix command name parser quoted argument bug
+
 ## 0.4.7 (May 16, 2019)
   - Fix command name parser by quoted single or double
 
