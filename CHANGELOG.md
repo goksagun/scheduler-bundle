@@ -1,3 +1,6 @@
+## 1.0.1 (December 16, 2019)
+  - Fix command name parser quoted argument bug
+
 ## 1.0.0 (December 10, 2019)
   - Add symfony 4.4 support
 
