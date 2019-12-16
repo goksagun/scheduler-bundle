@@ -16,11 +16,20 @@ class TaskHelperTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
+    public function testParseNameMoreComplexArgs()
+    {
+        $actual = TaskHelper::parseName('foo:command \'bar baz buzz\' --baz');
+
+        $expected = ['foo:command', 'bar baz buzz', '--baz'];
+
+        $this->assertSame($expected, $actual);
+    }
+
     public function testParseNameMoreArgsWithSingleQuoted()
     {
         $actual = TaskHelper::parseName('foo:command --bar=10 --baz --buzz=\'0 day\'');
 
-        $expected = ['foo:command', '--bar=10', '--baz', '--buzz=\'0 day\''];
+        $expected = ['foo:command', '--bar=10', '--baz', '--buzz=0 day'];
 
         $this->assertSame($expected, $actual);
     }
@@ -29,7 +38,7 @@ class TaskHelperTest extends TestCase
     {
         $actual = TaskHelper::parseName('foo:command --bar=10 --baz --buzz="0 day"');
 
-        $expected = ['foo:command', '--bar=10', '--baz', '--buzz="0 day"'];
+        $expected = ['foo:command', '--bar=10', '--baz', '--buzz=0 day'];
 
         $this->assertSame($expected, $actual);
     }
