@@ -64,8 +64,6 @@ class ScheduledTaskListCommand extends Command
         $time += microtime(1);
 
         $output->writeln("Rendered in {$time} seconds.");
-
-        return 0;
     }
 
     private function handleTaskList(InputInterface $input, OutputInterface $output)

@@ -26,7 +26,5 @@ class DatabasedCommand extends Command
         }
 
         $output->writeln("Hello from schedule by database");
-
-        return 0;
     }
 }

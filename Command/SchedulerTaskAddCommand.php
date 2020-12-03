@@ -66,8 +66,6 @@ class SchedulerTaskAddCommand extends Command
         $this->storeTask($name, $expression, $times, $start, $stop, $status);
 
         $output->writeln(sprintf('Command "%s" added to scheduled task list.', $name));
-
-        return 0;
     }
 
     private function storeTask($name, $expression, $times = null, $start = null, $stop = null, $status = null)

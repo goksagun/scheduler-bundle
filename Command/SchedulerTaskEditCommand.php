@@ -53,8 +53,6 @@ class SchedulerTaskEditCommand extends SchedulerTaskAddCommand
         $this->updateTask($id, $name, $expression, $times, $start, $stop, $status);
 
         $output->writeln(sprintf('Scheduled task "%s" edited.', $name));
-
-        return 0;
     }
 
     private function updateTask($id, $name, $expression, $times = null, $start = null, $stop = null, $status = null)

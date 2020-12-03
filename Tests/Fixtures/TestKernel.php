@@ -27,7 +27,7 @@ class TestKernel extends Kernel
 
     public function getCacheDir()
     {
-        return __DIR__.'/cache/'.$this->environment;
+        return $this->rootDir.'/cache/'.$this->environment;
     }
 }
 
