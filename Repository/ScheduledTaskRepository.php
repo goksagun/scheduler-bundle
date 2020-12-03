@@ -3,8 +3,8 @@
 namespace Goksagun\SchedulerBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
-use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * This custom Doctrine repository contains some methods which are useful when
