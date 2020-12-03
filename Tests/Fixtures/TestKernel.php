@@ -24,6 +24,11 @@ class TestKernel extends Kernel
             $loader->load(__DIR__.'/config/nullable_type/config.yml');
         }
     }
+
+    public function getCacheDir()
+    {
+        return __DIR__.'/cache/'.$this->environment;
+    }
 }
 
 class_alias('Tests\Fixtures\TestKernel', 'TestKernel');
