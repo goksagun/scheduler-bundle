@@ -135,6 +135,8 @@ class ScheduledTaskCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->runScheduledTasks($input, $output);
+
+        return 0;
     }
 
     private function setTasks($resource)

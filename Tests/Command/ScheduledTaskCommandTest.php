@@ -47,7 +47,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Scheduled task(s) disabled. You should enable in scheduler.yml (or scheduler.yaml) config before running this command.',
             $output
         );
@@ -73,7 +73,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'There is no task scheduled. You should add task in scheduler.yml (or scheduler.yaml) config file.',
             $output
         );
@@ -112,7 +112,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "The 'invalid:command' task not found!",
             $output
         );
@@ -152,7 +152,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains("The 'no:output' completed!\n", $output);
+        $this->assertStringContainsString("The 'no:output' completed!\n", $output);
     }
 
     public function testGreetingSayHelloWithArgumentTaskCommand()
@@ -196,7 +196,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Hello John from Alaska",
             $output
         );
@@ -236,7 +236,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Hello John\nHello John",
             $output
         );
@@ -276,7 +276,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Goodbye John",
             $output
         );
@@ -433,7 +433,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Goodbye John",
             $output
         );
@@ -460,12 +460,12 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Hello from schedule by annotation",
             $output
         );
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "This is an foo: bar",
             $output
         );
@@ -508,7 +508,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Hello from schedule by database",
             $output
         );
@@ -543,19 +543,19 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertContains("3", $output);
+        $this->assertStringContainsString("3", $output);
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Name",
             $output
         );
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Expression",
             $output
         );
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             "Resource",
             $output
         );

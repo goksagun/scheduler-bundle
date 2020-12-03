@@ -1,4 +1,6 @@
 /vendor
+.idea
+.phpunit.result.cache
 coverage
 /Tests/Fixtures/cache
 phpunit.xml
