@@ -31,5 +31,7 @@ class AnnotatedCommand extends Command
         }
 
         $output->writeln("Hello from schedule by annotation");
+
+        return 0;
     }
 }

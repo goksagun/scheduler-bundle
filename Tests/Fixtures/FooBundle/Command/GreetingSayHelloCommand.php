@@ -33,5 +33,7 @@ class GreetingSayHelloCommand extends Command
         }
 
         $output->writeln($result);
+
+        return 0;
     }
 }
