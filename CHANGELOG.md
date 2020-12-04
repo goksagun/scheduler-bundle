@@ -1,3 +1,7 @@
+## 1.0.2 (December 04, 2020)
+  - Compatible with doctrine bundle 2.0
+  - Compatible with symfony 4 and symfony 5
+
 ## 1.0.1 (December 16, 2019)
   - Fix command name parser quoted argument bug
 
