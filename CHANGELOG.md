@@ -1,3 +1,6 @@
+## 1.0.3 (March 04, 2021)
+  - Removed container get usages for the fetch private services
+
 ## 1.0.2 (December 04, 2020)
   - Compatible with doctrine bundle 2.0
   - Compatible with symfony 4 and symfony 5
