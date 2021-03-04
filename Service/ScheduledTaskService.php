@@ -7,6 +7,7 @@ use Goksagun\SchedulerBundle\Command\AnnotatedCommandTrait;
 use Goksagun\SchedulerBundle\Command\ConfiguredCommandTrait;
 use Goksagun\SchedulerBundle\Command\DatabasedCommandTrait;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -22,13 +23,28 @@ class ScheduledTaskService
     private $container;
     private $application;
 
+    /**
+     * @var ScheduledTaskRepository
+     */
+    private $repository;
+
     private $tasks = [];
 
-    public function __construct(array $config, ContainerInterface $container, KernelInterface $kernel)
-    {
+    public function __construct(
+        array $config,
+        ContainerInterface $container,
+        KernelInterface $kernel,
+        ScheduledTaskRepository $repository
+    ) {
         $this->config = $config;
         $this->container = $container;
         $this->application = new Application($kernel);
+        $this->repository = $repository;
+    }
+
+    private function getRepository()
+    {
+        return $this->repository;
     }
 
     public function list($status = null, $resource = null, $props = [])
@@ -61,7 +77,7 @@ class ScheduledTaskService
             $scheduledTask->setStatus($status);
         }
 
-        $this->container->get('scheduler.repository.scheduled_task')->save($scheduledTask);
+        $this->repository->save($scheduledTask);
 
         return $scheduledTask;
     }
@@ -82,7 +98,7 @@ class ScheduledTaskService
 
     public function update($id, $name, $expression, $times = null, $start = null, $stop = null, $status = null)
     {
-        $scheduledTask = $this->container->get('scheduler.repository.scheduled_task')->find($id);
+        $scheduledTask = $this->repository->find($id);
 
         if (!$scheduledTask instanceof ScheduledTask) {
             throw new NotFoundHttpException(sprintf('The task by id "%s" is not found', $id));
@@ -99,20 +115,20 @@ class ScheduledTaskService
             $scheduledTask->setStatus($status);
         }
 
-        $this->container->get('scheduler.repository.scheduled_task')->save($scheduledTask);
+        $this->repository->save($scheduledTask);
 
         return $scheduledTask;
     }
 
     public function delete($id)
     {
-        $scheduledTask = $this->container->get('scheduler.repository.scheduled_task')->find($id);
+        $scheduledTask = $this->repository->find($id);
 
         if (!$scheduledTask instanceof ScheduledTask) {
             throw new NotFoundHttpException(sprintf('The task by id "%s" is not found', $id));
         }
 
-        $this->container->get('scheduler.repository.scheduled_task')->delete($scheduledTask);
+        $this->repository->delete($scheduledTask);
     }
 
     public function isValidName($name)

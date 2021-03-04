@@ -5,6 +5,7 @@ namespace Goksagun\SchedulerBundle\Command;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 
@@ -19,11 +20,8 @@ trait DatabasedCommandTrait
             return;
         }
 
-        if (method_exists($this, 'getRepository')) {
-            $repository = $this->getRepository();
-        } else {
-            $repository = $this->getContainer()->get('scheduler.repository.scheduled_task');
-        }
+        /** @var ScheduledTaskRepository $repository */
+        $repository = $this->getRepository();
 
         $databases = $repository->findAll();
 
