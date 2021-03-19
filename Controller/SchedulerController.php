@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,20 +17,41 @@ use Symfony\Component\Routing\Annotation\Route;
 class SchedulerController extends AbstractController
 {
     /**
-     * @Route("/run", methods={"POST"})
+     * @param Request $request
+     * @param KernelInterface $kernel
+     * @return Response
+     *
+     * @Route("/run", methods={"GET"})
      */
-    public function run(KernelInterface $kernel)
+    public function run(Request $request, KernelInterface $kernel)
     {
-        $application = new Application($kernel);
-        $application->setAutoExit(false);
+        $async = $request->query->get('async');
+        $resource = $request->query->get('resource');
 
-        $input = new ArrayInput([
-            'command' => 'scheduler:run'
-        ]);
+        $command = ['command' => 'scheduler:run'];
 
-        $output = new BufferedOutput();
-        $application->run($input, $output);
+        if ($async !== null) {
+            $command['--async'] = $async;
+        }
 
-        return new Response($output->fetch());
+        if ($resource !== null) {
+            $command['--resource'] = $resource;
+        }
+
+        try {
+
+            $application = new Application($kernel);
+            $application->setAutoExit(false);
+
+            $input = new ArrayInput($command);
+            $output = new BufferedOutput();
+            $application->run($input, $output);
+
+            return new Response($output->fetch());
+
+        } catch (\Exception $e) {
+            return new Response($e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+
     }
 }
