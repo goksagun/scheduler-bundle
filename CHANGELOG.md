@@ -1,3 +1,6 @@
+## 1.1.0 (March 22, 2021)
+  - Add http trigger endpoint GET scheduler/run
+
 ## 1.0.3 (March 04, 2021)
   - Removed container get usages for the fetch private services
 
