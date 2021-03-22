@@ -16,6 +16,10 @@ services:
         # if you need to do this, you can override this setting on individual services
         public: false
 
+    Goksagun\SchedulerBundle\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
+
     scheduler.command.scheduled_task:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskCommand
         arguments: ['%scheduler%', '@doctrine.orm.entity_manager', '@scheduler.repository.scheduled_task', '@scheduler.repository.scheduled_task_log']
