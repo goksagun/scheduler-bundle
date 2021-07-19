@@ -19,6 +19,7 @@ use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -182,29 +183,12 @@ class ScheduledTaskCommand extends Command
             }
 
             try {
-                $arguments = $this->getCommandArguments($command, $name);
-
                 if ($isAsync) {
                     $phpBinaryPath = $this->getPhpBinaryPath();
                     $projectRoot = $this->getProjectDir();
 
-                    $asyncCommand = [$phpBinaryPath, $projectRoot.'/bin/console'];
-
-                    // Add scheduled task command arguments to async process command.
-                    foreach ($arguments as $key => $value) {
-                        $commandArgument = $value;
-                        if (StringHelper::startsWith($key, '--')) {
-                            if (null !== $value) {
-                                $commandArgument = $key.'='.$value;
-                            } else {
-                                $commandArgument = $key;
-                            }
-                        }
-
-                        array_push($asyncCommand, $commandArgument);
-                    }
-
-                    $process = new Process($asyncCommand, null, null, null, $timeout = static::PROCESS_TIMEOUT);
+                    $asyncCommand = $phpBinaryPath.' '.$projectRoot.'/bin/console '.$name;
+                    $process = Process::fromShellCommandline($asyncCommand);
 
                     $process->start();
 
@@ -215,9 +199,11 @@ class ScheduledTaskCommand extends Command
 
                     $output->writeln(" - Started async process: {$process->getCommandLine()}");
                 } else {
-                    $input = new ArrayInput($arguments);
+                    $taskInput = new StringInput($name);
+                    $command->mergeApplicationDefinition();
+                    $taskInput->bind($command->getDefinition());
 
-                    $command->run($input, $output);
+                    $command->run($taskInput, $output);
 
                     // Update scheduled task status as executed.
                     $this->updateScheduledTaskStatusAsExecuted($scheduledTask);
@@ -289,58 +275,6 @@ class ScheduledTaskCommand extends Command
         foreach ($this->tasks as $task) {
             yield $task;
         }
-    }
-
-    private function getCommandArguments(Command $command, $name)
-    {
-        // Get parts from full task name.
-        // First part is the command name the others arguments and options.
-        $parts = TaskHelper::parseName($name);
-
-        // Shift command name from arguments.
-        $arguments = [
-            'command' => array_shift($parts),
-        ];
-
-        foreach ($parts as $key => $part) {
-            if (StringHelper::startsWith($part, '--')) {
-                $option = explode('=', $part);
-
-                $arguments[$option[0]] = $option[1] ?? null;
-
-                unset($parts[$key]);
-            }
-        }
-
-        if ($parts) {
-            // Remove "command" argument index
-            $argumentNames = array_filter(
-                array_keys($command->getDefinition()->getArguments()),
-                function ($argumentName) {
-                    return 'command' !== $argumentName;
-                }
-            );
-
-            $arguments = array_merge(
-                $arguments,
-                array_combine(
-                    array_slice($argumentNames, 0, count($parts)),
-                    $parts
-                )
-            );
-        }
-
-        /*
-         * [
-         *      'command' => 'command-name'
-         *      'argument-one' => 'argument-one-value',
-         *      'argument-two' => 'argument-two-value',
-         *      '--option-one' => 'option-one-value',
-         *      '--option-two' => null,
-         * ]
-         */
-
-        return $arguments;
     }
 
     private function getEntityManager()

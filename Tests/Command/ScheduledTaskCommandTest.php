@@ -13,6 +13,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
+use Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
+use Tests\Fixtures\FooBundle\Command\ArrayOptionCommand;
 use Tests\Fixtures\FooBundle\Command\DatabasedCommand;
 use Tests\Fixtures\FooBundle\Command\GreetingSayGoodbyeCommand;
 use Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
@@ -530,7 +532,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $application = $this->getApplication();
         $scheduledTaskRepository = $this->createScheduledTaskRepository();
 
-        $application->add(new AnnotatedCommand());
+        $application->add(new ArrayArgumentCommand());
         $application->add(new ScheduledTaskListCommand($config, $scheduledTaskRepository));
 
         $command = $application->find('scheduler:list');
@@ -630,5 +632,79 @@ class ScheduledTaskCommandTest extends KernelTestCase
         ;
 
         return $scheduledTaskLogRepository;
+    }
+
+    public function testArrayArgumentCommand()
+    {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'schedule:array-argument argument1 argument2',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
+        $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
+        $scheduledTaskRepository = $this->createScheduledTaskRepository();
+        $scheduledTaskLogRepository = $this->createScheduledTaskLogRepository();
+
+        $application->add(new ArrayArgumentCommand());
+        $application->add(new ScheduledTaskCommand($config, $entityManager, $scheduledTaskRepository, $scheduledTaskLogRepository));
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString("argument1 - argument2", $output);
+    }
+
+    public function testArrayOptionCommand()
+    {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'schedule:array-option --foo option1 --foo option2',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
+        $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
+        $scheduledTaskRepository = $this->createScheduledTaskRepository();
+        $scheduledTaskLogRepository = $this->createScheduledTaskLogRepository();
+
+        $application->add(new ArrayOptionCommand());
+        $application->add(new ScheduledTaskCommand($config, $entityManager, $scheduledTaskRepository, $scheduledTaskLogRepository));
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString("option1 - option2", $output);
     }
 }
