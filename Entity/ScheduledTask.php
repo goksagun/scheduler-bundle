@@ -38,7 +38,7 @@ class ScheduledTask implements StatusInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="text", options={"comment":"Scheduled task command name"})
+     * @ORM\Column(name="name", type="string", length=2048, options={"comment":"Scheduled task command name"})
      */
     private $name;
 
