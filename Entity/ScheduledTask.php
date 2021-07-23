@@ -14,7 +14,6 @@ use Goksagun\SchedulerBundle\Utils\HashHelper;
  * @ORM\Table(
  *     name="scheduled_tasks",
  *     indexes={
- *         @ORM\Index(name="name_idx", columns={"name"}),
  *         @ORM\Index(name="status_idx", columns={"status"})
  *     }
  * )
