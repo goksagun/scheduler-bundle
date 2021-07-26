@@ -1,6 +1,6 @@
 <?php
 
-namespace Goksagun\SchedulerBundle\Entity;
+    namespace Goksagun\SchedulerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
