@@ -29,7 +29,7 @@ Open a command console, enter your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```console
-$ composer require goksagun/scheduler-bundle
+composer require goksagun/scheduler-bundle
 ```
 
 This command requires you to have Composer installed globally, as 
@@ -107,19 +107,19 @@ Or add task(s) to database, you can use `scheduler:add` command to add
 a task to database:
 
 ```console
-$ php bin/console scheduler:add 'command:name argument --option' '@daily'
+php bin/console scheduler:add 'command:name argument --option' '@daily'
 ```
 
 If you want to edit task you can use `scheduler:edit` command:
 
 ```console
-$ php bin/console scheduler:edit [id] 'command:name argument --no-option' '@hourly'
+php bin/console scheduler:edit [id] 'command:name argument --no-option' '@hourly'
 ```
 
 If you want to list tasks you can use `scheduler:list` command:
 
 ```console
-$ php bin/console scheduler:list
+php bin/console scheduler:list
 ```
 
 
@@ -130,5 +130,5 @@ Then, if you want to track scheduled task(s) add the bundle log table
 schema and store executed task(s) to db:
 
 ```console
-$ php bin/console doctrine:schema:update --force
+php bin/console doctrine:schema:update --force
 ```
