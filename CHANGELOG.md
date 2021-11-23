@@ -1,3 +1,6 @@
+## 1.2.0 (November 23, 2021)
+  - Allow php8
+
 ## 1.1.0 (March 22, 2021)
   - Add http trigger endpoint GET scheduler/run
 
