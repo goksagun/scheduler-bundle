@@ -1,3 +1,6 @@
+## 1.3.0 (February 06, 2022)
+  - Add support for array argument and array options
+
 ## 1.2.0 (November 23, 2021)
   - Allow php8
 
