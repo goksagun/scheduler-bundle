@@ -389,7 +389,7 @@ class ScheduledTaskCommand extends Command
     {
         $em = $this->getEntityManager();
 
-        $tableName = $em->getClassMetadata('SchedulerBundle:ScheduledTaskLog')->getTableName();
+        $tableName = $em->getClassMetadata(ScheduledTaskLog::class)->getTableName();
 
         return $em->getConnection()->getSchemaManager()->tablesExist((array)$tableName);
     }
