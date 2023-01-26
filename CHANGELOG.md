@@ -1,3 +1,6 @@
+## 1.3.1 (January 26, 2023)
+  - Fix removed short namespace aliases support
+
 ## 1.3.0 (February 06, 2022)
   - Add support for array argument and array options
 
