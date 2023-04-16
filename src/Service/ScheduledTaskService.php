@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Service;
 
 use Cron\CronExpression;
@@ -17,18 +19,16 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class ScheduledTaskService
 {
-    use ConfiguredCommandTrait, AnnotatedCommandTrait, DatabasedCommandTrait;
+    use ConfiguredCommandTrait;
+    use AnnotatedCommandTrait;
+    use DatabasedCommandTrait;
 
-    private $config;
-    private $container;
-    private $application;
+    private array $config;
+    private ContainerInterface $container;
+    private Application $application;
+    private ScheduledTaskRepository $repository;
 
-    /**
-     * @var ScheduledTaskRepository
-     */
-    private $repository;
-
-    private $tasks = [];
+    private array $tasks = [];
 
     public function __construct(
         array $config,
@@ -42,20 +42,26 @@ class ScheduledTaskService
         $this->repository = $repository;
     }
 
-    private function getRepository()
+    private function getRepository(): ScheduledTaskRepository
     {
         return $this->repository;
     }
 
-    public function list($status = null, $resource = null, $props = [])
+    public function list($status = null, $resource = null, $props = []): array
     {
         $this->setTasks($status, $resource, $props);
 
         return $this->tasks;
     }
 
-    public function create($name, $expression, $times = null, $start = null, $stop = null, $status = null)
-    {
+    public function create(
+        string $name,
+        string $expression,
+        ?int $times = null,
+        ?string $start = null,
+        ?string $stop = null,
+        ?string $status = null
+    ): ScheduledTask {
         $scheduledTask = new ScheduledTask();
         $scheduledTask
             ->setName($name)
@@ -120,7 +126,7 @@ class ScheduledTaskService
         return $scheduledTask;
     }
 
-    public function delete($id)
+    public function delete($id): void
     {
         $scheduledTask = $this->repository->find($id);
 
@@ -131,24 +137,24 @@ class ScheduledTaskService
         $this->repository->delete($scheduledTask);
     }
 
-    public function isValidName($name)
+    public function isValidName($name): bool
     {
         return $this->application->has(TaskHelper::getCommandName($name));
     }
 
-    public function isValidExpression($expression)
+    public function isValidExpression($expression): bool
     {
         return CronExpression::isValidExpression($expression);
     }
 
-    private function setTasks($status = null, $resource = null, $props = [])
+    private function setTasks(?string $status = null, ?string $resource = null, array $props = []): void
     {
         $this->setConfiguredTasks($status, $resource, $props);
         $this->setAnnotatedTasks($status, $resource, $props);
         $this->setDatabasedTasks($status, $resource, $props);
     }
 
-    private function getContainer()
+    private function getContainer(): ContainerInterface
     {
         return $this->container;
     }
