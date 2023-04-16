@@ -22,11 +22,9 @@ use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\NoOutputCommand;
 
 class ScheduledTaskCommandTest extends KernelTestCase
 {
-    private function getApplication()
+    private function getApplication(): Application
     {
-        $application = new Application();
-
-        return $application;
+        return new Application();
     }
 
     public function testDisabledCommand()

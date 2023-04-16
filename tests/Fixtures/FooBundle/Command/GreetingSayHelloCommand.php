@@ -21,7 +21,7 @@ class GreetingSayHelloCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $name = $input->getArgument('name');
         $city = $input->getArgument('city');
@@ -34,6 +34,6 @@ class GreetingSayHelloCommand extends Command
 
         $output->writeln($result);
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

@@ -17,12 +17,12 @@ class ArrayArgumentCommand extends Command
             ->addArgument('foo', InputArgument::IS_ARRAY);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $foo = $input->getArgument('foo');
 
         $output->writeln(implode(' - ', $foo));
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

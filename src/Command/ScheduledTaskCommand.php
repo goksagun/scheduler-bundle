@@ -132,11 +132,11 @@ class ScheduledTaskCommand extends Command
         }
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->runScheduledTasks($input, $output);
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function setTasks($resource)

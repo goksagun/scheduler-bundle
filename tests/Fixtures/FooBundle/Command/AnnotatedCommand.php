@@ -22,7 +22,7 @@ class AnnotatedCommand extends Command
             ->addOption('foo', null, InputOption::VALUE_OPTIONAL);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $foo = $input->getOption('foo');
 
@@ -32,6 +32,6 @@ class AnnotatedCommand extends Command
 
         $output->writeln("Hello from schedule by annotation");
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

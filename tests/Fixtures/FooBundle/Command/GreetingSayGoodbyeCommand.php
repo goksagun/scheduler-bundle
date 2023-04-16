@@ -20,7 +20,7 @@ class GreetingSayGoodbyeCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $name = $input->getArgument('name');
 
@@ -30,7 +30,7 @@ class GreetingSayGoodbyeCommand extends Command
 
         $output->writeln("Goodbye {$name}");
 
-        return 0;
+        return Command::SUCCESS;
     }
 
 }

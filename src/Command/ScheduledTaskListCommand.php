@@ -55,7 +55,7 @@ class ScheduledTaskListCommand extends Command
         );
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $time = -microtime(1);
 
@@ -65,7 +65,7 @@ class ScheduledTaskListCommand extends Command
 
         $output->writeln("Rendered in {$time} seconds.");
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function handleTaskList(InputInterface $input, OutputInterface $output)

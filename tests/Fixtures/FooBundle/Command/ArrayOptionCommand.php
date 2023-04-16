@@ -17,12 +17,12 @@ class ArrayOptionCommand extends Command
             ->addOption('foo', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $foo = $input->getOption('foo');
 
         $output->writeln(implode(' - ', $foo));
 
-        return 0;
+        return Command::SUCCESS;
     }
 }
