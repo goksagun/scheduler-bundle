@@ -5,6 +5,7 @@ namespace Goksagun\SchedulerBundle\Command;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
+use Goksagun\SchedulerBundle\Service\ScheduledTaskBuilder;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Component\Console\Command\Command;
@@ -72,26 +73,13 @@ class SchedulerTaskAddCommand extends Command
 
     private function storeTask($name, $expression, $times = null, $start = null, $stop = null, $status = null)
     {
-        $scheduledTask = new ScheduledTask();
-        $scheduledTask
-            ->setName($name)
-            ->setExpression($expression);
-
-        if ($times) {
-            $scheduledTask->setTimes(intval($times));
-        }
-
-        if ($start) {
-            $scheduledTask->setStart(DateHelper::date($start));
-        }
-
-        if ($stop) {
-            $scheduledTask->setStop(DateHelper::date($stop));
-        }
-
-        if ($status) {
-            $scheduledTask->setStatus($status);
-        }
+        $scheduledTask = (new ScheduledTaskBuilder($name, $expression))
+            ->times($times)
+            ->start($start)
+            ->stop($stop)
+            ->status($status)
+            ->build()
+            ;
 
         $this->getRepository()->save($scheduledTask);
 
