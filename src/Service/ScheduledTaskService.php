@@ -62,26 +62,13 @@ class ScheduledTaskService
         ?string $stop = null,
         ?string $status = null
     ): ScheduledTask {
-        $scheduledTask = new ScheduledTask();
-        $scheduledTask
-            ->setName($name)
-            ->setExpression($expression);
-
-        if ($times) {
-            $scheduledTask->setTimes(intval($times));
-        }
-
-        if ($start) {
-            $scheduledTask->setStart(DateHelper::date($start));
-        }
-
-        if ($stop) {
-            $scheduledTask->setStop(DateHelper::date($stop));
-        }
-
-        if ($status) {
-            $scheduledTask->setStatus($status);
-        }
+        $scheduledTask = (new ScheduledTaskBuilder($name, $expression))
+            ->times($times)
+            ->start($start ? DateHelper::date($start) : null)
+            ->stop($stop ? DateHelper::date($stop) : null)
+            ->status($status)
+            ->build()
+        ;
 
         $this->repository->save($scheduledTask);
 
