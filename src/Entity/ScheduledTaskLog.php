@@ -11,8 +11,8 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
  * @ORM\Table(
  *     name="scheduled_task_logs",
  *     indexes={
- *         @ORM\Index(name="name_idx", columns={"name"}),
- *         @ORM\Index(name="search_idx", columns={"name", "status", "created_at"})
+ *         @ORM\Index(name="task_logs_name_idx", columns={"name"}),
+ *         @ORM\Index(name="task_logs_search_idx", columns={"name", "status", "created_at"})
  *     }
  * )
  * @ORM\Entity(repositoryClass="Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository")
