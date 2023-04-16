@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Fixtures\FooBundle;
+namespace Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Fixtures\FooBundle\Command;
+namespace Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

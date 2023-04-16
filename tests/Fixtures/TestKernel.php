@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Fixtures;
+namespace Goksagun\SchedulerBundle\Tests\Fixtures;
 
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\HttpKernel\Kernel;
@@ -12,7 +12,7 @@ class TestKernel extends Kernel
         return array(
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new \Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
-            new \Tests\Fixtures\FooBundle\FooBundle(),
+            new \Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\FooBundle(),
         );
     }
 
@@ -31,4 +31,4 @@ class TestKernel extends Kernel
     }
 }
 
-class_alias('Tests\Fixtures\TestKernel', 'TestKernel');
+class_alias('Goksagun\SchedulerBundle\Tests\Fixtures\TestKernel', 'TestKernel');

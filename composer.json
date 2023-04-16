@@ -15,7 +15,7 @@
         "MIT"
     ],
     "require": {
-        "php" : "^7.1.3|^8.0",
+        "php": "^7.1.3|^8.0",
         "doctrine/annotations": "^1.4",
         "doctrine/doctrine-bundle": "^2.0",
         "doctrine/orm": "^2.5",
@@ -29,13 +29,14 @@
         "symfony/phpunit-bridge": "^5.2"
     },
     "autoload": {
-        "psr-4": { "Goksagun\\SchedulerBundle\\": "" },
-        "exclude-from-classmap": [
-            "/Tests/"
-        ]
+        "psr-4": {
+            "Goksagun\\SchedulerBundle\\": "src/"
+        }
     },
     "autoload-dev": {
-        "psr-4": { "Tests\\Fixtures\\": "Tests/Fixtures/" }
+        "psr-4": {
+            "Goksagun\\SchedulerBundle\\Tests\\": "tests/"
+        }
     },
     "extra": {
         "branch-alias": {

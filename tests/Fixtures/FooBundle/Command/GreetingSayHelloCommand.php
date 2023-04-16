@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Fixtures\FooBundle\Command;
+namespace Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -8,14 +8,15 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GreetingSayGoodbyeCommand extends Command
+class GreetingSayHelloCommand extends Command
 {
     protected function configure()
     {
         $this
-            ->setName('greeting:say-goodbye')
-            ->setDescription('Greeting say goodbye command')
-            ->addArgument('name', InputArgument::OPTIONAL, 'Name')
+            ->setName('greeting:say-hello')
+            ->setDescription('Greeting say hello command')
+            ->addArgument('name', InputArgument::REQUIRED, 'Name')
+            ->addArgument('city', InputArgument::OPTIONAL, 'City')
             ->addOption('twice', null, InputOption::VALUE_NONE, 'Twice')
         ;
     }
@@ -23,14 +24,16 @@ class GreetingSayGoodbyeCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $name = $input->getArgument('name');
+        $city = $input->getArgument('city');
+
+        $result = $city ? "Hello {$name} from {$city}" : "Hello {$name}";
 
         if ($times = $input->getOption('twice')) {
-            $output->writeln("Goodbye {$name}");
+            $output->writeln($result);
         }
 
-        $output->writeln("Goodbye {$name}");
+        $output->writeln($result);
 
         return 0;
     }
-
 }

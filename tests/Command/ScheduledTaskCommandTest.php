@@ -12,13 +12,13 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
-use Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
-use Tests\Fixtures\FooBundle\Command\ArrayOptionCommand;
-use Tests\Fixtures\FooBundle\Command\DatabasedCommand;
-use Tests\Fixtures\FooBundle\Command\GreetingSayGoodbyeCommand;
-use Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
-use Tests\Fixtures\FooBundle\Command\NoOutputCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayOptionCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\DatabasedCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayGoodbyeCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\NoOutputCommand;
 
 class ScheduledTaskCommandTest extends KernelTestCase
 {
