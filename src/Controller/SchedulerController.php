@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -17,13 +19,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class SchedulerController extends AbstractController
 {
     /**
-     * @param Request $request
-     * @param KernelInterface $kernel
-     * @return Response
-     *
      * @Route("/run", methods={"GET"})
      */
-    public function run(Request $request, KernelInterface $kernel)
+    public function run(Request $request, KernelInterface $kernel): Response
     {
         $async = $request->query->get('async');
         $resource = $request->query->get('resource');
@@ -52,6 +50,5 @@ class SchedulerController extends AbstractController
         } catch (\Exception $e) {
             return new Response($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
-
     }
 }
