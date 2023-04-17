@@ -10,11 +10,7 @@ class HashIdGenerator extends AbstractIdGenerator
 {
 
     /**
-     * Generates an identifier for an entity.
-     *
-     * @param EntityManager $em
-     * @param object|null $entity
-     * @return mixed
+     * @inheritdoc
      */
     public function generate(EntityManager $em, $entity)
     {
