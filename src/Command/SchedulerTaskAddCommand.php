@@ -2,12 +2,9 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
-use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SchedulerTaskAddCommand extends Command
 {
+
+    use SchedulerTaskAddEditValidateOptionsTrait;
 
     private ScheduledTaskService $service;
 
@@ -70,33 +69,5 @@ class SchedulerTaskAddCommand extends Command
     private function storeTask($name, $expression, $times = null, $start = null, $stop = null, $status = null): void
     {
         $this->service->create($name, $expression, $times, $start, $stop, $status);
-    }
-
-    protected function validateOptions(array $options): void
-    {
-        $times = $options['times'];
-        if (!is_null($times) && !is_numeric($times)) {
-            throw new RuntimeException('The option "times" should be numeric value.');
-        }
-
-        $start = $options['start'];
-        if (!is_null($start) && !DateHelper::isDateValid($start)) {
-            throw new RuntimeException('The option "start" should be date or date and time value.');
-        }
-
-        $stop = $options['stop'];
-        if (!is_null($stop) && !DateHelper::isDateValid($stop)) {
-            throw new RuntimeException('The option "stop" should be date or date and time value.');
-        }
-
-        $status = $options['status'];
-        if (!is_null($status) && !in_array($status, StatusInterface::STATUSES)) {
-            throw new RuntimeException(
-                sprintf(
-                    'The option "status" should be valid. [values: "%s"]',
-                    implode('|', StatusInterface::STATUSES)
-                )
-            );
-        }
     }
 }
