@@ -2,7 +2,6 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -23,16 +22,13 @@ class ScheduledTaskListCommand extends Command
      */
     private array $tasks = [];
 
-    private ScheduledTaskRepository $repository;
-
     private ScheduledTaskService $service;
 
-    public function __construct(array $config, ScheduledTaskRepository $repository, ScheduledTaskService $service)
+    public function __construct(array $config, ScheduledTaskService $service)
     {
         parent::__construct();
 
         $this->config = $config;
-        $this->repository = $repository;
         $this->service = $service;
     }
 

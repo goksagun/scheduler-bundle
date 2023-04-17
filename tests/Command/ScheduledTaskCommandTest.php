@@ -613,11 +613,10 @@ class ScheduledTaskCommandTest extends KernelTestCase
             ]
         );
         $application = $this->getApplication();
-        $scheduledTaskRepository = $this->createScheduledTaskRepository();
         $scheduledTaskService = $this->createScheduledTaskService();
 
         $application->add(new ArrayArgumentCommand());
-        $application->add(new ScheduledTaskListCommand($config, $scheduledTaskRepository, $scheduledTaskService));
+        $application->add(new ScheduledTaskListCommand($config, $scheduledTaskService));
 
         $command = $application->find('scheduler:list');
         $commandTester = new CommandTester($command);
