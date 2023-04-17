@@ -22,14 +22,14 @@ class ScheduledTaskAddCommandTest extends KernelTestCase
         $command = $this->getCommand();
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'name' => 'Wouter',
+            'name' => 'Foo',
             'expression' => '@daily',
         ]);
 
         $output = $commandTester->getDisplay();
 
         $this->assertStringContainsString(
-            'Command "Wouter" added to scheduled task list.',
+            'Command "Foo" added to scheduled task list.',
             $output
         );
     }
@@ -42,7 +42,7 @@ class ScheduledTaskAddCommandTest extends KernelTestCase
         $command = $this->getCommand();
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'name' => 'Wouter',
+            'name' => 'Foo',
             'expression' => '@daily',
             '--times' => 'non-numeric',
         ]);
@@ -56,7 +56,7 @@ class ScheduledTaskAddCommandTest extends KernelTestCase
         $command = $this->getCommand();
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'name' => 'Wouter',
+            'name' => 'Foo',
             'expression' => '@daily',
             '--start' => 'non-valid-date',
         ]);
@@ -70,7 +70,7 @@ class ScheduledTaskAddCommandTest extends KernelTestCase
         $command = $this->getCommand();
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'name' => 'Wouter',
+            'name' => 'Foo',
             'expression' => '@daily',
             '--stop' => 'non-valid-date',
         ]);
@@ -84,7 +84,7 @@ class ScheduledTaskAddCommandTest extends KernelTestCase
         $command = $this->getCommand();
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'name' => 'Wouter',
+            'name' => 'Foo',
             'expression' => '@daily',
             '--status' => 'non-valid-status',
         ]);
