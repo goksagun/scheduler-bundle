@@ -8,13 +8,15 @@ use Goksagun\SchedulerBundle\Utils\StringHelper;
 
 class ScheduledTaskLogService
 {
-    public function __construct(private readonly array $config, private readonly ScheduledTaskLogRepository $repository)
-    {
+    public function __construct(
+        private readonly array $config,
+        private readonly ScheduledTaskLogRepository $repository
+    ) {
     }
 
     public function create(string $name, ?int $times = null, bool $save = false): ScheduledTaskLog
     {
-        $scheduledTaskLog = new ScheduledTaskLog();
+        $scheduledTaskLog = (new ScheduledTaskLogBuilder())->build();
 
         if (!$this->config['log']) {
             return $scheduledTaskLog;
@@ -22,8 +24,7 @@ class ScheduledTaskLogService
 
         $scheduledTaskLog
             ->setName($name)
-            ->setRemaining($times)
-        ;
+            ->setRemaining($times);
 
         if ($latestExecutedScheduledTask = $this->getLatestScheduledTaskLog($name)) {
             $scheduledTaskLog->setRemaining(
@@ -57,29 +58,29 @@ class ScheduledTaskLogService
     }
 
     public function updateStatus(
-        ScheduledTaskLog $scheduledTask,
+        ScheduledTaskLog $scheduledTaskLog,
         string $status,
         ?string $message = null,
         ?string $output = null,
         bool $save = false
     ): ScheduledTaskLog {
         if (!$this->config['log']) {
-            return $scheduledTask;
+            return $scheduledTaskLog;
         }
 
-        $scheduledTask->setStatus($status);
+        $scheduledTaskLog->setStatus($status);
         if (!empty($message)) {
-            $scheduledTask->setMessage(StringHelper::limit($message, 252));
+            $scheduledTaskLog->setMessage(StringHelper::limit($message, 252));
         }
 
         if (!empty($output)) {
-            $scheduledTask->setOutput($output);
+            $scheduledTaskLog->setOutput($output);
         }
 
         if ($save) {
             $this->repository->save();
         }
 
-        return $scheduledTask;
+        return $scheduledTaskLog;
     }
 }
