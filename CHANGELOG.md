@@ -1,3 +1,8 @@
+## 2.0.0 (April 18, 2023)
+  - Create php.yml (#14)
+  - Add test script (#17)
+  - Add support Symfony 6 (#15)
+
 ## 1.3.1 (January 26, 2023)
   - Fix removed short namespace aliases support
 
