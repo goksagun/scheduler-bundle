@@ -12,6 +12,7 @@ use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
+use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Component\Console\Command\Command;
@@ -46,12 +47,11 @@ class ScheduledTaskCommand extends Command
 
     private EntityManagerInterface $entityManager;
 
-    private ScheduledTaskRepository $repository;
+    private ScheduledTaskService $service;
 
     private ScheduledTaskLogService $logService;
 
     private string $projectDir;
-
     private array $tasks = [];
     /**
      * @var $processes array<int, ProcessInfo>
@@ -61,14 +61,14 @@ class ScheduledTaskCommand extends Command
     public function __construct(
         array $config,
         EntityManagerInterface $entityManager,
-        ScheduledTaskRepository $repository,
+        ScheduledTaskService $service,
         ScheduledTaskLogService $logService,
     ) {
         parent::__construct();
 
         $this->config = $config;
         $this->entityManager = $entityManager;
-        $this->repository = $repository;
+        $this->service = $service;
         $this->logService = $logService;
     }
 

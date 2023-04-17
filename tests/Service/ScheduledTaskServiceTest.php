@@ -16,7 +16,15 @@ class ScheduledTaskServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $repository = $this->createPartialMock(ScheduledTaskRepository::class, ['save']);
+        $repository = $this->createMock(ScheduledTaskRepository::class);
+        $repository
+            ->expects($this->any())
+            ->method('findAll')
+            ->willReturn([
+                (new ScheduledTask())
+                    ->setName('Foo')
+                    ->setExpression('@daily')
+            ]);
 
         $container = $this->createMock(ContainerInterface::class);
         $kernel = $this->createMock(KernelInterface::class);
@@ -129,5 +137,12 @@ class ScheduledTaskServiceTest extends TestCase
         $this->assertEquals(null, $scheduledTask->getStart());
         $this->assertEquals(null, $scheduledTask->getStop());
         $this->assertEquals(StatusInterface::STATUS_ACTIVE, $scheduledTask->getStatus());
+    }
+
+    public function testGetScheduledTasks()
+    {
+        $scheduledTasks = $this->service->getScheduledTasks();
+
+        $this->assertCount(1, $scheduledTasks);
     }
 }

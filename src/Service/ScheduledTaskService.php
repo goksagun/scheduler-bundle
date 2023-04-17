@@ -142,6 +142,11 @@ class ScheduledTaskService
         $this->setDatabasedTasks($status, $resource, $props);
     }
 
+    public function getScheduledTasks(): array
+    {
+        return $this->repository->findAll();
+    }
+
     private function getContainer(): ContainerInterface
     {
         return $this->container;

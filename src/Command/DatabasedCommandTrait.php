@@ -19,7 +19,7 @@ trait DatabasedCommandTrait
             return;
         }
 
-        $databases = $this->repository->findAll();
+        $databases = $this->service->getScheduledTasks();
 
         foreach ($databases as $database) {
             $databaseTask = $database->toArray();
