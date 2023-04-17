@@ -99,6 +99,4 @@ class ScheduledTaskAddCommandTest extends KernelTestCase
 
         return $application->find('scheduler:add');
     }
-
-
 }
