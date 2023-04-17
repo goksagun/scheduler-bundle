@@ -14,7 +14,7 @@ trait ConfiguredCommandTrait
         $status = StatusInterface::STATUS_ACTIVE,
         $resource = ResourceInterface::RESOURCE_CONFIG,
         $props = []
-    ) {
+    ): void {
         if (null !== $resource && ResourceInterface::RESOURCE_CONFIG !== $resource) {
             return;
         }
@@ -62,7 +62,7 @@ trait ConfiguredCommandTrait
                 $task = ArrayHelper::only($task, $props);
             }
 
-            array_push($this->tasks, $task);
+            $this->tasks[] = $task;
         }
     }
 }

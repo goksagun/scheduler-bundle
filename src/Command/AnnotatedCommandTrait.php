@@ -16,7 +16,7 @@ trait AnnotatedCommandTrait
         $status = StatusInterface::STATUS_ACTIVE,
         $resource = ResourceInterface::RESOURCE_ANNOTATION,
         $props = []
-    ) {
+    ): void {
         if (null !== $resource && ResourceInterface::RESOURCE_ANNOTATION !== $resource) {
             return;
         }
@@ -87,7 +87,7 @@ trait AnnotatedCommandTrait
                         $task = ArrayHelper::only($task, $props);
                     }
 
-                    array_push($this->tasks, $task);
+                    $this->tasks[] = $task;
                 }
             }
         }
