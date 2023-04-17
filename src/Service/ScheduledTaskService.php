@@ -23,23 +23,17 @@ class ScheduledTaskService
     use AnnotatedCommandTrait;
     use DatabasedCommandTrait;
 
-    private array $config;
-    private ContainerInterface $container;
-    private Application $application;
-    private ScheduledTaskRepository $repository;
-
+    /**
+     * @var array<int, array>
+     */
     private array $tasks = [];
 
     public function __construct(
-        array $config,
-        ContainerInterface $container,
-        KernelInterface $kernel,
-        ScheduledTaskRepository $repository
+        private readonly array $config,
+        private readonly KernelInterface $kernel,
+        private readonly ContainerInterface $container,
+        private readonly ScheduledTaskRepository $repository,
     ) {
-        $this->config = $config;
-        $this->container = $container;
-        $this->application = new Application($kernel);
-        $this->repository = $repository;
     }
 
     public function list($status = null, $resource = null, $props = []): array
@@ -127,7 +121,7 @@ class ScheduledTaskService
 
     public function isValidName($name): bool
     {
-        return $this->application->has(TaskHelper::getCommandName($name));
+        return $this->getApplication()->has(TaskHelper::getCommandName($name));
     }
 
     public function isValidExpression($expression): bool
@@ -150,5 +144,10 @@ class ScheduledTaskService
     private function getContainer(): ContainerInterface
     {
         return $this->container;
+    }
+
+    private function getApplication(): Application
+    {
+        return new Application($this->kernel);
     }
 }

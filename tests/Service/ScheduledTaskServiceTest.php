@@ -6,11 +6,11 @@ use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
-class ScheduledTaskServiceTest extends TestCase
+class ScheduledTaskServiceTest extends KernelTestCase
 {
     private ScheduledTaskService $service;
 
@@ -29,7 +29,7 @@ class ScheduledTaskServiceTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $kernel = $this->createMock(KernelInterface::class);
 
-        $this->service = new ScheduledTaskService([], $container, $kernel, $repository);
+        $this->service = new ScheduledTaskService([], $kernel, $container, $repository);
     }
 
     public function testCreateWithAllParams()
@@ -87,7 +87,7 @@ class ScheduledTaskServiceTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $kernel = $this->createMock(KernelInterface::class);
 
-        $this->service = new ScheduledTaskService([], $container, $kernel, $repository);
+        $this->service = new ScheduledTaskService([], $kernel, $container, $repository);
 
         $scheduledTask = $this->service->update(
             1,
@@ -124,7 +124,7 @@ class ScheduledTaskServiceTest extends TestCase
         $container = $this->createMock(ContainerInterface::class);
         $kernel = $this->createMock(KernelInterface::class);
 
-        $this->service = new ScheduledTaskService([], $container, $kernel, $repository);
+        $this->service = new ScheduledTaskService([], $kernel, $container, $repository);
 
         $scheduledTask = $this->service->update(
             1,

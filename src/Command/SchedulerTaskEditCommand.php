@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Command;
 
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
@@ -14,13 +16,10 @@ class SchedulerTaskEditCommand extends Command
 {
     use SchedulerTaskAddEditValidateOptionsTrait;
 
-    private ScheduledTaskService $service;
-
-    public function __construct(ScheduledTaskService $service)
-    {
+    public function __construct(
+        private readonly ScheduledTaskService $service
+    ) {
         parent::__construct();
-
-        $this->service = $service;
     }
 
     protected function configure(): void

@@ -6,42 +6,40 @@ use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 
 final class ScheduledTaskLogBuilder
 {
-    private ScheduledTaskLog $scheduledTaskLog;
-
-    public function __construct()
-    {
-        $this->scheduledTaskLog = new ScheduledTaskLog();
+    public function __construct(
+        private readonly ScheduledTaskLog $scheduledTaskLog = new ScheduledTaskLog()
+    ) {
     }
 
-    public function name(string $name): static
+    public function name(string $name): ScheduledTaskLogBuilder
     {
         $this->scheduledTaskLog->setName($name);
 
         return $this;
     }
 
-    public function status(string $status): static
+    public function status(string $status): ScheduledTaskLogBuilder
     {
         $this->scheduledTaskLog->setStatus($status);
 
         return $this;
     }
 
-    public function message(string $message): static
+    public function message(string $message): ScheduledTaskLogBuilder
     {
         $this->scheduledTaskLog->setMessage($message);
 
         return $this;
     }
 
-    public function output(string $output): static
+    public function output(string $output): ScheduledTaskLogBuilder
     {
         $this->scheduledTaskLog->setOutput($output);
 
         return $this;
     }
 
-    public function remaining(int $times): static
+    public function remaining(int $times): ScheduledTaskLogBuilder
     {
         $this->scheduledTaskLog->setRemaining($times);
 

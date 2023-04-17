@@ -42,14 +42,6 @@ class ScheduledTaskCommand extends Command
     use AnnotatedCommandTrait;
     use DatabasedCommandTrait;
 
-    private array $config;
-
-    private EntityManagerInterface $entityManager;
-
-    private ScheduledTaskService $service;
-
-    private ScheduledTaskLogService $logService;
-
     private string $projectDir;
 
     /**
@@ -63,17 +55,12 @@ class ScheduledTaskCommand extends Command
     private array $processes = [];
 
     public function __construct(
-        array $config,
-        EntityManagerInterface $entityManager,
-        ScheduledTaskService $service,
-        ScheduledTaskLogService $logService,
+        private readonly array $config,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ScheduledTaskService $service,
+        private readonly ScheduledTaskLogService $logService,
     ) {
         parent::__construct();
-
-        $this->config = $config;
-        $this->entityManager = $entityManager;
-        $this->service = $service;
-        $this->logService = $logService;
     }
 
     protected function configure(): void

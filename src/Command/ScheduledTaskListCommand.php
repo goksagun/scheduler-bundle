@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Command;
 
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
@@ -11,25 +13,22 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ScheduledTaskListCommand extends Command
 {
-    use ConfiguredCommandTrait, AnnotatedCommandTrait, DatabasedCommandTrait;
+    use ConfiguredCommandTrait;
+    use AnnotatedCommandTrait;
+    use DatabasedCommandTrait;
 
     const TABLE_HEADERS = ['#', 'Id', 'Name', 'Expression', 'Times', 'Start', 'Stop', 'Status', 'Resource'];
-
-    private array $config;
 
     /**
      * @var array<int, array>
      */
     private array $tasks = [];
 
-    private ScheduledTaskService $service;
-
-    public function __construct(array $config, ScheduledTaskService $service)
-    {
+    public function __construct(
+        private readonly array $config,
+        private readonly ScheduledTaskService $service
+    ) {
         parent::__construct();
-
-        $this->config = $config;
-        $this->service = $service;
     }
 
     protected function configure(): void
@@ -51,11 +50,11 @@ class ScheduledTaskListCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $time = -microtime(1);
+        $time = -microtime(true);
 
         $this->handleTaskList($input, $output);
 
-        $time += microtime(1);
+        $time += microtime(true);
 
         $output->writeln("Rendered in {$time} seconds.");
 
