@@ -268,24 +268,6 @@ class ScheduledTaskCommand extends Command
         }
     }
 
-    private function getLatestScheduledTaskLog(string $name, ?string $status = null)
-    {
-        $criteria = [
-            'name' => $name,
-        ];
-
-        if (null !== $status) {
-            $criteria['status'] = $status;
-        }
-
-        return $this->logRepository->findOneBy(
-            $criteria,
-            [
-                'id' => 'desc',
-            ]
-        );
-    }
-
     private function createScheduledTaskLog(string $name, ?int $times = null): ScheduledTaskLog
     {
         return $this->logService->create($name, $times);
@@ -356,7 +338,7 @@ class ScheduledTaskCommand extends Command
     {
         // Check remaining.
         if ($this->config['log'] && null !== $task['times']) {
-            $scheduledTask = $this->getLatestScheduledTaskLog($task['name']);
+            $scheduledTask = $this->logService->getLatestScheduledTaskLog($task['name']);
 
             if ($scheduledTask instanceof ScheduledTaskLog && $scheduledTask->isRemainingZero()) {
                 return false;
