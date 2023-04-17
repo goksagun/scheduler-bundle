@@ -38,13 +38,13 @@ services:
 
     scheduler.command.scheduled_task_add:
         class: Goksagun\SchedulerBundle\Command\SchedulerTaskAddCommand
-        arguments: ['@scheduler.repository.scheduled_task']
+        arguments: ['@scheduler.service.scheduled_task']
         tags:
             - { name: 'console.command', command: 'scheduler:add' }
 
     scheduler.command.scheduled_task_edit:
         class: Goksagun\SchedulerBundle\Command\SchedulerTaskEditCommand
-        arguments: ['@scheduler.repository.scheduled_task']
+        arguments: ['@scheduler.service.scheduled_task']
         tags:
             - { name: 'console.command', command: 'scheduler:edit' }
 
