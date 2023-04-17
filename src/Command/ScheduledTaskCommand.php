@@ -284,26 +284,26 @@ class ScheduledTaskCommand extends Command
 
     private function createScheduledTaskLog(string $name, ?int $times = null): ScheduledTaskLog
     {
-        $scheduledTask = new ScheduledTaskLog;
+        $scheduledTaskLog = new ScheduledTaskLog();
 
         if (!$this->config['log']) {
-            return $scheduledTask;
+            return $scheduledTaskLog;
         }
 
-        $scheduledTask->setName($name);
-        $scheduledTask->setRemaining($times);
+        $scheduledTaskLog->setName($name);
+        $scheduledTaskLog->setRemaining($times);
 
         if ($latestExecutedScheduledTask = $this->getLatestScheduledTaskLog($name)) {
-            $scheduledTask->setRemaining(
+            $scheduledTaskLog->setRemaining(
                 $latestExecutedScheduledTask->getRemaining()
             );
         }
 
         if ($this->checkTableExists()) {
-            $this->logRepository->save($scheduledTask);
+            $this->logRepository->save($scheduledTaskLog);
         }
 
-        return $scheduledTask;
+        return $scheduledTaskLog;
     }
 
     private function updateScheduledTaskStatus(
