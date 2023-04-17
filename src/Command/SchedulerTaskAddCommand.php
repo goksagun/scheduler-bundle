@@ -4,8 +4,7 @@ namespace Goksagun\SchedulerBundle\Command;
 
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
-use Goksagun\SchedulerBundle\Service\ScheduledTaskBuilderFactory;
+use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Component\Console\Command\Command;
@@ -17,16 +16,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SchedulerTaskAddCommand extends Command
 {
-    /**
-     * @var ScheduledTaskRepository
-     */
-    protected $repository;
 
-    public function __construct(ScheduledTaskRepository $repository)
+    private ScheduledTaskService $service;
+
+    public function __construct(ScheduledTaskService $service)
     {
         parent::__construct();
 
-        $this->repository = $repository;
+        $this->service = $service;
     }
 
     protected function configure()
@@ -73,17 +70,7 @@ class SchedulerTaskAddCommand extends Command
 
     private function storeTask($name, $expression, $times = null, $start = null, $stop = null, $status = null)
     {
-        $scheduledTask = ScheduledTaskBuilderFactory::create($name, $expression)
-            ->times($times)
-            ->start($start)
-            ->stop($stop)
-            ->status($status)
-            ->build()
-            ;
-
-        $this->getRepository()->save($scheduledTask);
-
-        return $scheduledTask;
+        return $this->service->create($name, $expression, $times, $start, $stop, $status);
     }
 
     /**
