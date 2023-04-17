@@ -2,28 +2,24 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
-use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 
 trait DatabasedCommandTrait
 {
     public function setDatabasedTasks(
-        $status = ScheduledTask::STATUS_ACTIVE,
+        $status = StatusInterface::STATUS_ACTIVE,
         $resource = ResourceInterface::RESOURCE_DATABASE,
         $props = []
-    ) {
+    ): void {
         if (null !== $resource && ResourceInterface::RESOURCE_DATABASE !== $resource) {
             return;
         }
 
-        /** @var ScheduledTaskRepository $repository */
-        $repository = $this->getRepository();
-
-        $databases = $repository->findAll();
+        $databases = $this->repository->findAll();
 
         foreach ($databases as $database) {
             $databaseTask = $database->toArray();
@@ -69,7 +65,7 @@ trait DatabasedCommandTrait
                 $task = ArrayHelper::only($task, $props);
             }
 
-            array_push($this->tasks, $task);
+            $this->tasks[] = $task;
         }
     }
 }

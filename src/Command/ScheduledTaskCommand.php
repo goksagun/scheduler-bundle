@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Command;
 
 use Cron\CronExpression;
@@ -20,6 +22,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -37,47 +41,35 @@ use Symfony\Component\Process\Process;
  */
 class ScheduledTaskCommand extends Command
 {
-    use ConfiguredCommandTrait, AnnotatedCommandTrait, DatabasedCommandTrait;
+    use ConfiguredCommandTrait;
+    use AnnotatedCommandTrait;
+    use DatabasedCommandTrait;
 
     const PROCESS_TIMEOUT = 3600 * 24; // 24 hours
 
-    /**
-     * @var array
-     */
-    private $config = [];
+    private array $config;
+
+    private EntityManagerInterface $entityManager;
+
+    private ScheduledTaskRepository $repository;
+
+    private ScheduledTaskLogRepository $logRepository;
+
+    private string $projectDir;
+
+    private array $tasks = [];
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var $processes array<int, ProcessInfo>
      */
-    private $entityManager;
+    private array $processes = [];
 
-    /**
-     * @var ScheduledTaskRepository
-     */
-    private $repository;
-
-    /**
-     * @var ScheduledTaskLogRepository
-     */
-    private $logRepository;
-
-    /**
-     * @var string
-     */
-    private $projectDir;
-
-    /**
-     * @var array
-     */
-    private $tasks = [];
-
-    /**
-     * @var ProcessInfo[]
-     */
-    private $processes = [];
-
-    public function __construct(array $config, EntityManagerInterface $entityManager, ScheduledTaskRepository $repository, ScheduledTaskLogRepository $logRepository)
-    {
+    public function __construct(
+        array $config,
+        EntityManagerInterface $entityManager,
+        ScheduledTaskRepository $repository,
+        ScheduledTaskLogRepository $logRepository
+    ) {
         parent::__construct();
 
         $this->config = $config;
@@ -86,7 +78,7 @@ class ScheduledTaskCommand extends Command
         $this->logRepository = $logRepository;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('scheduler:run')
@@ -100,7 +92,7 @@ class ScheduledTaskCommand extends Command
             );
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $resource = $input->getOption('resource');
 
@@ -139,14 +131,14 @@ class ScheduledTaskCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function setTasks($resource)
+    private function setTasks(?string $resource): void
     {
         $this->setConfiguredTasks(StatusInterface::STATUS_ACTIVE, $resource);
         $this->setAnnotatedTasks(StatusInterface::STATUS_ACTIVE, $resource);
         $this->setDatabasedTasks(StatusInterface::STATUS_ACTIVE, $resource);
     }
 
-    private function runScheduledTasks(InputInterface $input, OutputInterface $output)
+    private function runScheduledTasks(InputInterface $input, OutputInterface $output): void
     {
         $isAsync = $input->getOption('async');
 
@@ -177,7 +169,7 @@ class ScheduledTaskCommand extends Command
             // Create scheduled task status as queued.
             $scheduledTask = $this->createScheduledTaskLog($name, $times);
 
-            if (!$command = $this->validateCommand($output, $i, $name, $scheduledTask)) {
+            if (!$command = $this->validateCommand($output, $name, $scheduledTask)) {
                 continue;
             }
 
@@ -186,7 +178,7 @@ class ScheduledTaskCommand extends Command
                     $phpBinaryPath = $this->getPhpBinaryPath();
                     $projectRoot = $this->getProjectDir();
 
-                    $asyncCommand = $phpBinaryPath.' '.$projectRoot.'/bin/console '.$name;
+                    $asyncCommand = $phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name;
                     $process = Process::fromShellCommandline($asyncCommand);
 
                     $process->start();
@@ -225,7 +217,7 @@ class ScheduledTaskCommand extends Command
         }
     }
 
-    private function validateTask($task)
+    private function validateTask(array $task): array
     {
         $errors = [];
 
@@ -269,29 +261,14 @@ class ScheduledTaskCommand extends Command
         return $errors;
     }
 
-    private function getTasks()
+    private function getTasks(): \Generator
     {
         foreach ($this->tasks as $task) {
             yield $task;
         }
     }
 
-    private function getEntityManager()
-    {
-        return $this->entityManager;
-    }
-
-    private function getRepository()
-    {
-        return $this->repository;
-    }
-
-    private function getLogRepository()
-    {
-        return $this->logRepository;
-    }
-
-    private function getLatestScheduledTaskLog($name, $status = null)
+    private function getLatestScheduledTaskLog(string $name, ?string $status = null)
     {
         $criteria = [
             'name' => $name,
@@ -301,7 +278,7 @@ class ScheduledTaskCommand extends Command
             $criteria['status'] = $status;
         }
 
-        return $this->getLogRepository()->findOneBy(
+        return $this->logRepository->findOneBy(
             $criteria,
             [
                 'id' => 'desc',
@@ -309,7 +286,7 @@ class ScheduledTaskCommand extends Command
         );
     }
 
-    private function createScheduledTaskLog($name, $times = null)
+    private function createScheduledTaskLog(string $name, ?int $times = null): ScheduledTaskLog
     {
         $scheduledTask = new ScheduledTaskLog;
 
@@ -327,7 +304,7 @@ class ScheduledTaskCommand extends Command
         }
 
         if ($this->checkTableExists()) {
-            $this->getLogRepository()->save($scheduledTask);
+            $this->logRepository->save($scheduledTask);
         }
 
         return $scheduledTask;
@@ -335,10 +312,10 @@ class ScheduledTaskCommand extends Command
 
     private function updateScheduledTaskStatus(
         ScheduledTaskLog $scheduledTask,
-        $status,
-        $message = null,
-        $output = null
-    ) {
+        string $status,
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
         if (!$this->config['log']) {
             return $scheduledTask;
         }
@@ -353,7 +330,7 @@ class ScheduledTaskCommand extends Command
         }
 
         if ($this->checkTableExists()) {
-            $this->getLogRepository()->save();
+            $this->logRepository->save();
         }
 
         return $scheduledTask;
@@ -361,17 +338,17 @@ class ScheduledTaskCommand extends Command
 
     private function updateScheduledTaskStatusAsStarted(
         ScheduledTaskLog $scheduledTask,
-        $message = null,
-        $output = null
-    ) {
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_STARTED, $message, $output);
     }
 
     private function updateScheduledTaskStatusAsExecuted(
         ScheduledTaskLog $scheduledTask,
-        $message = null,
-        $output = null
-    ) {
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
         if ($scheduledTask->getRemaining()) {
             $scheduledTask->decreaseRemaining();
         }
@@ -379,21 +356,22 @@ class ScheduledTaskCommand extends Command
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_EXECUTED, $message, $output);
     }
 
-    private function updateScheduledTaskStatusAsFailed(ScheduledTaskLog $scheduledTask, $message = null, $output = null)
-    {
+    private function updateScheduledTaskStatusAsFailed(
+        ScheduledTaskLog $scheduledTask,
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_FAILED, $message, $output);
     }
 
-    private function checkTableExists()
+    private function checkTableExists(): bool
     {
-        $em = $this->getEntityManager();
+        $tableName = $this->entityManager->getClassMetadata(ScheduledTaskLog::class)->getTableName();
 
-        $tableName = $em->getClassMetadata(ScheduledTaskLog::class)->getTableName();
-
-        return $em->getConnection()->getSchemaManager()->tablesExist((array)$tableName);
+        return $this->entityManager->getConnection()->createSchemaManager()->tablesExist((array)$tableName);
     }
 
-    private function isTaskDue($task)
+    private function isTaskDue(array $task): bool
     {
         // Check remaining.
         if ($this->config['log'] && null !== $task['times']) {
@@ -432,8 +410,11 @@ class ScheduledTaskCommand extends Command
         return $cron->isDue();
     }
 
-    private function validateCommand(OutputInterface $output, int $i, string $name, ScheduledTaskLog $scheduledTask)
-    {
+    private function validateCommand(
+        OutputInterface $output,
+        string $name,
+        ScheduledTaskLog $scheduledTask
+    ): ?Command {
         $commandName = TaskHelper::getCommandName($name);
 
         try {
@@ -448,7 +429,7 @@ class ScheduledTaskCommand extends Command
         return null;
     }
 
-    public function setProjectDir(string $projectDir)
+    public function setProjectDir(string $projectDir): void
     {
         $this->projectDir = $projectDir;
     }
@@ -469,7 +450,7 @@ class ScheduledTaskCommand extends Command
         return $phpBinaryPath;
     }
 
-    private function finishAsyncProcesses(OutputInterface $output)
+    private function finishAsyncProcesses(OutputInterface $output): void
     {
         do {
             // Loop active process and remove if successful.

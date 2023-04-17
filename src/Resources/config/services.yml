@@ -22,7 +22,11 @@ services:
 
     scheduler.command.scheduled_task:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskCommand
-        arguments: ['%scheduler%', '@doctrine.orm.entity_manager', '@scheduler.repository.scheduled_task', '@scheduler.repository.scheduled_task_log']
+        arguments:
+            - '%scheduler%'
+            - '@doctrine.orm.entity_manager'
+            - '@scheduler.repository.scheduled_task'
+            - '@scheduler.repository.scheduled_task_log'
         calls:
             - method: setProjectDir
               arguments:
