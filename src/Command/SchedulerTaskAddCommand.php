@@ -74,19 +74,23 @@ class SchedulerTaskAddCommand extends Command
 
     protected function validateOptions(array $options): void
     {
-        if (!is_null($options['times']) && !is_numeric($options['times'])) {
+        $times = $options['times'];
+        if (!is_null($times) && !is_numeric($times)) {
             throw new RuntimeException('The option "times" should be numeric value.');
         }
 
-        if (!is_null($options['start']) && !DateHelper::isDateValid($options['start'])) {
+        $start = $options['start'];
+        if (!is_null($start) && !DateHelper::isDateValid($start)) {
             throw new RuntimeException('The option "start" should be date or date and time value.');
         }
 
-        if (!is_null($options['stop']) && !DateHelper::isDateValid($options['stop'])) {
+        $stop = $options['stop'];
+        if (!is_null($stop) && !DateHelper::isDateValid($stop)) {
             throw new RuntimeException('The option "stop" should be date or date and time value.');
         }
 
-        if (!is_null($options['status']) && !in_array($options['status'], StatusInterface::STATUSES)) {
+        $status = $options['status'];
+        if (!is_null($status) && !in_array($status, StatusInterface::STATUSES)) {
             throw new RuntimeException(
                 sprintf(
                     'The option "status" should be valid. [values: "%s"]',
