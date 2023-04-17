@@ -12,11 +12,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class ScheduledTaskAddCommandTest extends KernelTestCase
 {
-    private function getApplication(): Application
-    {
-        return new Application();
-    }
-
     public function testAddNewTaskOnlyRequiredParams()
     {
         $command = $this->getCommand();
@@ -98,5 +93,10 @@ class ScheduledTaskAddCommandTest extends KernelTestCase
         $application->add(new SchedulerTaskAddCommand($service));
 
         return $application->find('scheduler:add');
+    }
+
+    private function getApplication(): Application
+    {
+        return new Application();
     }
 }
