@@ -42,11 +42,6 @@ class ScheduledTaskService
         $this->repository = $repository;
     }
 
-    private function getRepository(): ScheduledTaskRepository
-    {
-        return $this->repository;
-    }
-
     public function list($status = null, $resource = null, $props = []): array
     {
         $this->setTasks($status, $resource, $props);
