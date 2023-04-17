@@ -686,16 +686,13 @@ class ScheduledTaskCommandTest extends KernelTestCase
             $scheduledTasks[] = $scheduledTask;
         }
 
-        // Now, mock the repository, so it returns mock of the employee
         $scheduledTaskRepository = $this->createMock(ScheduledTaskRepository::class);
-        $scheduledTaskRepository->expects($this->any())
+        $scheduledTaskRepository
+            ->expects($this->any())
             ->method('findAll')
             ->willReturn($scheduledTasks);
 
-        // Last, mock the EntityManager to return mock of the repository
         $entityManager = $this->createMock(EntityManagerInterface::class);
-        // use getMock() on PHPUnit 5.3 or below
-        // $entityManager = $this->getMock(ObjectManager::class);
         $entityManager->expects($this->any())
             ->method('getRepository')
             ->willReturn($scheduledTaskRepository);
@@ -719,7 +716,8 @@ class ScheduledTaskCommandTest extends KernelTestCase
         }
 
         $scheduledTaskRepository = $this->createMock(ScheduledTaskRepository::class);
-        $scheduledTaskRepository->expects($this->any())
+        $scheduledTaskRepository
+            ->expects($this->any())
             ->method('findAll')
             ->willReturn($scheduledTasks);
 
@@ -729,7 +727,8 @@ class ScheduledTaskCommandTest extends KernelTestCase
     private function createScheduledTaskLogRepository(): ScheduledTaskLogRepository
     {
         $scheduledTaskLogRepository = $this->createMock(ScheduledTaskLogRepository::class);
-        $scheduledTaskLogRepository->expects($this->any())
+        $scheduledTaskLogRepository
+            ->expects($this->any())
             ->method('findOneBy')
             ->willReturn([]);
 
