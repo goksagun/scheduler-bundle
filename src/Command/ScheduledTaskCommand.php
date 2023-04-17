@@ -10,7 +10,6 @@ use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
-use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
@@ -52,9 +51,14 @@ class ScheduledTaskCommand extends Command
     private ScheduledTaskLogService $logService;
 
     private string $projectDir;
-    private array $tasks = [];
+
     /**
-     * @var $processes array<int, ProcessInfo>
+     * @var array<int, array>
+     */
+    private array $tasks = [];
+
+    /**
+     * @var array<int, ProcessInfo>
      */
     private array $processes = [];
 

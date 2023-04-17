@@ -16,20 +16,15 @@ class ScheduledTaskListCommand extends Command
 
     const TABLE_HEADERS = ['#', 'Id', 'Name', 'Expression', 'Times', 'Start', 'Stop', 'Status', 'Resource'];
 
-    /**
-     * @var array
-     */
-    private $config;
+    private array $config;
 
     /**
-     * @var array
+     * @var array<int, array>
      */
-    private $tasks = [];
+    private array $tasks = [];
 
-    /**
-     * @var ScheduledTaskRepository
-     */
-    private $repository;
+    private ScheduledTaskRepository $repository;
+
     private ScheduledTaskService $service;
 
     public function __construct(array $config, ScheduledTaskRepository $repository, ScheduledTaskService $service)
@@ -41,7 +36,7 @@ class ScheduledTaskListCommand extends Command
         $this->service = $service;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('scheduler:list')
@@ -50,7 +45,7 @@ class ScheduledTaskListCommand extends Command
             ->addOption('resource', null, InputOption::VALUE_REQUIRED, 'Scheduled task resource');
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->setTasks(
             $input->getOption('status'),
@@ -71,7 +66,7 @@ class ScheduledTaskListCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function handleTaskList(InputInterface $input, OutputInterface $output)
+    private function handleTaskList(InputInterface $input, OutputInterface $output): void
     {
         $i = 0;
         $rows = array_map(
@@ -91,25 +86,7 @@ class ScheduledTaskListCommand extends Command
         $table->render();
     }
 
-    /**
-     * @param null $status
-     * @param null $resource
-     * @param array $props
-     * @return array
-     */
-    public function listTasks($status = null, $resource = null, $props = [])
-    {
-        $this->setTasks($status, $resource, $props);
-
-        return $this->tasks;
-    }
-
-    private function getRepository()
-    {
-        return $this->repository;
-    }
-
-    private function setTasks($status, $resource, $props = [])
+    private function setTasks($status, $resource, $props = []): void
     {
         $this->setConfiguredTasks($status, $resource, $props);
         $this->setAnnotatedTasks($status, $resource, $props);
