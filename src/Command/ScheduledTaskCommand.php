@@ -52,8 +52,6 @@ class ScheduledTaskCommand extends Command
 
     private ScheduledTaskRepository $repository;
 
-    private ScheduledTaskLogRepository $logRepository;
-
     private ScheduledTaskLogService $logService;
 
     private string $projectDir;
@@ -68,7 +66,6 @@ class ScheduledTaskCommand extends Command
         array $config,
         EntityManagerInterface $entityManager,
         ScheduledTaskRepository $repository,
-        ScheduledTaskLogRepository $logRepository,
         ScheduledTaskLogService $logService,
     ) {
         parent::__construct();
@@ -76,7 +73,6 @@ class ScheduledTaskCommand extends Command
         $this->config = $config;
         $this->entityManager = $entityManager;
         $this->repository = $repository;
-        $this->logRepository = $logRepository;
         $this->logService = $logService;
     }
 
