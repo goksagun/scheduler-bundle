@@ -2,7 +2,6 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
@@ -26,7 +25,7 @@ class SchedulerTaskAddCommand extends Command
         $this->service = $service;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('scheduler:add')
@@ -44,14 +43,14 @@ class SchedulerTaskAddCommand extends Command
             );
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $options = ArrayHelper::only($input->getOptions(), ['times', 'start', 'stop', 'status']);
 
         $this->validateOptions($options);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $name = $input->getArgument('name');
         $expression = $input->getArgument('expression');
@@ -68,33 +67,12 @@ class SchedulerTaskAddCommand extends Command
         return 0;
     }
 
-    private function storeTask($name, $expression, $times = null, $start = null, $stop = null, $status = null)
+    private function storeTask($name, $expression, $times = null, $start = null, $stop = null, $status = null): void
     {
-        return $this->service->create($name, $expression, $times, $start, $stop, $status);
+        $this->service->create($name, $expression, $times, $start, $stop, $status);
     }
 
-    /**
-     * @param $name
-     * @param $expression
-     * @param null $times
-     * @param null $start
-     * @param null $stop
-     * @param null $status
-     * @return ScheduledTask
-     */
-    public function addTask($name, $expression, $times = null, $start = null, $stop = null, $status = null)
-    {
-        $this->validateOptions(compact('name', 'expression', 'times', 'start', 'stop', 'status'));
-
-        return $this->storeTask($name, $expression, $times, $start, $stop, $status);
-    }
-
-    protected function getRepository()
-    {
-        return $this->repository;
-    }
-
-    protected function validateOptions(array $options)
+    protected function validateOptions(array $options): void
     {
         if (!is_null($options['times']) && !is_numeric($options['times'])) {
             throw new RuntimeException('The option "times" should be numeric value.');
