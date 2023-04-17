@@ -20,53 +20,47 @@ task(s) as asynchronously call the command scheduler with async flag
 Installation
 ============
 
-Step 1: Download the Bundle
----------------------------
+Make sure Composer is installed globally, as explained in the
+[installation chapter](https://getcomposer.org/doc/00-intro.md)
+of the Composer documentation.
+
+Applications that use Symfony Flex
+----------------------------------
+
+Open a command console, enter your project directory and execute:
+
+```console
+$ composer require goksagun/scheduler-bundle
+```
+
+Applications that don't use Symfony Flex
+----------------------------------------
+
+### Step 1: Download the Bundle
 
 Open a command console, enter your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```console
-composer require goksagun/scheduler-bundle
+$ composer require goksagun/scheduler-bundle
 ```
 
-This command requires you to have Composer installed globally, as 
-explained in the 
-[installation chapter](https://getcomposer.org/doc/00-intro.md) of the 
-Composer documentation.
-
-Step 2: Enable the Bundle (for symfony version 2, 3)
--------------------------
+### Step 2: Enable the Bundle
 
 Then, enable the bundle by adding it to the list of registered bundles
-in the `app/AppKernel.php` file of your project:
+in the `config/bundles.php` file of your project:
 
 ```php
-<?php
-// app/AppKernel.php
+// config/bundles.php
 
-// ...
-class AppKernel extends Kernel
-{
-    public function registerBundles()
-    {
-        $bundles = array(
-            // ...
-            new Goksagun\SchedulerBundle\SchedulerBundle(),
-        );
-
-        // ...
-    }
-
+return [
     // ...
-}
+    Goksagun\SchedulerBundle\SchedulerBundle::class => ['all' => true],
+];
 ```
 
-Step 3: Add the Bundle config file (for symfony version 2, 3)
-----------------------------------
-
-Then, add the bundle configuration yml file `scheduler.yml` into 
-`app/config` directory:
+Then, add console commands to scheduler yml file `scheduler.yml` into 
+`config/packages` directory:
 
 ```yml
 scheduler:
@@ -76,14 +70,6 @@ scheduler:
     tasks:
          - { name: command:name argument --option, expression: "* * * * *" }
          - { name: another-command:name, expression: "@hourly" }
-```
-
-Import new config file to `config.yml` into `app/config` directory:
-
-```yml
-imports:
-    ...
-    - { resource: scheduler.yml }
 ```
 
 Or use annotation:
