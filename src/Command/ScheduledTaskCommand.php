@@ -26,6 +26,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+
 /**
  * Command scheduler allows you to fluently and expressively define your command
  * schedule within application itself. When using the scheduler, only a single
@@ -279,24 +281,7 @@ class ScheduledTaskCommand extends Command
         ?string $message = null,
         ?string $output = null
     ): ScheduledTaskLog {
-        if (!$this->config['log']) {
-            return $scheduledTask;
-        }
-
-        $scheduledTask->setStatus($status);
-        if (!empty($message)) {
-            $scheduledTask->setMessage(StringHelper::limit($message, 252));
-        }
-
-        if (!empty($output)) {
-            $scheduledTask->setOutput($output);
-        }
-
-        if ($this->checkTableExists()) {
-            $this->logRepository->save();
-        }
-
-        return $scheduledTask;
+        return $this->logService->updateStatus($scheduledTask, $status, $message, $output);
     }
 
     private function updateScheduledTaskStatusAsStarted(
