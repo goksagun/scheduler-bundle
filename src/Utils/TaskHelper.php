@@ -2,9 +2,13 @@
 
 namespace Goksagun\SchedulerBundle\Utils;
 
-class TaskHelper
+final class TaskHelper
 {
-    public static function parseName($name)
+    private function __construct()
+    {
+    }
+
+    public static function parseName($name): array
     {
         $name = preg_replace('/\'/', '"', $name);
         $found = preg_match_all('/"(?:\\\\.|[^\\\\"])*"|\S+/', $name, $matches);
@@ -22,7 +26,7 @@ class TaskHelper
             }
 
             if (StringHelper::contains($part, ['"', '\''])) {
-                array_push($temp, $part);
+                $temp[] = $part;
 
                 unset($parts[$i]);
             }
@@ -31,7 +35,7 @@ class TaskHelper
         $chunk = array_chunk($temp, 2);
 
         foreach ($chunk as $item) {
-            array_push($parts, implode(' ', $item));
+            $parts[] = implode(' ', $item);
         }
 
         $parts = array_map(
@@ -46,7 +50,7 @@ class TaskHelper
 
     public static function getCommandName($name)
     {
-        $parts = static::parseName($name);
+        $parts = TaskHelper::parseName($name);
 
         return reset($parts);
     }

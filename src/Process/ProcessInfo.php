@@ -7,8 +7,8 @@ use Symfony\Component\Process\Process;
 
 class ProcessInfo
 {
-    private $process;
-    private $scheduledTaskLog;
+    private Process $process;
+    private ScheduledTaskLog $scheduledTaskLog;
 
     public function __construct(Process $process, ScheduledTaskLog $scheduledTaskLog)
     {
@@ -21,7 +21,7 @@ class ProcessInfo
         return $this->process;
     }
 
-    public function setProcess(Process $process)
+    public function setProcess(Process $process): void
     {
         $this->process = $process;
     }
@@ -31,7 +31,7 @@ class ProcessInfo
         return $this->scheduledTaskLog;
     }
 
-    public function setScheduledTaskLog(ScheduledTaskLog $scheduledTaskLog)
+    public function setScheduledTaskLog(ScheduledTaskLog $scheduledTaskLog): void
     {
         $this->scheduledTaskLog = $scheduledTaskLog;
     }

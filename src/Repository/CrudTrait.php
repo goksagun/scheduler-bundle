@@ -4,12 +4,7 @@ namespace Goksagun\SchedulerBundle\Repository;
 
 trait CrudTrait
 {
-    /**
-     * @param $entity
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    public function save($entity = null)
+    public function save(?object $entity = null): void
     {
         $em = $this->getEntityManager();
 
@@ -19,10 +14,7 @@ trait CrudTrait
         $em->flush();
     }
 
-    /**
-     * @param $entity
-     */
-    public function delete($entity)
+    public function delete(object $entity): void
     {
         $em = $this->getEntityManager();
 

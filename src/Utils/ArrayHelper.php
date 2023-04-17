@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Utils;
 
 final class ArrayHelper
 {
+    private function __construct()
+    {
+    }
+
     /**
      * Determine if the given key exists in the provided array.
-     *
-     * @param  \ArrayAccess|array $array
-     * @param  string|int $key
-     * @return bool
      */
-    public static function exists($array, $key)
+    public static function exists(array|\ArrayAccess $array, int|string $key): bool
     {
         if ($array instanceof \ArrayAccess) {
             return $array->offsetExists($key);
@@ -22,38 +24,26 @@ final class ArrayHelper
 
     /**
      * Get a subset of the items from the given array.
-     *
-     * @param  array $array
-     * @param  array|string $keys
-     * @return array
      */
-    public static function only($array, $keys)
+    public static function only(array $array, array|string $keys): array
     {
         return array_intersect_key($array, array_flip((array)$keys));
     }
 
     /**
-     * Get all of the given array except for a specified array of keys.
-     *
-     * @param  array $array
-     * @param  array|string $keys
-     * @return array
+     * Get all the given array except for a specified array of keys.
      */
-    public static function except($array, $keys)
+    public static function except(array $array, array|string $keys): array
     {
-        static::forget($array, $keys);
+        ArrayHelper::forget($array, $keys);
 
         return $array;
     }
 
     /**
      * Remove one or many array items from a given array using "dot" notation.
-     *
-     * @param  array $array
-     * @param  array|string $keys
-     * @return void
      */
-    public static function forget(&$array, $keys)
+    public static function forget(array &$array, array|string $keys): void
     {
         $original = &$array;
 
