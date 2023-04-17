@@ -67,8 +67,7 @@ class ScheduledTaskService
             ->start($start ? DateHelper::date($start) : null)
             ->stop($stop ? DateHelper::date($stop) : null)
             ->status($status)
-            ->build()
-        ;
+            ->build();
 
         $this->repository->save($scheduledTask);
 
@@ -89,8 +88,15 @@ class ScheduledTaskService
         return current($task);
     }
 
-    public function update($id, $name, $expression, $times = null, $start = null, $stop = null, $status = null)
-    {
+    public function update(
+        $id,
+        $name,
+        $expression,
+        $times = null,
+        $start = null,
+        $stop = null,
+        $status = null
+    ): ScheduledTask {
         $scheduledTask = $this->repository->find($id);
 
         if (!$scheduledTask instanceof ScheduledTask) {

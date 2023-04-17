@@ -5,7 +5,7 @@ namespace Command;
 use Goksagun\SchedulerBundle\Command\SchedulerTaskEditCommand;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
+use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -14,11 +14,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class ScheduledTaskEditCommandTest extends KernelTestCase
 {
-    private function getApplication(): Application
-    {
-        return new Application();
-    }
-
     public function testEditTaskOnlyRequiredParams()
     {
         $command = $this->getCommand();
@@ -110,22 +105,22 @@ class ScheduledTaskEditCommandTest extends KernelTestCase
     private function getCommand(): Command
     {
         $application = $this->getApplication();
-        $repository = $this->createMock(ScheduledTaskRepository::class);
-        $repository
+        $service = $this->createMock(ScheduledTaskService::class);
+        $service
             ->expects($this->once())
-            ->method('find')
+            ->method('update')
             ->withAnyParameters()
             ->willReturn(
                 (new ScheduledTask())
-                    ->setName('Foo')
-                    ->setExpression('@daily')
-                    ->setTimes(3)
-                    ->setStart(new \DateTime('2023-01-01'))
-                    ->setStop(new \DateTime('2023-01-02'))
-                    ->setStatus(StatusInterface::STATUS_INACTIVE)
+                    ->setName('Bar')
+                    ->setExpression('@hourly')
+                    ->setTimes(1)
+                    ->setStart(new \DateTime('2023-02-01'))
+                    ->setStop(new \DateTime('2023-02-02'))
+                    ->setStatus(StatusInterface::STATUS_ACTIVE)
             );
 
-        $application->add(new SchedulerTaskEditCommand($repository));
+        $application->add(new SchedulerTaskEditCommand($service));
 
         return $application->find('scheduler:edit');
     }
@@ -133,12 +128,15 @@ class ScheduledTaskEditCommandTest extends KernelTestCase
     public function getCommandForValidation(): Command
     {
         $application = $this->getApplication();
-        $repository = $this->createPartialMock(ScheduledTaskRepository::class, ['find']);
+        $service = $this->createPartialMock(ScheduledTaskService::class, ['update']);
 
-        $application->add(new SchedulerTaskEditCommand($repository));
+        $application->add(new SchedulerTaskEditCommand($service));
 
         return $application->find('scheduler:edit');
     }
 
-
+    private function getApplication(): Application
+    {
+        return new Application();
+    }
 }
