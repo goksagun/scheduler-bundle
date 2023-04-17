@@ -4,7 +4,6 @@ namespace Goksagun\SchedulerBundle\Tests\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Goksagun\SchedulerBundle\Command\ScheduledTaskCommand;
-use Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
@@ -599,53 +598,6 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
     }
 
-    public function testScheduleTaskListOption()
-    {
-        $config = $this->createConfigMock(
-            true,
-            false,
-            false,
-            [
-                [
-                    'name' => 'schedule:annotate --foo=baz',
-                    'expression' => '*/10 * * * *',
-                ],
-            ]
-        );
-        $application = $this->getApplication();
-        $scheduledTaskService = $this->createScheduledTaskService();
-
-        $application->add(new ArrayArgumentCommand());
-        $application->add(new ScheduledTaskListCommand($config, $scheduledTaskService));
-
-        $command = $application->find('scheduler:list');
-        $commandTester = new CommandTester($command);
-        $commandTester->execute(
-            [
-                'command' => $command->getName(),
-            ]
-        );
-
-        $output = $commandTester->getDisplay();
-
-        $this->assertStringContainsString("3", $output);
-
-        $this->assertStringContainsString(
-            "Name",
-            $output
-        );
-
-        $this->assertStringContainsString(
-            "Expression",
-            $output
-        );
-
-        $this->assertStringContainsString(
-            "Resource",
-            $output
-        );
-    }
-
     public function testArrayArgumentCommand()
     {
         $config = $this->createConfigMock(
@@ -739,8 +691,12 @@ class ScheduledTaskCommandTest extends KernelTestCase
         return new Application();
     }
 
-    private function createConfigMock($enabled = true, bool $async = false, bool $log = false, array $tasks = []): array
-    {
+    private function createConfigMock(
+        bool $enabled = true,
+        bool $async = false,
+        bool $log = false,
+        array $tasks = []
+    ): array {
         return ['enabled' => $enabled, 'async' => $async, 'log' => $log, 'tasks' => $tasks];
     }
 
@@ -771,30 +727,6 @@ class ScheduledTaskCommandTest extends KernelTestCase
             ->willReturn($scheduledTaskRepository);
 
         return $entityManager;
-    }
-
-    private function createScheduledTaskRepository($data = []): ScheduledTaskRepository
-    {
-        $scheduledTasks = [];
-        foreach ($data as $datum) {
-            $scheduledTask = new ScheduledTask();
-            $scheduledTask->setName($datum['name']);
-            $scheduledTask->setExpression($datum['expression']);
-            $scheduledTask->setTimes($datum['times'] ?? null);
-            $scheduledTask->setStart($datum['start'] ?? null);
-            $scheduledTask->setStop($datum['stop'] ?? null);
-            $scheduledTask->setStatus($datum['status'] ?? StatusInterface::STATUS_ACTIVE);
-
-            $scheduledTasks[] = $scheduledTask;
-        }
-
-        $scheduledTaskRepository = $this->createMock(ScheduledTaskRepository::class);
-        $scheduledTaskRepository
-            ->expects($this->any())
-            ->method('findAll')
-            ->willReturn($scheduledTasks);
-
-        return $scheduledTaskRepository;
     }
 
     private function createScheduledTaskService(array $data = []): ScheduledTaskService
