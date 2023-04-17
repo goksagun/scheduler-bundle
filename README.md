@@ -1,7 +1,5 @@
 Scheduler Bundle
 ================
-<img src="https://travis-ci.org/goksagun/scheduler-bundle.svg?branch=master">
-
 Command scheduler allows you to fluently and expressively define your 
 command schedule within application itself. When using the scheduler, 
 only a single Cron entry is needed on your server. Your task schedule is 
