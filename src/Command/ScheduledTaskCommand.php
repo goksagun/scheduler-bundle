@@ -22,8 +22,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -44,8 +42,6 @@ class ScheduledTaskCommand extends Command
     use ConfiguredCommandTrait;
     use AnnotatedCommandTrait;
     use DatabasedCommandTrait;
-
-    const PROCESS_TIMEOUT = 3600 * 24; // 24 hours
 
     private array $config;
 
