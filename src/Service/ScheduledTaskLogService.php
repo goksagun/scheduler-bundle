@@ -4,6 +4,7 @@ namespace Goksagun\SchedulerBundle\Service;
 
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository;
+use Goksagun\SchedulerBundle\Utils\StringHelper;
 
 class ScheduledTaskLogService
 {
@@ -53,5 +54,32 @@ class ScheduledTaskLogService
                 'id' => 'desc',
             ]
         );
+    }
+
+    public function updateStatus(
+        ScheduledTaskLog $scheduledTask,
+        string $status,
+        ?string $message = null,
+        ?string $output = null,
+        bool $save = false
+    ): ScheduledTaskLog {
+        if (!$this->config['log']) {
+            return $scheduledTask;
+        }
+
+        $scheduledTask->setStatus($status);
+        if (!empty($message)) {
+            $scheduledTask->setMessage(StringHelper::limit($message, 252));
+        }
+
+        if (!empty($output)) {
+            $scheduledTask->setOutput($output);
+        }
+
+        if ($save) {
+            $this->repository->save();
+        }
+
+        return $scheduledTask;
     }
 }
