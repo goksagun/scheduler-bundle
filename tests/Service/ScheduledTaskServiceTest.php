@@ -2,6 +2,7 @@
 
 namespace Service;
 
+use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
@@ -23,7 +24,7 @@ class ScheduledTaskServiceTest extends TestCase
         $this->service = new ScheduledTaskService([], $container, $kernel, $repository);
     }
 
-    public function testCreateWithFullParams()
+    public function testCreateWithAllParams()
     {
         $scheduledTask = $this->service->create(
             'Foo',
@@ -52,6 +53,79 @@ class ScheduledTaskServiceTest extends TestCase
         $this->assertEquals('Foo', $scheduledTask->getName());
         $this->assertEquals('@daily', $scheduledTask->getExpression());
         $this->assertEquals(null, $scheduledTask->getTimes());
+        $this->assertEquals(null, $scheduledTask->getStart());
+        $this->assertEquals(null, $scheduledTask->getStop());
+        $this->assertEquals(StatusInterface::STATUS_ACTIVE, $scheduledTask->getStatus());
+    }
+
+    public function testUpdateWithAllParams()
+    {
+        $repository = $this->createMock(ScheduledTaskRepository::class);
+
+        $repository
+            ->expects($this->once())
+            ->method('find')
+            ->withAnyParameters()
+            ->willReturn(
+                (new ScheduledTask())
+                    ->setName('Foo')
+                    ->setExpression('@hourly')
+                    ->setTimes(3)
+                    ->setStart(new \DateTime('2023-01-01'))
+                    ->setStop(new \DateTime('2023-01-02'))
+                    ->setStatus(StatusInterface::STATUS_INACTIVE)
+            );
+
+        $container = $this->createMock(ContainerInterface::class);
+        $kernel = $this->createMock(KernelInterface::class);
+
+        $this->service = new ScheduledTaskService([], $container, $kernel, $repository);
+
+        $scheduledTask = $this->service->update(
+            1,
+            'Bar',
+            '@hourly',
+            1,
+            '2023-02-01',
+            '2023-02-02',
+            StatusInterface::STATUS_ACTIVE
+        );
+
+        $this->assertEquals('Bar', $scheduledTask->getName());
+        $this->assertEquals('@hourly', $scheduledTask->getExpression());
+        $this->assertEquals(1, $scheduledTask->getTimes());
+        $this->assertEquals(new \DateTime('2023-02-01'), $scheduledTask->getStart());
+        $this->assertEquals(new \DateTime('2023-02-02'), $scheduledTask->getStop());
+        $this->assertEquals(StatusInterface::STATUS_ACTIVE, $scheduledTask->getStatus());
+    }
+
+    public function testUpdateWithRequiredParams()
+    {
+        $repository = $this->createMock(ScheduledTaskRepository::class);
+
+        $repository
+            ->expects($this->once())
+            ->method('find')
+            ->withAnyParameters()
+            ->willReturn(
+                (new ScheduledTask())
+                    ->setName('Foo')
+                    ->setExpression('@hourly')
+            );
+
+        $container = $this->createMock(ContainerInterface::class);
+        $kernel = $this->createMock(KernelInterface::class);
+
+        $this->service = new ScheduledTaskService([], $container, $kernel, $repository);
+
+        $scheduledTask = $this->service->update(
+            1,
+            'Bar',
+            '@hourly'
+        );
+
+        $this->assertEquals('Bar', $scheduledTask->getName());
+        $this->assertEquals('@hourly', $scheduledTask->getExpression());
         $this->assertEquals(null, $scheduledTask->getStart());
         $this->assertEquals(null, $scheduledTask->getStop());
         $this->assertEquals(StatusInterface::STATUS_ACTIVE, $scheduledTask->getStatus());
