@@ -12,6 +12,7 @@ use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
+use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
@@ -51,10 +52,11 @@ class ScheduledTaskCommand extends Command
 
     private ScheduledTaskLogRepository $logRepository;
 
+    private ScheduledTaskLogService $logService;
+
     private string $projectDir;
 
     private array $tasks = [];
-
     /**
      * @var $processes array<int, ProcessInfo>
      */
@@ -64,7 +66,8 @@ class ScheduledTaskCommand extends Command
         array $config,
         EntityManagerInterface $entityManager,
         ScheduledTaskRepository $repository,
-        ScheduledTaskLogRepository $logRepository
+        ScheduledTaskLogRepository $logRepository,
+        ScheduledTaskLogService $logService,
     ) {
         parent::__construct();
 
@@ -72,6 +75,7 @@ class ScheduledTaskCommand extends Command
         $this->entityManager = $entityManager;
         $this->repository = $repository;
         $this->logRepository = $logRepository;
+        $this->logService = $logService;
     }
 
     protected function configure(): void
@@ -284,26 +288,7 @@ class ScheduledTaskCommand extends Command
 
     private function createScheduledTaskLog(string $name, ?int $times = null): ScheduledTaskLog
     {
-        $scheduledTaskLog = new ScheduledTaskLog();
-
-        if (!$this->config['log']) {
-            return $scheduledTaskLog;
-        }
-
-        $scheduledTaskLog->setName($name);
-        $scheduledTaskLog->setRemaining($times);
-
-        if ($latestExecutedScheduledTask = $this->getLatestScheduledTaskLog($name)) {
-            $scheduledTaskLog->setRemaining(
-                $latestExecutedScheduledTask->getRemaining()
-            );
-        }
-
-        if ($this->checkTableExists()) {
-            $this->logRepository->save($scheduledTaskLog);
-        }
-
-        return $scheduledTaskLog;
+        return $this->logService->create($name, $times);
     }
 
     private function updateScheduledTaskStatus(

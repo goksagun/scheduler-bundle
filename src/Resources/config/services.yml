@@ -27,6 +27,7 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@scheduler.repository.scheduled_task'
             - '@scheduler.repository.scheduled_task_log'
+            - '@scheduler.service.scheduled_task_log'
         calls:
             - method: setProjectDir
               arguments:
@@ -55,6 +56,10 @@ services:
     scheduler.service.scheduled_task:
         class: Goksagun\SchedulerBundle\Service\ScheduledTaskService
         arguments: ['%scheduler%', '@service_container', '@kernel', '@scheduler.repository.scheduled_task']
+
+    scheduler.service.scheduled_task_log:
+        class: Goksagun\SchedulerBundle\Service\ScheduledTaskLogService
+        arguments: ['%scheduler%', '@scheduler.repository.scheduled_task_log']
 
     scheduler.repository.scheduled_task:
         class: Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository
