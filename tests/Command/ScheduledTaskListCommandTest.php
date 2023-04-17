@@ -7,11 +7,11 @@ use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class ScheduledTaskListCommandTest extends TestCase
+class ScheduledTaskListCommandTest extends KernelTestCase
 {
 
     public function testScheduleTaskListOption()
