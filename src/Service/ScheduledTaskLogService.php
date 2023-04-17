@@ -38,7 +38,7 @@ class ScheduledTaskLogService
         return $scheduledTaskLog;
     }
 
-    public function getLatestScheduledTaskLog(string $name, ?string $status = null)
+    public function getLatestScheduledTaskLog(string $name, ?string $status = null): ?ScheduledTaskLog
     {
         $criteria = [
             'name' => $name,

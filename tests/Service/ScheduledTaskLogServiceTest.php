@@ -31,6 +31,13 @@ class ScheduledTaskLogServiceTest extends TestCase
         $this->assertEquals('Foo', $scheduledTaskLog->getName());
     }
 
+    public function testGetLatestScheduledTaskLog()
+    {
+        $scheduledTaskLog = $this->service->getLatestScheduledTaskLog('Foo');
+
+        $this->assertEquals('Foo', $scheduledTaskLog->getName());
+    }
+
     public function testUpdateStatus()
     {
         $scheduledTaskLog = $this->service->updateStatus(
