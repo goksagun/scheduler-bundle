@@ -62,7 +62,7 @@ class ScheduledTaskService
         ?string $stop = null,
         ?string $status = null
     ): ScheduledTask {
-        $scheduledTask = (new ScheduledTaskBuilder($name, $expression))
+        $scheduledTask = ScheduledTaskBuilderFactory::create($name, $expression)
             ->times($times)
             ->start($start ? DateHelper::date($start) : null)
             ->stop($stop ? DateHelper::date($stop) : null)
