@@ -1,0 +1,71 @@
+parameters:
+    scheduler:
+        enabled: true
+        async: ~
+        log: ~
+        tasks: ~
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        # automatically injects dependencies in your services
+        autowire: true
+        # automatically registers your services as commands, event subscribers, etc.
+        autoconfigure: true
+        # this means you cannot fetch services directly from the container via $container->get()
+        # if you need to do this, you can override this setting on individual services
+        public: false
+
+    Goksagun\SchedulerBundle\Controller\:
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
+
+    scheduler.command.scheduled_task:
+        class: Goksagun\SchedulerBundle\Command\ScheduledTaskCommand
+        arguments:
+            - '%scheduler%'
+            - '@doctrine.orm.entity_manager'
+            - '@scheduler.service.scheduled_task'
+            - '@scheduler.service.scheduled_task_log'
+        calls:
+            - method: setProjectDir
+              arguments:
+                  - '%kernel.project_dir%'
+        tags:
+            - { name: 'console.command', command: 'scheduler:run' }
+
+    scheduler.command.scheduled_task_list:
+        class: Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand
+        arguments: ['%scheduler%', '@scheduler.service.scheduled_task']
+        tags:
+            - { name: 'console.command', command: 'scheduler:list' }
+
+    scheduler.command.scheduled_task_add:
+        class: Goksagun\SchedulerBundle\Command\SchedulerTaskAddCommand
+        arguments: ['@scheduler.service.scheduled_task']
+        tags:
+            - { name: 'console.command', command: 'scheduler:add' }
+
+    scheduler.command.scheduled_task_edit:
+        class: Goksagun\SchedulerBundle\Command\SchedulerTaskEditCommand
+        arguments: ['@scheduler.service.scheduled_task']
+        tags:
+            - { name: 'console.command', command: 'scheduler:edit' }
+
+    scheduler.service.scheduled_task:
+        class: Goksagun\SchedulerBundle\Service\ScheduledTaskService
+        arguments: ['%scheduler%', '@kernel', '@service_container', '@scheduler.repository.scheduled_task']
+
+    scheduler.service.scheduled_task_log:
+        class: Goksagun\SchedulerBundle\Service\ScheduledTaskLogService
+        arguments: ['%scheduler%', '@scheduler.repository.scheduled_task_log']
+
+    scheduler.repository.scheduled_task:
+        class: Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository
+        tags:
+            - { name: 'doctrine.repository_service' }
+
+    scheduler.repository.scheduled_task_log:
+        class: Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository
+        tags:
+              - { name: 'doctrine.repository_service' }
