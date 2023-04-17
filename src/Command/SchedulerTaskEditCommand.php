@@ -3,17 +3,29 @@
 namespace Goksagun\SchedulerBundle\Command;
 
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
+use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\ArrayHelper;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SchedulerTaskEditCommand extends SchedulerTaskAddCommand
+class SchedulerTaskEditCommand extends Command
 {
-    protected function configure()
+    private ScheduledTaskRepository $repository;
+
+    public function __construct(ScheduledTaskRepository $repository)
+    {
+        parent::__construct();
+
+        $this->repository = $repository;
+    }
+
+    protected function configure(): void
     {
         $this
             ->setName('scheduler:edit')
@@ -32,14 +44,14 @@ class SchedulerTaskEditCommand extends SchedulerTaskAddCommand
             );
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output)
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $options = ArrayHelper::only($input->getOptions(), ['times', 'start', 'stop', 'status']);
 
         $this->validateOptions($options);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $id = $input->getArgument('id');
         $name = $input->getArgument('name');
@@ -98,5 +110,34 @@ class SchedulerTaskEditCommand extends SchedulerTaskAddCommand
         $this->validateOptions(compact('name', 'expression', 'times', 'start', 'stop', 'status'));
 
         return $this->updateTask($id, $name, $expression, $times, $start, $stop, $status);
+    }
+
+    private function getRepository(): ScheduledTaskRepository
+    {
+        return $this->repository;
+    }
+
+    protected function validateOptions(array $options): void
+    {
+        if (!is_null($options['times']) && !is_numeric($options['times'])) {
+            throw new RuntimeException('The option "times" should be numeric value.');
+        }
+
+        if (!is_null($options['start']) && !DateHelper::isDateValid($options['start'])) {
+            throw new RuntimeException('The option "start" should be date or date and time value.');
+        }
+
+        if (!is_null($options['stop']) && !DateHelper::isDateValid($options['stop'])) {
+            throw new RuntimeException('The option "stop" should be date or date and time value.');
+        }
+
+        if (!is_null($options['status']) && !in_array($options['status'], StatusInterface::STATUSES)) {
+            throw new RuntimeException(
+                sprintf(
+                    'The option "status" should be valid. [values: "%s"]',
+                    implode('|', StatusInterface::STATUSES)
+                )
+            );
+        }
     }
 }
