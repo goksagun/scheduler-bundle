@@ -1,6 +1,6 @@
 <?php
 
-namespace Utils;
+namespace Goksagun\SchedulerBundle\Tests\Utils;
 
 use Goksagun\SchedulerBundle\Utils\StringHelper;
 use PHPUnit\Framework\TestCase;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller;
+namespace Goksagun\SchedulerBundle\Tests\Controller;
 
 use PHPUnit\Framework\TestCase;
 
