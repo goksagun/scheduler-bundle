@@ -41,6 +41,9 @@
             "Goksagun\\SchedulerBundle\\Tests\\": "tests/"
         }
     },
+    "scripts": {
+        "test": "phpunit"
+    },
     "extra": {
         "symfony": {
             "allow-contrib": "true"
