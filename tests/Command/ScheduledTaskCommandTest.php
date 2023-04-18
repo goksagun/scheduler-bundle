@@ -20,12 +20,16 @@ use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\NoOutputCommand;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class ScheduledTaskCommandTest extends KernelTestCase
 {
     public function testDisabledCommand()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.');
+
         $config = $this->createConfigMock(false);
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
@@ -48,17 +52,13 @@ class ScheduledTaskCommandTest extends KernelTestCase
                 'command' => $command->getName(),
             ]
         );
-
-        $output = $commandTester->getDisplay();
-
-        $this->assertStringContainsString(
-            'Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.',
-            $output
-        );
     }
 
     public function testEmptyTaskCommand()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('There is no task scheduled. You should add task in scheduler.yaml config file.');
+
         $config = $this->createConfigMock();
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
@@ -80,13 +80,6 @@ class ScheduledTaskCommandTest extends KernelTestCase
             [
                 'command' => $command->getName(),
             ]
-        );
-
-        $output = $commandTester->getDisplay();
-
-        $this->assertStringContainsString(
-            'There is no task scheduled. You should add task in scheduler.yaml config file.',
-            $output
         );
     }
 

@@ -93,19 +93,15 @@ class ScheduledTaskCommand extends Command
         $this->setTasks($resource);
 
         if (!$this->config['enabled']) {
-            $output->writeln(
+            throw new RuntimeException(
                 'Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.'
             );
-
-            return;
         }
 
         if (!$this->tasks) {
-            $output->writeln(
+            throw new RuntimeException(
                 'There is no task scheduled. You should add task in scheduler.yaml config file.'
             );
-
-            return;
         }
     }
 
@@ -264,7 +260,7 @@ class ScheduledTaskCommand extends Command
         ?string $message = null,
         ?string $output = null
     ): ScheduledTaskLog {
-        return $this->logService->updateStatus($scheduledTask, $status, $message, $output);
+        return $this->logService->updateStatus($scheduledTask, $status, $message, $output, $this->shouldStoreToDb());
     }
 
     private function updateScheduledTaskStatusAsStarted(
@@ -297,7 +293,7 @@ class ScheduledTaskCommand extends Command
 
     private function checkTableExists(): bool
     {
-        $tableName = $this->entityManager->getClassMetadata(ScheduledTaskLog::class)->getTableName();
+        $tableName = $this->getLogTableName();
 
         return $this->entityManager->getConnection()->createSchemaManager()->tablesExist((array)$tableName);
     }
@@ -425,5 +421,19 @@ class ScheduledTaskCommand extends Command
             // Check every second.
             sleep(1);
         } while (count($this->processes));
+    }
+
+    private function shouldStoreToDb(): bool
+    {
+        if (!$this->config['log']) {
+            return false;
+        }
+
+        return $this->checkTableExists();
+    }
+
+    private function getLogTableName(): string
+    {
+        return $this->entityManager->getClassMetadata(ScheduledTaskLog::class)->getTableName();
     }
 }

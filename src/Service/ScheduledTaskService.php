@@ -63,20 +63,6 @@ class ScheduledTaskService
         return $scheduledTask;
     }
 
-    public function get($id)
-    {
-        $this->setTasks();
-
-        $task = array_filter(
-            $this->tasks,
-            function ($task) use ($id) {
-                return $id == $task['id'];
-            }
-        );
-
-        return current($task);
-    }
-
     public function update(
         $id,
         $name,
