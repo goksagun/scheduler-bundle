@@ -301,7 +301,7 @@ class ScheduledTaskCommand extends Command
     private function isTaskDue(array $task): bool
     {
         // Check remaining.
-        if ($this->config['log'] && null !== $task['times']) {
+        if ($this->isLoggingEnabled() && null !== $task['times']) {
             $scheduledTask = $this->logService->getLatestScheduledTaskLog($task['name']);
 
             if ($scheduledTask instanceof ScheduledTaskLog && $scheduledTask->isRemainingZero()) {
@@ -425,11 +425,16 @@ class ScheduledTaskCommand extends Command
 
     private function shouldStoreToDb(): bool
     {
-        if (!$this->config['log']) {
+        if (!$this->isLoggingEnabled()) {
             return false;
         }
 
         return $this->checkTableExists();
+    }
+
+    private function isLoggingEnabled(): bool
+    {
+        return $this->config['log'];
     }
 
     private function getLogTableName(): string
