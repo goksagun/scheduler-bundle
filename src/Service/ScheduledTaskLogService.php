@@ -14,11 +14,11 @@ class ScheduledTaskLogService
     ) {
     }
 
-    public function create(string $name, ?int $times = null, bool $save = false): ScheduledTaskLog
+    public function create(string $name, ?int $times = null, bool $save = true): ScheduledTaskLog
     {
         $scheduledTaskLog = (new ScheduledTaskLogBuilder())->build();
 
-        if (!$this->config['log']) {
+        if (!$this->isLogEnabled()) {
             return $scheduledTaskLog;
         }
 
@@ -62,9 +62,9 @@ class ScheduledTaskLogService
         string $status,
         ?string $message = null,
         ?string $output = null,
-        bool $save = false
+        bool $save = true
     ): ScheduledTaskLog {
-        if (!$this->config['log']) {
+        if (!$this->isLogEnabled()) {
             return $scheduledTaskLog;
         }
 
@@ -82,5 +82,10 @@ class ScheduledTaskLogService
         }
 
         return $scheduledTaskLog;
+    }
+
+    private function isLogEnabled(): bool
+    {
+        return $this->config['log'];
     }
 }

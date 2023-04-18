@@ -260,7 +260,7 @@ class ScheduledTaskCommand extends Command
         ?string $message = null,
         ?string $output = null
     ): ScheduledTaskLog {
-        return $this->logService->updateStatus($scheduledTask, $status, $message, $output);
+        return $this->logService->updateStatus($scheduledTask, $status, $message, $output, $this->shouldStoreToDb());
     }
 
     private function updateScheduledTaskStatusAsStarted(
@@ -293,7 +293,7 @@ class ScheduledTaskCommand extends Command
 
     private function checkTableExists(): bool
     {
-        $tableName = $this->entityManager->getClassMetadata(ScheduledTaskLog::class)->getTableName();
+        $tableName = $this->getLogTableName();
 
         return $this->entityManager->getConnection()->createSchemaManager()->tablesExist((array)$tableName);
     }
@@ -421,5 +421,19 @@ class ScheduledTaskCommand extends Command
             // Check every second.
             sleep(1);
         } while (count($this->processes));
+    }
+
+    private function shouldStoreToDb(): bool
+    {
+        if (!$this->config['log']) {
+            return false;
+        }
+
+        return $this->checkTableExists();
+    }
+
+    private function getLogTableName(): string
+    {
+        return $this->entityManager->getClassMetadata(ScheduledTaskLog::class)->getTableName();
     }
 }

@@ -23,6 +23,9 @@ class SchedulerExtension extends Extension
         $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.service.scheduled_task');
         $scheduledTaskCommandDefinition->replaceArgument(0, $config);
 
+        $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.service.scheduled_task_log');
+        $scheduledTaskCommandDefinition->replaceArgument(0, $config);
+
         $scheduledTaskCommandDefinition = $container->getDefinition('scheduler.command.scheduled_task');
         $scheduledTaskCommandDefinition->replaceArgument(0, $config);
 
