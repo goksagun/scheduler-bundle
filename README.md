@@ -3,7 +3,7 @@ Scheduler Bundle
 Command scheduler allows you to fluently and expressively define your 
 command schedule within application itself. When using the scheduler, 
 only a single Cron entry is needed on your server. Your task schedule is 
-defined in the `scheduler.yml` file or `Schedule` annotation or 
+defined in the `scheduler.yaml` file or `Schedule` annotation or 
 `database`. When using the scheduler, you only need to add the following 
 Cron entry to your server:
 
@@ -59,10 +59,10 @@ return [
 ];
 ```
 
-Then, add console commands to scheduler yml file `scheduler.yml` into 
+Then, add console commands to scheduler yaml file `scheduler.yaml` into 
 `config/packages` directory:
 
-```yml
+```yaml
 scheduler:
     enabled: true
     async: ~
