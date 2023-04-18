@@ -1,3 +1,7 @@
+## 2.0.1 (April 18, 2023)
+  - Fix disabling scheduler (#18)
+  - Update README.md
+
 ## 2.0.0 (April 18, 2023)
   - Create php.yml (#14)
   - Add test script (#17)
