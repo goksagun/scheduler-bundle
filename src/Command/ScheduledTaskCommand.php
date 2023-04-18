@@ -93,19 +93,15 @@ class ScheduledTaskCommand extends Command
         $this->setTasks($resource);
 
         if (!$this->config['enabled']) {
-            $output->writeln(
+            throw new RuntimeException(
                 'Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.'
             );
-
-            return;
         }
 
         if (!$this->tasks) {
-            $output->writeln(
+            throw new RuntimeException(
                 'There is no task scheduled. You should add task in scheduler.yaml config file.'
             );
-
-            return;
         }
     }
 
