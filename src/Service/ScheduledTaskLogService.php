@@ -69,11 +69,11 @@ class ScheduledTaskLogService
         }
 
         $scheduledTaskLog->setStatus($status);
-        if (!empty($message)) {
+        if (null !== $message) {
             $scheduledTaskLog->setMessage(StringHelper::limit($message, 252));
         }
 
-        if (!empty($output)) {
+        if (null !== $output) {
             $scheduledTaskLog->setOutput($output);
         }
 
