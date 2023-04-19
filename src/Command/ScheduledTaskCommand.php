@@ -236,12 +236,13 @@ class ScheduledTaskCommand extends Command
         ScheduledTaskLog $scheduledTaskLog,
         OutputInterface $output
     ): bool {
-        try {
-            $this->getCommand($name);
-        } catch (CommandNotFoundException $e) {
-            $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $e->getMessage());
+        if (!$this->hasCommand($name)) {
+            $this->updateScheduledTaskLogStatusAsFailed(
+                $scheduledTaskLog,
+                sprintf('Command "%s" is not defined.', $name)
+            );
 
-            $output->writeln("The '{$name}' task not found!");
+            $output->writeln("The '$name' task not found!");
 
             return false;
         }
@@ -252,6 +253,11 @@ class ScheduledTaskCommand extends Command
     private function getCommand(string $name): Command
     {
         return $this->getApplication()->find(TaskHelper::getCommandName($name));
+    }
+
+    private function hasCommand(string $name): bool
+    {
+        return $this->getApplication()->has(TaskHelper::getCommandName($name));
     }
 
     private function handleTaskException(
