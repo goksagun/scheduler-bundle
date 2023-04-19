@@ -657,6 +657,53 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $this->assertEquals("The 'schedule:array-option --foo option1 --foo option2' completed!\n", $output);
     }
 
+    public function testAsyncCommand()
+    {
+        $config = $this->createConfigMock(
+            true,
+            true,
+            false,
+            [
+                [
+                    'name' => 'schedule:array-option --foo option1 --foo option2',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                ],
+            ]
+        );
+        $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
+        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskLogService = $this->createScheduledTaskLogService();
+
+        $scheduledTaskCommand = new ScheduledTaskCommand(
+            $config,
+            $entityManager,
+            $scheduledTaskService,
+            $scheduledTaskLogService
+        );
+        $scheduledTaskCommand->setProjectDir($this->getContainer()->getParameter('kernel.project_dir'));
+
+        $application->add(new ArrayOptionCommand());
+        $application->add(
+            $scheduledTaskCommand
+        );
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString('========== Error ==========', $output);
+    }
+
     private function getApplication(): Application
     {
         return new Application();

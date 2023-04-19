@@ -41,6 +41,7 @@ class ScheduledTaskCommand extends Command
     use AnnotatedCommandTrait;
     use DatabasedCommandTrait;
 
+    private const WAIT_INTERVAL_SECONDS = 1;
     private string $projectDir;
 
     /**
@@ -332,56 +333,76 @@ class ScheduledTaskCommand extends Command
 
     private function finishAsyncProcesses(OutputInterface $output): void
     {
-        do {
-            // Loop active process and remove if successful.
-            foreach ($this->processes as $j => $processInfo) {
+        while (count($this->processes)) {
+            $this->processes = array_filter($this->processes, function ($processInfo) use ($output) {
                 $process = $processInfo->getProcess();
 
                 if ($process->isRunning()) {
-                    continue;
+                    return true;
                 }
 
-                // Remove finished process from active processes list.
-                unset($this->processes[$j]);
+                $this->handleProcess($processInfo, $output);
 
-                $scheduledTaskLog = $processInfo->getScheduledTaskLog();
+                return false;
+            });
 
-                if (!$process->isSuccessful()) {
-                    $this->updateScheduledTaskLogStatusAsFailed(
-                        $scheduledTaskLog,
-                        'Task was failed executing as synchronously.',
-                        $process->getErrorOutput()
-                    );
+            sleep(self::WAIT_INTERVAL_SECONDS);
+        }
+    }
 
-                    $output->writeln(
-                        [
-                            " - Failed process: {$process->getCommandLine()}",
-                            '========== Error ==========',
-                            $process->getErrorOutput(),
-                        ]
-                    );
+    private function handleProcess(ProcessInfo $processInfo, OutputInterface $output): void
+    {
+        $process = $processInfo->getProcess();
 
-                    continue;
-                }
+        $scheduledTaskLog = $processInfo->getScheduledTaskLog();
 
-                $this->updateScheduledTaskLogStatusAsExecuted(
-                    $scheduledTaskLog,
-                    'Task was successfully executed as asynchronously.',
-                    $process->getOutput()
-                );
+        if (!$process->isSuccessful()) {
+            $this->handleFailedProcess($scheduledTaskLog, $process, $output);
 
-                $output->writeln(
-                    [
-                        " - Successful process: {$process->getCommandLine()}",
-                        '========== Output ==========',
-                        $process->getOutput(),
-                    ]
-                );
-            }
+            return;
+        }
 
-            // Check every second.
-            sleep(1);
-        } while (count($this->processes));
+        $this->handleSuccessfulProcess($scheduledTaskLog, $process, $output);
+    }
+
+    private function handleFailedProcess(
+        ScheduledTaskLog $scheduledTaskLog,
+        Process $process,
+        OutputInterface $output
+    ): void {
+        $this->updateScheduledTaskLogStatusAsFailed(
+            $scheduledTaskLog,
+            'Task was failed executing as synchronously.',
+            $process->getErrorOutput()
+        );
+
+        $output->writeln(
+            [
+                " - Failed process: {$process->getCommandLine()}",
+                '========== Error ==========',
+                $process->getErrorOutput(),
+            ]
+        );
+    }
+
+    private function handleSuccessfulProcess(
+        ScheduledTaskLog $scheduledTaskLog,
+        Process $process,
+        OutputInterface $output
+    ): void {
+        $this->updateScheduledTaskLogStatusAsExecuted(
+            $scheduledTaskLog,
+            'Task was successfully executed as asynchronously.',
+            $process->getOutput()
+        );
+
+        $output->writeln(
+            [
+                " - Successful process: {$process->getCommandLine()}",
+                '========== Output ==========',
+                $process->getOutput(),
+            ]
+        );
     }
 
     private function shouldStoreToDb(): bool
