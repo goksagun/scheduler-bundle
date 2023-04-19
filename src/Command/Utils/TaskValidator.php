@@ -1,6 +1,6 @@
 <?php
 
-namespace Goksagun\SchedulerBundle\Command;
+namespace Goksagun\SchedulerBundle\Command\Utils;
 
 use Cron\CronExpression;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;

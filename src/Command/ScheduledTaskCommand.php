@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Goksagun\SchedulerBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Goksagun\SchedulerBundle\Command\Utils\TaskValidator;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
