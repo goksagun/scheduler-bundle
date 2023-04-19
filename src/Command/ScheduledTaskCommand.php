@@ -131,12 +131,7 @@ class ScheduledTaskCommand extends Command
 
     private function runScheduledTasks(InputInterface $input, OutputInterface $output): void
     {
-        $isAsync = $input->getOption('async');
-
-        // Override is async property is set.
-        if (null !== $this->config['async']) {
-            $isAsync = $this->config['async'];
-        }
+        $isAsync = $this->getAsyncOption($input);
 
         foreach ($this->getTasks() as $i => $task) {
             $errors = $this->validateTask($task);
@@ -206,6 +201,15 @@ class ScheduledTaskCommand extends Command
         if ($isAsync) {
             $this->finishAsyncProcesses($output);
         }
+    }
+
+    private function getAsyncOption(InputInterface $input): bool
+    {
+        if (null !== $this->config['async']) {
+            return $this->config['async'];
+        }
+
+        return $input->getOption('async');
     }
 
     private function validateTask(array $task): array
