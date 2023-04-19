@@ -687,9 +687,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $scheduledTaskCommand->setProjectDir($this->getContainer()->getParameter('kernel.project_dir'));
 
         $application->add(new ArrayOptionCommand());
-        $application->add(
-            $scheduledTaskCommand
-        );
+        $application->add($scheduledTaskCommand);
 
         $command = $application->find('scheduler:run');
         $commandTester = new CommandTester($command);

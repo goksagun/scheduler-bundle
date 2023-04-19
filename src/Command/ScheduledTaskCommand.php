@@ -228,7 +228,7 @@ class ScheduledTaskCommand extends Command
             $bufferedOutput->fetch()
         );
 
-        $output->writeln("The '{$name}' completed!");
+        $output->writeln("The '$name' completed!");
     }
 
     private function validateCommand(
@@ -268,7 +268,7 @@ class ScheduledTaskCommand extends Command
     ): void {
         $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $message);
 
-        $output->writeln("The '{$name}'  failed!");
+        $output->writeln("The '$name'  failed!");
     }
 
     private function getTasks(): \Generator
