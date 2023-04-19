@@ -132,7 +132,7 @@ class ScheduledTaskCommand extends Command
         }
 
         if ($isAsync) {
-            $this->finishAsyncProcesses($output);
+            $this->waitForAsyncTasksCompletion($output);
         }
 
         return Command::SUCCESS;
@@ -331,7 +331,7 @@ class ScheduledTaskCommand extends Command
         return $phpBinaryPath;
     }
 
-    private function finishAsyncProcesses(OutputInterface $output): void
+    private function waitForAsyncTasksCompletion(OutputInterface $output): void
     {
         while (count($this->processes)) {
             $this->processes = array_filter($this->processes, function ($processInfo) use ($output) {
