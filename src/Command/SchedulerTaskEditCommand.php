@@ -63,7 +63,7 @@ class SchedulerTaskEditCommand extends Command
 
         $output->writeln(sprintf('Scheduled task "%s" edited.', $name));
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function updateTask(
