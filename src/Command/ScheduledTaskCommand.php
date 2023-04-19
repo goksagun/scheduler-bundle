@@ -253,9 +253,7 @@ class ScheduledTaskCommand extends Command
 
     private function getCommand(mixed $name): Command
     {
-        $commandName = TaskHelper::getCommandName($name);
-
-        return $this->getApplication()->find($commandName);
+        return $this->getApplication()->find(TaskHelper::getCommandName($name));
     }
 
     private function handleTaskException(
