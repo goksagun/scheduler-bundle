@@ -118,20 +118,6 @@ class ScheduledTaskCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->runScheduledTasks($input, $output);
-
-        return Command::SUCCESS;
-    }
-
-    private function setTasks(?string $resource): void
-    {
-        $this->setConfiguredTasks(StatusInterface::STATUS_ACTIVE, $resource);
-        $this->setAnnotatedTasks(StatusInterface::STATUS_ACTIVE, $resource);
-        $this->setDatabasedTasks(StatusInterface::STATUS_ACTIVE, $resource);
-    }
-
-    private function runScheduledTasks(InputInterface $input, OutputInterface $output): void
-    {
         $isAsync = $this->getAsyncOption($input);
 
         foreach ($this->getTasks() as $task) {
@@ -143,12 +129,21 @@ class ScheduledTaskCommand extends Command
                 continue;
             }
 
-            $this->executeTAsk($task, $isAsync, $output);
+            $this->executeTask($task, $isAsync, $output);
         }
 
         if ($isAsync) {
             $this->finishAsyncProcesses($output);
         }
+
+        return Command::SUCCESS;
+    }
+
+    private function setTasks(?string $resource): void
+    {
+        $this->setConfiguredTasks(StatusInterface::STATUS_ACTIVE, $resource);
+        $this->setAnnotatedTasks(StatusInterface::STATUS_ACTIVE, $resource);
+        $this->setDatabasedTasks(StatusInterface::STATUS_ACTIVE, $resource);
     }
 
     private function getAsyncOption(InputInterface $input): bool
