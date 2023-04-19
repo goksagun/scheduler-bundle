@@ -14,7 +14,6 @@ use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -193,7 +192,7 @@ class ScheduledTaskCommand extends Command
                 $this->runSyncTask($name, $scheduledTaskLog, $output);
             }
         } catch (\Exception $e) {
-            $this->handleTaskException($scheduledTaskLog, $e->getMessage(), $output, $name);
+            $this->handleTaskException($name, $scheduledTaskLog, $output, $e->getMessage());
         }
     }
 
@@ -261,10 +260,10 @@ class ScheduledTaskCommand extends Command
     }
 
     private function handleTaskException(
+        string $name,
         ScheduledTaskLog $scheduledTaskLog,
-        string $message,
         OutputInterface $output,
-        mixed $name
+        string $message,
     ): void {
         $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $message);
 
