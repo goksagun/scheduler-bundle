@@ -1,4 +1,4 @@
-Scheduler Bundle
+Scheduler Bundle [![PHP Composer Workflow](https://github.com/goksagun/scheduler-bundle/actions/workflows/php.yml/badge.svg)](https://github.com/goksagun/scheduler-bundle/actions/workflows/php.yml)
 ================
 Command scheduler allows you to fluently and expressively define your 
 command schedule within application itself. When using the scheduler, 
