@@ -204,7 +204,6 @@ class ScheduledTaskCommand extends Command
         $projectRoot = $this->getProjectDir();
 
         $process = Process::fromShellCommandline($phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name);
-
         $process->start();
 
         $this->updateScheduledTaskLogStatusAsStarted($scheduledTaskLog);
@@ -227,7 +226,11 @@ class ScheduledTaskCommand extends Command
         $bufferedOutput = new BufferedOutput();
         $command->run($stringInput, $bufferedOutput);
 
-        $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog, 'Task was successfully executed as synchronously.', output: $bufferedOutput->fetch());
+        $this->updateScheduledTaskLogStatusAsExecuted(
+            $scheduledTaskLog,
+            'Task was successfully executed as synchronously.',
+            $bufferedOutput->fetch()
+        );
 
         $output->writeln("The '{$name}' completed!");
     }
@@ -451,7 +454,11 @@ class ScheduledTaskCommand extends Command
                 $scheduledTaskLog = $processInfo->getScheduledTaskLog();
 
                 if (!$process->isSuccessful()) {
-                    $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, 'Task was failed executing as synchronously.', $process->getErrorOutput());
+                    $this->updateScheduledTaskLogStatusAsFailed(
+                        $scheduledTaskLog,
+                        'Task was failed executing as synchronously.',
+                        $process->getErrorOutput()
+                    );
 
                     $output->writeln(
                         [
@@ -464,7 +471,11 @@ class ScheduledTaskCommand extends Command
                     continue;
                 }
 
-                $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog, 'Task was successfully executed as asynchronously.', $process->getOutput());
+                $this->updateScheduledTaskLogStatusAsExecuted(
+                    $scheduledTaskLog,
+                    'Task was successfully executed as asynchronously.',
+                    $process->getOutput()
+                );
 
                 $output->writeln(
                     [
