@@ -1,3 +1,7 @@
+## 2.0.2 (April 19, 2023)
+  - Refactor task command (#19)
+  - Add GitHub Actions PHP Composer badge
+
 ## 2.0.1 (April 18, 2023)
   - Fix disabling scheduler (#18)
   - Update README.md
