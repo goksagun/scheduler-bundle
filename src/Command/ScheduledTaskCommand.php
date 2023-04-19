@@ -142,55 +142,9 @@ class ScheduledTaskCommand extends Command
                 continue;
             }
 
-            $name = $task['name'];
-            $times = $task['times'];
-
-            // Create scheduled task status as queued.
-            $scheduledTask = $this->createScheduledTaskLog($name, $times);
-
-            if (!$command = $this->validateCommand($output, $name, $scheduledTask)) {
-                continue;
-            }
-
-            try {
-                if ($isAsync) {
-                    $phpBinaryPath = $this->getPhpBinaryPath();
-                    $projectRoot = $this->getProjectDir();
-
-                    $asyncCommand = $phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name;
-                    $process = Process::fromShellCommandline($asyncCommand);
-
-                    $process->start();
-
-                    // Update scheduled task status as started.
-                    $this->updateScheduledTaskStatusAsStarted($scheduledTask);
-
-                    $this->processes[] = new ProcessInfo($process, $scheduledTask);
-
-                    $output->writeln(" - Started async process: {$process->getCommandLine()}");
-                } else {
-                    $taskInput = new StringInput($name);
-                    $command->mergeApplicationDefinition();
-                    $taskInput->bind($command->getDefinition());
-
-                    $command->run($taskInput, $output);
-
-                    // Update scheduled task status as executed.
-                    $this->updateScheduledTaskStatusAsExecuted($scheduledTask);
-
-                    $output->writeln("The '{$name}' completed!");
-                }
-            } catch (\Exception $e) {
-                // Log error message.
-                $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
-
-                $output->writeln("The '{$name}'  failed!");
-
-                continue;
-            }
+            $this->executeTAsk($task, $isAsync, $output);
         }
 
-        // Finish task(s) if is async.
         if ($isAsync) {
             $this->finishAsyncProcesses($output);
         }
@@ -219,6 +173,73 @@ class ScheduledTaskCommand extends Command
         }
 
         return true;
+    }
+
+    private function executeTask(array $task, bool $isAsync, OutputInterface $output): void
+    {
+        $name = $task['name'];
+        $times = $task['times'];
+
+        $scheduledTaskLog = $this->createScheduledTaskLogStatusAsQueued($name, $times);
+
+        if (!$command = $this->validateCommand($output, $name, $scheduledTaskLog)) {
+            return;
+        }
+
+        try {
+            if ($isAsync) {
+                $this->startAsyncProcess($command, $scheduledTaskLog, $output);
+            } else {
+                $this->runSyncTask($name, $command, $scheduledTaskLog, $output);
+            }
+        } catch (\Exception $e) {
+            $this->handleTaskException($scheduledTaskLog, $e->getMessage(), $output, $name);
+        }
+    }
+
+    private function startAsyncProcess(Command $command, ScheduledTaskLog $scheduledTaskLog, OutputInterface $output): void
+    {
+        $phpBinaryPath = $this->getPhpBinaryPath();
+        $projectRoot = $this->getProjectDir();
+
+        $asyncCommand = $phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $command->getName();
+        $process = Process::fromShellCommandline($asyncCommand);
+
+        $process->start();
+
+        $this->updateScheduledTaskLogStatusAsStarted($scheduledTaskLog);
+
+        $this->processes[] = new ProcessInfo($process, $scheduledTaskLog);
+
+        $output->writeln(" - Started async process: {$process->getCommandLine()}");
+    }
+
+    private function runSyncTask(
+        string $name,
+        Command $command,
+        ScheduledTaskLog $scheduledTaskLog,
+        OutputInterface $output
+    ): void {
+        $taskInput = new StringInput($name);
+        $command->mergeApplicationDefinition();
+        $taskInput->bind($command->getDefinition());
+
+        $command->run($taskInput, $output);
+
+        $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog);
+
+        $output->writeln("The '{$name}' completed!");
+    }
+
+    private function handleTaskException(
+        ScheduledTaskLog $scheduledTaskLog,
+        string $message,
+        OutputInterface $output,
+        mixed $name
+    ): void {
+        $this->updateScheduledTaskStatusAsFailed($scheduledTaskLog, $message);
+
+        $output->writeln("The '{$name}'  failed!");
     }
 
     private function validateTask(array $task): array
@@ -297,7 +318,7 @@ class ScheduledTaskCommand extends Command
         }
     }
 
-    private function createScheduledTaskLog(string $name, ?int $times = null): ScheduledTaskLog
+    private function createScheduledTaskLogStatusAsQueued(string $name, ?int $times = null): ScheduledTaskLog
     {
         return $this->logService->create($name, $times);
     }
@@ -311,7 +332,7 @@ class ScheduledTaskCommand extends Command
         return $this->logService->updateStatus($scheduledTask, $status, $message, $output, $this->shouldStoreToDb());
     }
 
-    private function updateScheduledTaskStatusAsStarted(
+    private function updateScheduledTaskLogStatusAsStarted(
         ScheduledTaskLog $scheduledTask,
         ?string $message = null,
         ?string $output = null
@@ -319,7 +340,7 @@ class ScheduledTaskCommand extends Command
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_STARTED, $message, $output);
     }
 
-    private function updateScheduledTaskStatusAsExecuted(
+    private function updateScheduledTaskLogStatusAsExecuted(
         ScheduledTaskLog $scheduledTask,
         ?string $message = null,
         ?string $output = null
@@ -438,7 +459,7 @@ class ScheduledTaskCommand extends Command
                     continue;
                 }
 
-                $this->updateScheduledTaskStatusAsExecuted($scheduledTask, null, $process->getOutput());
+                $this->updateScheduledTaskLogStatusAsExecuted($scheduledTask, null, $process->getOutput());
 
                 $output->writeln(
                     [
