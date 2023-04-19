@@ -63,6 +63,16 @@ class ScheduledTaskCommand extends Command
         parent::__construct();
     }
 
+    public function setProjectDir(string $projectDir): void
+    {
+        $this->projectDir = $projectDir;
+    }
+
+    public function getProjectDir(): string
+    {
+        return $this->projectDir;
+    }
+
     protected function configure(): void
     {
         $this
@@ -372,16 +382,6 @@ class ScheduledTaskCommand extends Command
         }
 
         return null;
-    }
-
-    public function setProjectDir(string $projectDir): void
-    {
-        $this->projectDir = $projectDir;
-    }
-
-    public function getProjectDir(): string
-    {
-        return $this->projectDir;
     }
 
     private function getPhpBinaryPath(): string
