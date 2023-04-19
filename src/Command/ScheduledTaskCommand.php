@@ -202,8 +202,7 @@ class ScheduledTaskCommand extends Command
         $phpBinaryPath = $this->getPhpBinaryPath();
         $projectRoot = $this->getProjectDir();
 
-        $asyncCommand = $phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name;
-        $process = Process::fromShellCommandline($asyncCommand);
+        $process = Process::fromShellCommandline($phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name);
 
         $process->start();
 
