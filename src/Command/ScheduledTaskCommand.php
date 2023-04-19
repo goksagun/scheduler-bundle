@@ -133,15 +133,8 @@ class ScheduledTaskCommand extends Command
     {
         $isAsync = $this->getAsyncOption($input);
 
-        foreach ($this->getTasks() as $i => $task) {
-            $errors = $this->validateTask($task);
-
-            if (!empty($errors)) {
-                $output->writeln(" - The task '{$task['name']}' has errors:");
-                foreach ($errors as $error) {
-                    $output->writeln(sprintf('  - %s', $error));
-                }
-
+        foreach ($this->getTasks() as $task) {
+            if (!$this->isTaskValid($task, $output)) {
                 continue;
             }
 
@@ -210,6 +203,22 @@ class ScheduledTaskCommand extends Command
         }
 
         return $input->getOption('async');
+    }
+
+    private function isTaskValid(array $task, OutputInterface $output): bool
+    {
+        $errors = $this->validateTask($task);
+
+        if (!empty($errors)) {
+            $output->writeln(" - The task '{$task['name']}' has errors:");
+            foreach ($errors as $error) {
+                $output->writeln(sprintf('  - %s', $error));
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     private function validateTask(array $task): array
