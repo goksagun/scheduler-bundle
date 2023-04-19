@@ -18,7 +18,7 @@ class ScheduledTaskLogService
     {
         $scheduledTaskLog = (new ScheduledTaskLogBuilder())->build();
 
-        if (!$this->isLogEnabled()) {
+        if (!$this->isLoggingEnabled()) {
             return $scheduledTaskLog;
         }
 
@@ -64,7 +64,7 @@ class ScheduledTaskLogService
         ?string $output = null,
         bool $save = true
     ): ScheduledTaskLog {
-        if (!$this->isLogEnabled()) {
+        if (!$this->isLoggingEnabled()) {
             return $scheduledTaskLog;
         }
 
@@ -84,7 +84,7 @@ class ScheduledTaskLogService
         return $scheduledTaskLog;
     }
 
-    private function isLogEnabled(): bool
+    public function isLoggingEnabled(): bool
     {
         return $this->config['log'];
     }
