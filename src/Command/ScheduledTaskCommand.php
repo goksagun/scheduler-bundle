@@ -49,7 +49,6 @@ class ScheduledTaskCommand extends Command
      * @var array<int, array>
      */
     private array $tasks = [];
-
     /**
      * @var array<int, ProcessInfo>
      */
@@ -59,7 +58,7 @@ class ScheduledTaskCommand extends Command
         private readonly array $config,
         private readonly EntityManagerInterface $entityManager,
         private readonly ScheduledTaskService $service,
-        private readonly ScheduledTaskLogService $logService,
+        private readonly ScheduledTaskLogService $logService
     ) {
         parent::__construct();
     }
@@ -171,213 +170,9 @@ class ScheduledTaskCommand extends Command
         return true;
     }
 
-    private function executeTask(array $task, bool $isAsync, OutputInterface $output): void
-    {
-        $name = $task['name'];
-        $times = $task['times'];
-
-        $scheduledTaskLog = $this->createScheduledTaskLogStatusAsQueued($name, $times);
-
-        if (!$this->validateCommand($name, $scheduledTaskLog, $output)) {
-            return;
-        }
-
-        try {
-            if ($isAsync) {
-                $this->startAsyncProcess($name, $scheduledTaskLog, $output);
-            } else {
-                $this->runSyncTask($name, $scheduledTaskLog, $output);
-            }
-        } catch (\Exception $e) {
-            $this->handleTaskException($scheduledTaskLog, $e->getMessage(), $output, $name);
-        }
-    }
-
-    private function startAsyncProcess(string $name, ScheduledTaskLog $scheduledTaskLog, OutputInterface $output): void
-    {
-        $phpBinaryPath = $this->getPhpBinaryPath();
-        $projectRoot = $this->getProjectDir();
-
-        $process = Process::fromShellCommandline($phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name);
-        $process->start();
-
-        $this->updateScheduledTaskLogStatusAsStarted($scheduledTaskLog);
-
-        $this->processes[] = new ProcessInfo($process, $scheduledTaskLog);
-
-        $output->writeln(" - Started async process: {$process->getCommandLine()}");
-    }
-
-    private function runSyncTask(
-        string $name,
-        ScheduledTaskLog $scheduledTaskLog,
-        OutputInterface $output
-    ): void {
-        $command = $this->getCommand($name);
-        $command->mergeApplicationDefinition();
-        $stringInput = new StringInput($name);
-        $stringInput->bind($command->getDefinition());
-
-        $bufferedOutput = new BufferedOutput();
-        $command->run($stringInput, $bufferedOutput);
-
-        $this->updateScheduledTaskLogStatusAsExecuted(
-            $scheduledTaskLog,
-            'Task was successfully executed as synchronously.',
-            $bufferedOutput->fetch()
-        );
-
-        $output->writeln("The '{$name}' completed!");
-    }
-
-    private function validateCommand(
-        string $name,
-        ScheduledTaskLog $scheduledTaskLog,
-        OutputInterface $output
-    ): ?Command {
-        try {
-            return $this->getCommand($name);
-        } catch (CommandNotFoundException $e) {
-            $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $e->getMessage());
-
-            $output->writeln("The '{$name}' task not found!");
-        }
-
-        return null;
-    }
-
-    private function getCommand(mixed $name): Command
-    {
-        return $this->getApplication()->find(TaskHelper::getCommandName($name));
-    }
-
-    private function handleTaskException(
-        ScheduledTaskLog $scheduledTaskLog,
-        string $message,
-        OutputInterface $output,
-        mixed $name
-    ): void {
-        $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $message);
-
-        $output->writeln("The '{$name}'  failed!");
-    }
-
     private function validateTask(array $task): array
     {
-        $errors = [];
-
-        $this->validateName($task, $errors);
-        $this->validateExpression($task, $errors);
-        $this->validateTimes($task, $errors);
-        $this->validateStart($task, $errors);
-        $this->validateStop($task, $errors);
-
-        return $errors;
-    }
-
-    private function validateName(array $task, array &$errors): void
-    {
-        if (!isset($task['name'])) {
-            $errors['name'] = "The task command name should be defined.";
-        }
-    }
-
-    private function validateExpression(array $task, array &$errors): void
-    {
-        if (!isset($task['expression'])) {
-            $errors['expression'] = "The task command expression should be defined.";
-        }
-    }
-
-    private function validateTimes(array $task, array &$errors): void
-    {
-        $times = $task['times'] ?? null;
-
-        if (!empty($times) && !is_int($times)) {
-            $errors['times'] = "The times should be integer.";
-        }
-    }
-
-    private function validateStart(array $task, array &$errors): void
-    {
-        $start = $task['start'] ?? null;
-
-        if (!empty($start) && !$this->isValidDate($start)) {
-            $errors['start'] = $this->getDateValidationErrorMessage('start');
-        }
-    }
-
-    private function validateStop(array $task, array &$errors): void
-    {
-        $stop = $task['stop'] ?? null;
-
-        if (!empty($stop) && !$this->isValidDate($stop)) {
-            $errors['stop'] = $this->getDateValidationErrorMessage('stop');
-        }
-    }
-
-    private function isValidDate(mixed $date): bool
-    {
-        return DateHelper::isDateValid($date) || DateHelper::isDateValid($date, DateHelper::DATETIME_FORMAT);
-    }
-
-    private function getDateValidationErrorMessage(string $field): string
-    {
-        return sprintf(
-            'The %s should be date (%s) or datetime (%s).',
-            $field,
-            DateHelper::DATE_FORMAT,
-            DateHelper::DATETIME_FORMAT
-        );
-    }
-
-    private function getTasks(): \Generator
-    {
-        foreach ($this->tasks as $task) {
-            yield $task;
-        }
-    }
-
-    private function createScheduledTaskLogStatusAsQueued(string $name, ?int $times = null): ScheduledTaskLog
-    {
-        return $this->logService->create($name, $times);
-    }
-
-    private function updateScheduledTaskStatus(
-        ScheduledTaskLog $scheduledTask,
-        string $status,
-        ?string $message = null,
-        ?string $output = null
-    ): ScheduledTaskLog {
-        return $this->logService->updateStatus($scheduledTask, $status, $message, $output, $this->shouldStoreToDb());
-    }
-
-    private function updateScheduledTaskLogStatusAsStarted(
-        ScheduledTaskLog $scheduledTask,
-        ?string $message = null,
-        ?string $output = null
-    ): ScheduledTaskLog {
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_STARTED, $message, $output);
-    }
-
-    private function updateScheduledTaskLogStatusAsExecuted(
-        ScheduledTaskLog $scheduledTask,
-        ?string $message = null,
-        ?string $output = null
-    ): ScheduledTaskLog {
-        if ($scheduledTask->getRemaining()) {
-            $scheduledTask->decreaseRemaining();
-        }
-
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_EXECUTED, $message, $output);
-    }
-
-    private function updateScheduledTaskLogStatusAsFailed(
-        ScheduledTaskLog $scheduledTask,
-        ?string $message = null,
-        ?string $output = null
-    ): ScheduledTaskLog {
-        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_FAILED, $message, $output);
+        return (new TaskValidator())->validateTask($task);
     }
 
     private function isTaskDue(array $task): bool
@@ -433,6 +228,143 @@ class ScheduledTaskCommand extends Command
         }
 
         return !$scheduledTask->isRemainingZero();
+    }
+
+    private function executeTask(array $task, bool $isAsync, OutputInterface $output): void
+    {
+        $name = $task['name'];
+        $times = $task['times'];
+
+        $scheduledTaskLog = $this->createScheduledTaskLogStatusAsQueued($name, $times);
+
+        if (!$this->validateCommand($name, $scheduledTaskLog, $output)) {
+            return;
+        }
+
+        try {
+            if ($isAsync) {
+                $this->startAsyncProcess($name, $scheduledTaskLog, $output);
+            } else {
+                $this->runSyncTask($name, $scheduledTaskLog, $output);
+            }
+        } catch (\Exception $e) {
+            $this->handleTaskException($scheduledTaskLog, $e->getMessage(), $output, $name);
+        }
+    }
+
+    private function startAsyncProcess(string $name, ScheduledTaskLog $scheduledTaskLog, OutputInterface $output): void
+    {
+        $phpBinaryPath = $this->getPhpBinaryPath();
+        $projectRoot = $this->getProjectDir();
+
+        $process = Process::fromShellCommandline($phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name);
+        $process->start();
+
+        $this->updateScheduledTaskLogStatusAsStarted($scheduledTaskLog);
+
+        $this->processes[] = new ProcessInfo($process, $scheduledTaskLog);
+
+        $output->writeln(" - Started async process: {$process->getCommandLine()}");
+    }
+
+    private function runSyncTask(string $name, ScheduledTaskLog $scheduledTaskLog, OutputInterface $output): void
+    {
+        $command = $this->getCommand($name);
+        $command->mergeApplicationDefinition();
+        $stringInput = new StringInput($name);
+        $stringInput->bind($command->getDefinition());
+
+        $bufferedOutput = new BufferedOutput();
+        $command->run($stringInput, $bufferedOutput);
+
+        $this->updateScheduledTaskLogStatusAsExecuted(
+            $scheduledTaskLog,
+            'Task was successfully executed as synchronously.',
+            $bufferedOutput->fetch()
+        );
+
+        $output->writeln("The '{$name}' completed!");
+    }
+
+    private function validateCommand(
+        string $name,
+        ScheduledTaskLog $scheduledTaskLog,
+        OutputInterface $output
+    ): ?Command {
+        try {
+            return $this->getCommand($name);
+        } catch (CommandNotFoundException $e) {
+            $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $e->getMessage());
+
+            $output->writeln("The '{$name}' task not found!");
+        }
+
+        return null;
+    }
+
+    private function getCommand(mixed $name): Command
+    {
+        return $this->getApplication()->find(TaskHelper::getCommandName($name));
+    }
+
+    private function handleTaskException(
+        ScheduledTaskLog $scheduledTaskLog,
+        string $message,
+        OutputInterface $output,
+        mixed $name
+    ): void {
+        $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $message);
+
+        $output->writeln("The '{$name}'  failed!");
+    }
+
+    private function getTasks(): \Generator
+    {
+        foreach ($this->tasks as $task) {
+            yield $task;
+        }
+    }
+
+    private function createScheduledTaskLogStatusAsQueued(string $name, ?int $times = null): ScheduledTaskLog
+    {
+        return $this->logService->create($name, $times);
+    }
+
+    private function updateScheduledTaskStatus(
+        ScheduledTaskLog $scheduledTask,
+        string $status,
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
+        return $this->logService->updateStatus($scheduledTask, $status, $message, $output, $this->shouldStoreToDb());
+    }
+
+    private function updateScheduledTaskLogStatusAsStarted(
+        ScheduledTaskLog $scheduledTask,
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_STARTED, $message, $output);
+    }
+
+    private function updateScheduledTaskLogStatusAsExecuted(
+        ScheduledTaskLog $scheduledTask,
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
+        if ($scheduledTask->getRemaining()) {
+            $scheduledTask->decreaseRemaining();
+        }
+
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_EXECUTED, $message, $output);
+    }
+
+    private function updateScheduledTaskLogStatusAsFailed(
+        ScheduledTaskLog $scheduledTask,
+        ?string $message = null,
+        ?string $output = null
+    ): ScheduledTaskLog {
+        return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_FAILED, $message, $output);
     }
 
     private function getPhpBinaryPath(): string
