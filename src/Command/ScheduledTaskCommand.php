@@ -316,13 +316,6 @@ class ScheduledTaskCommand extends Command
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_FAILED, $message, $output);
     }
 
-    private function checkTableExists(): bool
-    {
-        $tableName = $this->getLogTableName();
-
-        return $this->entityManager->getConnection()->createSchemaManager()->tablesExist((array)$tableName);
-    }
-
     private function isTaskDue(array $task): bool
     {
         // Check remaining.
@@ -455,6 +448,13 @@ class ScheduledTaskCommand extends Command
         }
 
         return $this->checkTableExists();
+    }
+
+    private function checkTableExists(): bool
+    {
+        $tableName = $this->getLogTableName();
+
+        return $this->entityManager->getConnection()->createSchemaManager()->tablesExist((array)$tableName);
     }
 
     private function isLoggingEnabled(): bool
