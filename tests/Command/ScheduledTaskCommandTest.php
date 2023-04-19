@@ -28,7 +28,9 @@ class ScheduledTaskCommandTest extends KernelTestCase
     public function testDisabledCommand()
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.');
+        $this->expectExceptionMessage(
+            'Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.'
+        );
 
         $config = $this->createConfigMock(false);
         $application = $this->getApplication();
@@ -123,10 +125,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString(
-            "The 'invalid:command' task not found!",
-            $output
-        );
+        $this->assertEquals("The 'invalid:command' task not found!\n", $output);
     }
 
     public function testNoOutputTaskCommand()
@@ -170,7 +169,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString("The 'no:output' completed!\n", $output);
+        $this->assertEquals("The 'no:output' completed!\n", $output);
     }
 
     public function testGreetingSayHelloWithArgumentTaskCommand()
@@ -221,10 +220,8 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString(
-            "Hello John from Alaska",
-            $output
-        );
+        $this->assertStringContainsString("The 'greeting:say-hello John Alaska' completed!\n", $output);
+        $this->assertStringContainsString("The 'greeting:say-hello Jane Alaska' completed!\n", $output);
     }
 
     public function testGreetingSayHelloWithArgumentAndOptionTaskCommand()
@@ -268,10 +265,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString(
-            "Hello John\nHello John",
-            $output
-        );
+        $this->assertEquals("The 'greeting:say-hello John --twice' completed!\n", $output);
     }
 
     public function testGreetingSayGoodbyeWithStartDateOptionTaskCommand()
@@ -315,10 +309,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString(
-            "Goodbye John",
-            $output
-        );
+        $this->assertEquals("The 'greeting:say-goodbye John' completed!\n", $output);
     }
 
     public function testGreetingSayGoodbyeWithWrongOptionsTaskCommand()
@@ -362,8 +353,8 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertSame(
-            " - The task 'greeting:say-goodbye John' has errors:
+        $this->assertEquals(
+            "The task 'greeting:say-goodbye John' has errors:
   - The times should be integer.
   - The start should be date (Y-m-d) or datetime (Y-m-d H:i).
   - The stop should be date (Y-m-d) or datetime (Y-m-d H:i).\n",
@@ -500,10 +491,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString(
-            "Goodbye John",
-            $output
-        );
+        $this->assertEquals("The 'greeting:say-goodbye John' completed!\n", $output);
     }
 
     public function testScheduleAnnotatedTaskCommand()
@@ -534,15 +522,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString(
-            "Hello from schedule by annotation",
-            $output
-        );
-
-        $this->assertStringContainsString(
-            "This is an foo: bar",
-            $output
-        );
+        $this->assertEquals("The 'schedule:annotate --foo=bar' completed!\n", $output);
     }
 
     public function testScheduleDatabasedTaskCommand()
@@ -585,10 +565,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString(
-            "Hello from schedule by database",
-            $output
-        );
+        $this->assertEquals("The 'schedule:database' completed!\n", $output);
     }
 
     public function testArrayArgumentCommand()
@@ -632,7 +609,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString("argument1 - argument2", $output);
+        $this->assertEquals("The 'schedule:array-argument argument1 argument2' completed!\n", $output);
     }
 
     public function testArrayOptionCommand()
@@ -676,7 +653,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertStringContainsString("option1 - option2", $output);
+        $this->assertEquals("The 'schedule:array-option --foo option1 --foo option2' completed!\n", $output);
     }
 
     private function getApplication(): Application

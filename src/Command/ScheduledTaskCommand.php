@@ -20,6 +20,7 @@ use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -164,7 +165,7 @@ class ScheduledTaskCommand extends Command
         $errors = $this->validateTask($task);
 
         if (!empty($errors)) {
-            $output->writeln(" - The task '{$task['name']}' has errors:");
+            $output->writeln("The task '{$task['name']}' has errors:");
             foreach ($errors as $error) {
                 $output->writeln(sprintf('  - %s', $error));
             }
@@ -182,7 +183,7 @@ class ScheduledTaskCommand extends Command
 
         $scheduledTaskLog = $this->createScheduledTaskLogStatusAsQueued($name, $times);
 
-        if (!$command = $this->validateCommand($output, $name, $scheduledTaskLog)) {
+        if (!$this->validateCommand($name, $scheduledTaskLog, $output)) {
             return;
         }
 
@@ -190,7 +191,7 @@ class ScheduledTaskCommand extends Command
             if ($isAsync) {
                 $this->startAsyncProcess($name, $scheduledTaskLog, $output);
             } else {
-                $this->runSyncTask($name, $command, $scheduledTaskLog, $output);
+                $this->runSyncTask($name, $scheduledTaskLog, $output);
             }
         } catch (\Exception $e) {
             $this->handleTaskException($scheduledTaskLog, $e->getMessage(), $output, $name);
@@ -215,19 +216,43 @@ class ScheduledTaskCommand extends Command
 
     private function runSyncTask(
         string $name,
-        Command $command,
         ScheduledTaskLog $scheduledTaskLog,
         OutputInterface $output
     ): void {
-        $taskInput = new StringInput($name);
+        $command = $this->getCommand($name);
         $command->mergeApplicationDefinition();
-        $taskInput->bind($command->getDefinition());
+        $stringInput = new StringInput($name);
+        $stringInput->bind($command->getDefinition());
 
-        $command->run($taskInput, $output);
+        $bufferedOutput = new BufferedOutput();
+        $command->run($stringInput, $bufferedOutput);
 
-        $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog);
+        $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog, 'Task was successfully executed as synchronously.', output: $bufferedOutput->fetch());
 
         $output->writeln("The '{$name}' completed!");
+    }
+
+    private function validateCommand(
+        string $name,
+        ScheduledTaskLog $scheduledTaskLog,
+        OutputInterface $output
+    ): ?Command {
+        try {
+            return $this->getCommand($name);
+        } catch (CommandNotFoundException $e) {
+            $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $e->getMessage());
+
+            $output->writeln("The '{$name}' task not found!");
+        }
+
+        return null;
+    }
+
+    private function getCommand(mixed $name): Command
+    {
+        $commandName = TaskHelper::getCommandName($name);
+
+        return $this->getApplication()->find($commandName);
     }
 
     private function handleTaskException(
@@ -398,29 +423,6 @@ class ScheduledTaskCommand extends Command
         return $cron->isDue();
     }
 
-    private function validateCommand(
-        OutputInterface $output,
-        string $name,
-        ScheduledTaskLog $scheduledTask
-    ): ?Command {
-        $commandName = TaskHelper::getCommandName($name);
-
-        try {
-            return $this->getApplication()->find($commandName);
-        } catch (CommandNotFoundException $e) {
-            $this->updateScheduledTaskLogStatusAsFailed($scheduledTask, $e->getMessage());
-
-            $output->writeln(" - The '{$name}' task not found!");
-        }
-
-        return null;
-    }
-
-    private function getCommand(mixed $commandName): Command
-    {
-        return $this->getApplication()->find($commandName);
-    }
-
     private function getPhpBinaryPath(): string
     {
         $phpBinaryFinder = new PhpExecutableFinder();
@@ -449,7 +451,7 @@ class ScheduledTaskCommand extends Command
                 $scheduledTaskLog = $processInfo->getScheduledTaskLog();
 
                 if (!$process->isSuccessful()) {
-                    $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, null, $process->getErrorOutput());
+                    $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, 'Task was failed executing as synchronously.', $process->getErrorOutput());
 
                     $output->writeln(
                         [
@@ -462,7 +464,7 @@ class ScheduledTaskCommand extends Command
                     continue;
                 }
 
-                $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog, null, $process->getOutput());
+                $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog, 'Task was successfully executed as asynchronously.', $process->getOutput());
 
                 $output->writeln(
                     [
