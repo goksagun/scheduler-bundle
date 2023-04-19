@@ -188,7 +188,7 @@ class ScheduledTaskCommand extends Command
 
         try {
             if ($isAsync) {
-                $this->startAsyncProcess($command, $scheduledTaskLog, $output);
+                $this->startAsyncProcess($name, $scheduledTaskLog, $output);
             } else {
                 $this->runSyncTask($name, $command, $scheduledTaskLog, $output);
             }
@@ -197,12 +197,12 @@ class ScheduledTaskCommand extends Command
         }
     }
 
-    private function startAsyncProcess(Command $command, ScheduledTaskLog $scheduledTaskLog, OutputInterface $output): void
+    private function startAsyncProcess(string $name, ScheduledTaskLog $scheduledTaskLog, OutputInterface $output): void
     {
         $phpBinaryPath = $this->getPhpBinaryPath();
         $projectRoot = $this->getProjectDir();
 
-        $asyncCommand = $phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $command->getName();
+        $asyncCommand = $phpBinaryPath . ' ' . $projectRoot . '/bin/console ' . $name;
         $process = Process::fromShellCommandline($asyncCommand);
 
         $process->start();
@@ -237,7 +237,7 @@ class ScheduledTaskCommand extends Command
         OutputInterface $output,
         mixed $name
     ): void {
-        $this->updateScheduledTaskStatusAsFailed($scheduledTaskLog, $message);
+        $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $message);
 
         $output->writeln("The '{$name}'  failed!");
     }
@@ -352,7 +352,7 @@ class ScheduledTaskCommand extends Command
         return $this->updateScheduledTaskStatus($scheduledTask, ScheduledTaskLog::STATUS_EXECUTED, $message, $output);
     }
 
-    private function updateScheduledTaskStatusAsFailed(
+    private function updateScheduledTaskLogStatusAsFailed(
         ScheduledTaskLog $scheduledTask,
         ?string $message = null,
         ?string $output = null
@@ -409,13 +409,17 @@ class ScheduledTaskCommand extends Command
         try {
             return $this->getApplication()->find($commandName);
         } catch (CommandNotFoundException $e) {
-            // Log error message.
-            $this->updateScheduledTaskStatusAsFailed($scheduledTask, $e->getMessage());
+            $this->updateScheduledTaskLogStatusAsFailed($scheduledTask, $e->getMessage());
 
             $output->writeln(" - The '{$name}' task not found!");
         }
 
         return null;
+    }
+
+    private function getCommand(mixed $commandName): Command
+    {
+        return $this->getApplication()->find($commandName);
     }
 
     private function getPhpBinaryPath(): string
@@ -443,10 +447,10 @@ class ScheduledTaskCommand extends Command
                 // Remove finished process from active processes list.
                 unset($this->processes[$j]);
 
-                $scheduledTask = $processInfo->getScheduledTaskLog();
+                $scheduledTaskLog = $processInfo->getScheduledTaskLog();
 
                 if (!$process->isSuccessful()) {
-                    $this->updateScheduledTaskStatusAsFailed($scheduledTask, null, $process->getErrorOutput());
+                    $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, null, $process->getErrorOutput());
 
                     $output->writeln(
                         [
@@ -459,7 +463,7 @@ class ScheduledTaskCommand extends Command
                     continue;
                 }
 
-                $this->updateScheduledTaskLogStatusAsExecuted($scheduledTask, null, $process->getOutput());
+                $this->updateScheduledTaskLogStatusAsExecuted($scheduledTaskLog, null, $process->getOutput());
 
                 $output->writeln(
                     [
