@@ -522,7 +522,8 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $output = $commandTester->getDisplay();
 
-        $this->assertEquals("The 'schedule:annotate --foo=bar' completed!\n", $output);
+        $this->assertStringContainsString("The 'schedule:annotate' completed!\n", $output);
+        $this->assertStringContainsString("The 'schedule:annotate --foo=bar' completed!\n", $output);
     }
 
     public function testScheduleDatabasedTaskCommand()
