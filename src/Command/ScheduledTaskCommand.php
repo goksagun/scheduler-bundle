@@ -387,41 +387,57 @@ class ScheduledTaskCommand extends Command
 
     private function isTaskDue(array $task): bool
     {
-        // Check remaining.
-        if ($this->isLoggingEnabled() && null !== $task['times']) {
-            $scheduledTask = $this->logService->getLatestScheduledTaskLog($task['name']);
+        if (
+            $this->isTaskPastStartDate($task)
+            && $this->isTaskNotPastEndDate($task)
+            && $this->isTaskNotExceededMaxExecutions($task)) {
+            $cron = CronExpression::factory($task['expression']);
 
-            if ($scheduledTask instanceof ScheduledTaskLog && $scheduledTask->isRemainingZero()) {
-                return false;
-            }
+            return $cron->isDue();
+        }
+
+        return false;
+    }
+
+    private function isTaskPastStartDate(array $task): bool
+    {
+        $start = $task['start'];
+        if (null === $start) {
+            return true;
         }
 
         $now = DateHelper::date();
+        $startDate = DateHelper::date($start);
 
-        // Check start date.
-        if (null !== $task['start']) {
-            $start = DateHelper::date($task['start']);
+        return $startDate <= $now;
+    }
 
-            if ($start > $now) {
-                return false;
-            }
+    private function isTaskNotPastEndDate(array $task): bool
+    {
+        $end = $task['stop'];
+        if (null === $end) {
+            return true;
         }
 
-        // Check start date.
-        if (null !== $task['stop']) {
-            $stop = DateHelper::date($task['stop']);
+        $now = DateHelper::date();
+        $endDate = DateHelper::date($end);
 
-            if ($stop < $now) {
-                return false;
-            }
+        return $endDate >= $now;
+    }
+
+    private function isTaskNotExceededMaxExecutions(array $task): bool
+    {
+        if (!$this->isLoggingEnabled() || null === $task['times']) {
+            return true;
         }
 
-        $expression = $task['expression'];
+        $scheduledTask = $this->logService->getLatestScheduledTaskLog($task['name']);
 
-        $cron = CronExpression::factory($expression);
+        if (null === $scheduledTask) {
+            return true;
+        }
 
-        // TRUE if the cron is due to run or FALSE if not.
-        return $cron->isDue();
+        return !$scheduledTask->isRemainingZero();
     }
 
     private function getPhpBinaryPath(): string
