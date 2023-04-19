@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Cron\CronExpression;
 use Doctrine\ORM\EntityManagerInterface;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
@@ -12,7 +11,6 @@ use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
-use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
@@ -156,7 +154,7 @@ class ScheduledTaskCommand extends Command
 
     private function isTaskValid(array $task, OutputInterface $output): bool
     {
-        $errors = $this->validateTask($task);
+        $errors = (new TaskValidator($this->logService))->validateTask($task);
 
         if (!empty($errors)) {
             $output->writeln("The task '{$task['name']}' has errors:");
@@ -168,11 +166,6 @@ class ScheduledTaskCommand extends Command
         }
 
         return true;
-    }
-
-    private function validateTask(array $task): array
-    {
-        return (new TaskValidator($this->logService))->validateTask($task);
     }
 
     private function isTaskDue(array $task): bool
