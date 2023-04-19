@@ -69,3 +69,7 @@ services:
         class: Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository
         tags:
               - { name: 'doctrine.repository_service' }
+
+    scheduler.validator.scheduled_task_validator:
+        class: Goksagun\SchedulerBundle\Command\TaskValidator
+        arguments: ['@scheduler.service.scheduled_task_log']
