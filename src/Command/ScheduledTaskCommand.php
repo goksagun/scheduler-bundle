@@ -202,44 +202,69 @@ class ScheduledTaskCommand extends Command
     {
         $errors = [];
 
+        $this->validateName($task, $errors);
+        $this->validateExpression($task, $errors);
+        $this->validateTimes($task, $errors);
+        $this->validateStart($task, $errors);
+        $this->validateStop($task, $errors);
+
+        return $errors;
+    }
+
+    private function validateName(array $task, array &$errors): void
+    {
         if (!isset($task['name'])) {
             $errors['name'] = "The task command name should be defined.";
         }
+    }
 
+    private function validateExpression(array $task, array &$errors): void
+    {
         if (!isset($task['expression'])) {
             $errors['expression'] = "The task command expression should be defined.";
         }
+    }
 
+    private function validateTimes(array $task, array &$errors): void
+    {
         $times = $task['times'] ?? null;
-        if (!empty($times)) {
-            if (!is_int($times)) {
-                $errors['times'] = "The times should be integer.";
-            }
-        }
 
+        if (!empty($times) && !is_int($times)) {
+            $errors['times'] = "The times should be integer.";
+        }
+    }
+
+    private function validateStart(array $task, array &$errors): void
+    {
         $start = $task['start'] ?? null;
-        if (!empty($start)
-            && !(DateHelper::isDateValid($start) || DateHelper::isDateValid($start, DateHelper::DATETIME_FORMAT))
-        ) {
-            $errors['start'] = sprintf(
-                'The start should be date (%s) or datetime (%s).',
-                DateHelper::DATE_FORMAT,
-                DateHelper::DATETIME_FORMAT
-            );
-        }
 
+        if (!empty($start) && !$this->isValidDate($start)) {
+            $errors['start'] = $this->getDateValidationErrorMessage('start');
+        }
+    }
+
+    private function validateStop(array $task, array &$errors): void
+    {
         $stop = $task['stop'] ?? null;
-        if (!empty($stop)
-            && !(DateHelper::isDateValid($stop) || DateHelper::isDateValid($stop, DateHelper::DATETIME_FORMAT))
-        ) {
-            $errors['stop'] = sprintf(
-                'The stop should be date (%s) or datetime (%s).',
-                DateHelper::DATE_FORMAT,
-                DateHelper::DATETIME_FORMAT
-            );
-        }
 
-        return $errors;
+        if (!empty($stop) && !$this->isValidDate($stop)) {
+            $errors['stop'] = $this->getDateValidationErrorMessage('stop');
+        }
+    }
+
+    private function isValidDate(mixed $date): bool
+    {
+        return DateHelper::isDateValid($date) || DateHelper::isDateValid($date, DateHelper::DATETIME_FORMAT);
+    }
+
+    private function getDateValidationErrorMessage(string $field): string
+    {
+        return sprintf(
+            'The %s should be date (%s) or datetime (%s).',
+            $field,
+            DateHelper::DATE_FORMAT,
+            DateHelper::DATETIME_FORMAT
+        );
     }
 
     private function getTasks(): \Generator
