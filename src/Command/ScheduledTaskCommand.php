@@ -48,6 +48,7 @@ class ScheduledTaskCommand extends Command
      * @var array<int, array>
      */
     private array $tasks = [];
+
     /**
      * @var array<int, ProcessInfo>
      */
@@ -234,19 +235,21 @@ class ScheduledTaskCommand extends Command
         string $name,
         ScheduledTaskLog $scheduledTaskLog,
         OutputInterface $output
-    ): ?Command {
+    ): bool {
         try {
-            return $this->getCommand($name);
+            $this->getCommand($name);
         } catch (CommandNotFoundException $e) {
             $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $e->getMessage());
 
             $output->writeln("The '{$name}' task not found!");
+
+            return false;
         }
 
-        return null;
+        return true;
     }
 
-    private function getCommand(mixed $name): Command
+    private function getCommand(string $name): Command
     {
         return $this->getApplication()->find(TaskHelper::getCommandName($name));
     }
