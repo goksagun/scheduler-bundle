@@ -2,10 +2,15 @@
 
 namespace Goksagun\SchedulerBundle\Command;
 
+use Cron\CronExpression;
+use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 
 class TaskValidator
 {
+    public function __construct(private readonly ScheduledTaskLogService $taskLogService)
+    {
+    }
 
     public function validateTask(array $task): array
     {
@@ -74,5 +79,60 @@ class TaskValidator
             DateHelper::DATE_FORMAT,
             DateHelper::DATETIME_FORMAT
         );
+    }
+
+    public function isTaskDue(array $task): bool
+    {
+        if (
+            $this->isTaskPastStartDate($task)
+            && $this->isTaskNotPastEndDate($task)
+            && $this->isTaskNotExceededMaxExecutions($task)) {
+            $cron = CronExpression::factory($task['expression']);
+
+            return $cron->isDue();
+        }
+
+        return false;
+    }
+
+    private function isTaskPastStartDate(array $task): bool
+    {
+        $start = $task['start'];
+        if (null === $start) {
+            return true;
+        }
+
+        $now = DateHelper::date();
+        $startDate = DateHelper::date($start);
+
+        return $startDate <= $now;
+    }
+
+    private function isTaskNotPastEndDate(array $task): bool
+    {
+        $end = $task['stop'];
+        if (null === $end) {
+            return true;
+        }
+
+        $now = DateHelper::date();
+        $endDate = DateHelper::date($end);
+
+        return $endDate >= $now;
+    }
+
+    private function isTaskNotExceededMaxExecutions(array $task): bool
+    {
+        if (!$this->taskLogService->isLoggingEnabled() || null === $task['times']) {
+            return true;
+        }
+
+        $scheduledTask = $this->taskLogService->getLatestScheduledTaskLog($task['name']);
+
+        if (null === $scheduledTask) {
+            return true;
+        }
+
+        return !$scheduledTask->isRemainingZero();
     }
 }
