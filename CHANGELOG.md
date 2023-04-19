@@ -1,3 +1,6 @@
+## 2.1.0 (April 19, 2023)
+  - Add task delete command (#20)
+
 ## 2.0.2 (April 19, 2023)
   - Refactor task command (#19)
   - Add GitHub Actions PHP Composer badge
