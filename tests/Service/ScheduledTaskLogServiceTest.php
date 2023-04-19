@@ -1,6 +1,6 @@
 <?php
 
-namespace Service;
+namespace Goksagun\SchedulerBundle\Tests\Service;
 
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;

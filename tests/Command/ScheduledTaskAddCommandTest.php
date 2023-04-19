@@ -1,6 +1,6 @@
 <?php
 
-namespace Command;
+namespace Goksagun\SchedulerBundle\Tests\Command;
 
 use Goksagun\SchedulerBundle\Command\SchedulerTaskAddCommand;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;

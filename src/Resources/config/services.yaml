@@ -52,6 +52,12 @@ services:
         tags:
             - { name: 'console.command', command: 'scheduler:edit' }
 
+    scheduler.command.scheduled_task_delete:
+        class: Goksagun\SchedulerBundle\Command\ScheduledTaskDeleteCommand
+        arguments: ['@scheduler.service.scheduled_task']
+        tags:
+            - { name: 'console.command', command: 'scheduler:delete' }
+
     scheduler.service.scheduled_task:
         class: Goksagun\SchedulerBundle\Service\ScheduledTaskService
         arguments: ['%scheduler%', '@kernel', '@service_container', '@scheduler.repository.scheduled_task']
