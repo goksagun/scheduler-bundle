@@ -65,4 +65,61 @@ class ArrayUtilsTest extends TestCase
 
         $this->assertSame($expected, $array);
     }
+
+    public function testForgetWithNestedKeys()
+    {
+        $array = [
+            'foo' => [
+                'bar' => 'baz',
+                'qux' => [
+                    'quux' => 'corge',
+                    'grault' => 'garply',
+                ],
+            ],
+            'waldo' => 'fred',
+        ];
+
+        $expected = [
+            'foo' => [
+                'qux' => [
+                    'quux' => 'corge',
+                ],
+            ],
+            'waldo' => 'fred',
+        ];
+
+        ArrayUtils::forget($array, ['foo.bar', 'foo.qux.grault']);
+
+        $this->assertSame($expected, $array);
+    }
+
+    public function testForgetWithNoneExistentKeys()
+    {
+        $array = [
+            'foo' => [
+                'bar' => 'baz',
+            ],
+        ];
+
+        $expected = $array;
+
+        ArrayUtils::forget($array, ['foo.baz', 'qux']);
+
+        $this->assertSame($expected, $array);
+    }
+
+    public function testForgetWithEmptyKeys()
+    {
+        $array = [
+            'foo' => [
+                'bar' => 'baz',
+            ],
+        ];
+
+        $expected = $array;
+
+        ArrayUtils::forget($array, []);
+
+        $this->assertSame($expected, $array);
+    }
 }
