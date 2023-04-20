@@ -5,7 +5,7 @@ namespace Goksagun\SchedulerBundle\Tests\Utils;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use PHPUnit\Framework\TestCase;
 
-class ArrayHelperTest extends TestCase
+class ArrayUtilsTest extends TestCase
 {
     public function testExists()
     {
