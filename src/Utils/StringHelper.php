@@ -64,11 +64,12 @@ final class StringHelper
 
     public static function interpolate(string $message, array $context): string
     {
-        $replacement = [];
-        foreach ($context as $key => $value) {
-            $replacement['{{' . $key . '}}'] = $value;
-        }
-
-        return strtr($message, $replacement);
+        return preg_replace_callback(
+            '/{{\s*(\w+)\s*}}/',
+            function ($matches) use ($context) {
+                return $context[$matches[1]] ?? $matches[0];
+            },
+            $message
+        );
     }
 }
