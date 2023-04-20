@@ -12,6 +12,11 @@ final class ArrayUtils
 
     /**
      * Determine if the given key exists in the provided array.
+     *
+     * @param array|\ArrayAccess $array The array to search for the key.
+     * @param int|string $key The key to search for in the array.
+     *
+     * @return bool True if the key exists in the array, false otherwise.
      */
     public static function exists(array|\ArrayAccess $array, int|string $key): bool
     {
@@ -21,6 +26,7 @@ final class ArrayUtils
 
         return array_key_exists($key, $array);
     }
+
 
     /**
      * Get a subset of the items from the given array.
@@ -55,7 +61,7 @@ final class ArrayUtils
 
         foreach ($keys as $key) {
             // if the exact key exists in the top-level, remove it
-            if (static::exists($array, $key)) {
+            if (ArrayUtils::exists($array, $key)) {
                 unset($array[$key]);
 
                 continue;
