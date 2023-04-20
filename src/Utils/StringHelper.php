@@ -61,4 +61,14 @@ final class StringHelper
 
         return rtrim(mb_strimwidth($value, 0, $limit, '', 'UTF-8')) . $end;
     }
+
+    public static function interpolate(string $message, array $context): string
+    {
+        $replacement = [];
+        foreach ($context as $key => $value) {
+            $replacement['{{' . $key . '}}'] = $value;
+        }
+
+        return strtr($message, $replacement);
+    }
 }

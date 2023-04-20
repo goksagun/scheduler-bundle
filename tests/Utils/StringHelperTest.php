@@ -36,4 +36,9 @@ class StringHelperTest extends TestCase
     {
         $this->assertEquals('Foo bar baz...', StringHelper::limit('Foo bar baz fuzz', 11));
     }
+
+    public function testInterpolate()
+    {
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{name}}!', ['name' => 'John']));
+    }
 }
