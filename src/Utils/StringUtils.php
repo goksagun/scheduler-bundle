@@ -2,7 +2,7 @@
 
 namespace Goksagun\SchedulerBundle\Utils;
 
-final class StringHelper
+final class StringUtils
 {
     private function __construct()
     {
