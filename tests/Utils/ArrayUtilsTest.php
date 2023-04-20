@@ -7,13 +7,24 @@ use PHPUnit\Framework\TestCase;
 
 class ArrayUtilsTest extends TestCase
 {
-    public function testExists()
+    public function testExistsWithArray()
     {
-        $array = ['foo' => 'bar', 'baz' => 'buz'];
+        $array = ['foo' => 'bar'];
 
-        $condition = ArrayUtils::exists($array, 'foo');
+        $this->assertTrue(ArrayUtils::exists($array, 'foo'));
+        $this->assertFalse(ArrayUtils::exists($array, 'baz'));
+    }
 
-        $this->assertTrue($condition);
+    public function testExistsWithDotNotation()
+    {
+        $array = [
+            'foo' => [
+                'bar' => 'baz',
+            ],
+        ];
+
+        $this->assertTrue(ArrayUtils::exists($array, 'foo.bar'));
+        $this->assertFalse(ArrayUtils::exists($array, 'foo.baz'));
     }
 
     public function testOnly()

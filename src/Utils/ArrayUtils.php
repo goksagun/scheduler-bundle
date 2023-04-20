@@ -11,21 +11,31 @@ final class ArrayUtils
     }
 
     /**
-     * Determine if the given key exists in the provided array.
+     * Determine if the given key exists in the provided array using "dot" notation.
      *
-     * @param array|\ArrayAccess $array The array to search for the key.
-     * @param int|string $key The key to search for in the array.
+     * @param array $array The array to search for the key.
+     * @param string $key The key to search for in the array using "dot" notation.
      *
      * @return bool True if the key exists in the array, false otherwise.
      */
-    public static function exists(array|\ArrayAccess $array, int|string $key): bool
+    public static function exists(array $array, string $key): bool
     {
-        if ($array instanceof \ArrayAccess) {
-            return $array->offsetExists($key);
+        if (array_key_exists($key, $array)) {
+            return true;
         }
 
-        return array_key_exists($key, $array);
+        foreach (explode('.', $key) as $segment) {
+            if (!is_array($array) || !array_key_exists($segment, $array)) {
+                return false;
+            }
+
+            $array = $array[$segment];
+        }
+
+        return true;
     }
+
+
 
 
     /**
@@ -57,41 +67,41 @@ final class ArrayUtils
     }
 
     /**
-     * Remove one or many array items from a given array using "dot" notation.
+     * Remove one or many items from the provided array using "dot" notation.
      *
-     * @param  array  $array  The target array from which to remove items.
-     * @param  array|string  $keys  The key(s) of the item(s) to be removed. Can be a dot-notation string or an array of keys.
+     * @param array $array The array to remove items from.
+     * @param array|string $keys The dot notation key(s) of the item(s) to remove.
+     *
      * @return void
      */
     public static function forget(array &$array, array|string $keys): void
     {
-        $keys = (array) $keys;
+        $keys = (array)$keys;
 
         if (count($keys) === 0) {
             return;
         }
 
         foreach ($keys as $key) {
-            // if the exact key exists in the top-level, remove it
-            if (ArrayUtils::exists($array, $key)) {
+            if (!str_contains($key, '.')) {
                 unset($array[$key]);
                 continue;
             }
 
             $parts = explode('.', $key);
-            $arrayRef = &$array;
+            $current = &$array;
 
             while (count($parts) > 1) {
                 $part = array_shift($parts);
 
-                if (isset($arrayRef[$part]) && is_array($arrayRef[$part])) {
-                    $arrayRef = &$arrayRef[$part];
+                if (isset($current[$part]) && is_array($current[$part])) {
+                    $current = &$current[$part];
                 } else {
                     continue 2;
                 }
             }
 
-            unset($arrayRef[array_shift($parts)]);
+            unset($current[array_shift($parts)]);
         }
     }
 }
