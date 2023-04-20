@@ -3,9 +3,9 @@
 use Goksagun\SchedulerBundle\Utils\StringUtils;
 
 if (!function_exists('limit')) {
-    function limit(string $value, int $limit = 100, string $end = '...'): string
+    function limit(string $input, int $length = 100, string $indicator = '...'): string
     {
-        return StringUtils::limit($value, $limit, $end);
+        return StringUtils::limit($input, $length, $indicator);
     }
 }
 

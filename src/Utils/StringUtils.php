@@ -65,19 +65,19 @@ final class StringUtils
     /**
      * Truncates a string to a specified length, adding an ellipsis to the end if necessary.
      *
-     * @param string $value The input string to limit.
-     * @param int $limit The maximum length of the output string. Defaults to 100.
-     * @param string $end The text to append to the end of the truncated string. Defaults to '...'.
+     * @param string $input The input string to limit.
+     * @param int $length The maximum length of the output string. Defaults to 100.
+     * @param string $indicator The text to append to the end of the truncated string. Defaults to '...'.
      *
      * @return string The truncated string.
      */
-    public static function limit(string $value, int $limit = 100, string $end = '...'): string
+    public static function limit(string $input, int $length = 100, string $indicator = '...'): string
     {
-        if (mb_strwidth($value, 'UTF-8') <= $limit) {
-            return $value;
+        if (mb_strwidth($input, 'UTF-8') <= $length) {
+            return $input;
         }
 
-        return rtrim(mb_strimwidth($value, 0, $limit, '', 'UTF-8')) . $end;
+        return rtrim(mb_strimwidth($input, 0, $length, '', 'UTF-8')) . $indicator;
     }
 
     /**
