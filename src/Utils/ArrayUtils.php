@@ -36,8 +36,6 @@ final class ArrayUtils
     }
 
 
-
-
     /**
      * Get a subset of the items from the given array, containing only the specified keys.
      *
@@ -76,32 +74,25 @@ final class ArrayUtils
      */
     public static function forget(array &$array, array|string $keys): void
     {
-        $keys = (array)$keys;
+        foreach ((array)$keys as $key) {
+            if (str_contains($key, '.')) {
+                $segments = explode('.', $key);
+                $reference =& $array;
 
-        if (count($keys) === 0) {
-            return;
-        }
+                while (count($segments) > 1) {
+                    $segment = array_shift($segments);
 
-        foreach ($keys as $key) {
-            if (!str_contains($key, '.')) {
-                unset($array[$key]);
-                continue;
-            }
-
-            $parts = explode('.', $key);
-            $current = &$array;
-
-            while (count($parts) > 1) {
-                $part = array_shift($parts);
-
-                if (isset($current[$part]) && is_array($current[$part])) {
-                    $current = &$current[$part];
-                } else {
-                    continue 2;
+                    if (isset($reference[$segment]) && is_array($reference[$segment])) {
+                        $reference =& $reference[$segment];
+                    } else {
+                        continue 2;
+                    }
                 }
-            }
 
-            unset($current[array_shift($parts)]);
+                unset($reference[array_shift($segments)]);
+            } else {
+                unset($array[$key]);
+            }
         }
     }
 }
