@@ -39,13 +39,16 @@ class StringHelperTest extends TestCase
 
     public function testInterpolate()
     {
-        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{name}}!', ['name' => 'John']));
-        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{ name }}!', ['name' => 'John']));
-        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{name }}!', ['name' => 'John']));
-        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{ name}}!', ['name' => 'John']));
-        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{  name}}!', ['name' => 'John']));
-        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{  name }}!', ['name' => 'John']));
-        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {{  name        }}!', ['name' => 'John']));
-        $this->assertEquals('Hello John Doe!', StringHelper::interpolate('Hello {{firstName}} {{lastName}}!', ['firstName' => 'John', 'lastName' => 'Doe']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {name}!', ['name' => 'John']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello { name }!', ['name' => 'John']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {name }!', ['name' => 'John']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello { name}!', ['name' => 'John']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {  name}!', ['name' => 'John']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {  name }!', ['name' => 'John']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello {  name        }!', ['name' => 'John']));
+        $this->assertEquals('Hello John Doe!', StringHelper::interpolate('Hello {firstName} {lastName}!', ['firstName' => 'John', 'lastName' => 'Doe']));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello [name]!', ['name' => 'John'], '[]'));
+        $this->assertEquals('Hello John!', StringHelper::interpolate('Hello [[name]]!', ['name' => 'John'], '[[]]'));
+        $this->assertEquals('Hello John and Welcome!', StringHelper::interpolate('Hello [ name ] and [greeting]!', ['name' => 'John', 'greeting' => 'Welcome'], '[]'));
     }
 }

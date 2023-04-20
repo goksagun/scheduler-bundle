@@ -62,11 +62,17 @@ final class StringHelper
         return rtrim(mb_strimwidth($value, 0, $limit, '', 'UTF-8')) . $end;
     }
 
-    public static function interpolate(string $message, array $context): string
+    public static function interpolate(string $message, array $context, string $delimiter = '{}'): string
     {
+        $delimiterLength = strlen($delimiter) / 2;
+        $openDelim = preg_quote(substr($delimiter, 0, $delimiterLength), '/');
+        $closeDelim = preg_quote(substr($delimiter, -$delimiterLength), '/');
+
+        $pattern = sprintf('/%s\s*(\w+)\s*%s/', $openDelim, $closeDelim);
+
         return preg_replace_callback(
-            '/{{\s*(\w+)\s*}}/',
-            function ($matches) use ($context) {
+            $pattern,
+            function($matches) use ($context) {
                 return $context[$matches[1]] ?? $matches[0];
             },
             $message
