@@ -5,7 +5,7 @@ namespace Goksagun\SchedulerBundle\Command;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 
 trait DatabasedCommandTrait
@@ -62,7 +62,7 @@ trait DatabasedCommandTrait
 
             // Filter props if exists
             if ($props) {
-                $task = ArrayHelper::only($task, $props);
+                $task = ArrayUtils::only($task, $props);
             }
 
             $this->tasks[] = $task;

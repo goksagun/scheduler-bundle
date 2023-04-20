@@ -2,7 +2,7 @@
 
 namespace Goksagun\SchedulerBundle\Tests\Utils;
 
-use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use PHPUnit\Framework\TestCase;
 
 class ArrayHelperTest extends TestCase
@@ -11,7 +11,7 @@ class ArrayHelperTest extends TestCase
     {
         $array = ['foo' => 'bar', 'baz' => 'buz'];
 
-        $condition = ArrayHelper::exists($array, 'foo');
+        $condition = ArrayUtils::exists($array, 'foo');
 
         $this->assertTrue($condition);
     }
@@ -21,7 +21,7 @@ class ArrayHelperTest extends TestCase
         $array = ['foo' => 'bar', 'baz' => 'buz'];
         $expected = ['foo' => 'bar'];
 
-        $actual = ArrayHelper::only($array, ['foo']);
+        $actual = ArrayUtils::only($array, ['foo']);
 
         $this->assertSame($expected, $actual);
     }
@@ -31,7 +31,7 @@ class ArrayHelperTest extends TestCase
         $array = ['foo' => 'bar', 'baz' => 'buz'];
         $expected = ['foo' => 'bar'];
 
-        $actual = ArrayHelper::only($array, 'foo');
+        $actual = ArrayUtils::only($array, 'foo');
 
         $this->assertSame($expected, $actual);
     }
@@ -41,7 +41,7 @@ class ArrayHelperTest extends TestCase
         $array = ['foo' => 'bar', 'baz' => 'buz'];
         $expected = ['baz' => 'buz'];
 
-        $actual = ArrayHelper::except($array, ['foo']);
+        $actual = ArrayUtils::except($array, ['foo']);
 
         $this->assertSame($expected, $actual);
     }
@@ -51,7 +51,7 @@ class ArrayHelperTest extends TestCase
         $array = ['foo' => 'bar', 'baz' => 'buz'];
         $expected = ['baz' => 'buz'];
 
-        $actual = ArrayHelper::except($array, 'foo');
+        $actual = ArrayUtils::except($array, 'foo');
 
         $this->assertSame($expected, $actual);
     }
@@ -61,7 +61,7 @@ class ArrayHelperTest extends TestCase
         $array = ['foo' => 'bar', 'baz' => 'buz'];
         $expected = ['baz' => 'buz'];
 
-        ArrayHelper::forget($array, 'foo');
+        ArrayUtils::forget($array, 'foo');
 
         $this->assertSame($expected, $array);
     }

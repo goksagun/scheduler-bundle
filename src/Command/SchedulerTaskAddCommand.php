@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Goksagun\SchedulerBundle\Command;
 
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
-use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -42,7 +42,7 @@ class SchedulerTaskAddCommand extends Command
 
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
-        $options = ArrayHelper::only($input->getOptions(), ['times', 'start', 'stop', 'status']);
+        $options = ArrayUtils::only($input->getOptions(), ['times', 'start', 'stop', 'status']);
 
         $this->validateOptions($options);
     }

@@ -4,7 +4,7 @@ namespace Goksagun\SchedulerBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\HashHelper;
 
@@ -114,7 +114,7 @@ class ScheduledTask implements StatusInterface
     public function preUpdate()
     {
         $this->id = HashHelper::generateIdFromProps(
-            ArrayHelper::only(get_object_vars($this), HashHelper::GENERATED_PROPS)
+            ArrayUtils::only(get_object_vars($this), HashHelper::GENERATED_PROPS)
         );
 
         $this->updatedAt = DateHelper::date();
@@ -129,8 +129,8 @@ class ScheduledTask implements StatusInterface
         $allProps = get_object_vars($this);
 
         return empty($props)
-            ? ArrayHelper::except($allProps, static::EXCLUDED_PROPS)
-            : ArrayHelper::only($allProps, $props);
+            ? ArrayUtils::except($allProps, static::EXCLUDED_PROPS)
+            : ArrayUtils::only($allProps, $props);
     }
 
     /**

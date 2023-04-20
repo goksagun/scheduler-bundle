@@ -5,7 +5,7 @@ namespace Goksagun\SchedulerBundle\Annotation;
 use Doctrine\Common\Annotations\Annotation\Required;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 
 /**
  * @Annotation
@@ -111,6 +111,6 @@ class Schedule implements StatusInterface
 
         return empty($props)
             ? $allProps
-            : ArrayHelper::only($allProps, $props);
+            : ArrayUtils::only($allProps, $props);
     }
 }

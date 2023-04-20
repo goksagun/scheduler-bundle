@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Goksagun\SchedulerBundle\Utils;
 
-final class ArrayHelper
+final class ArrayUtils
 {
     private function __construct()
     {
@@ -35,7 +35,7 @@ final class ArrayHelper
      */
     public static function except(array $array, array|string $keys): array
     {
-        ArrayHelper::forget($array, $keys);
+        ArrayUtils::forget($array, $keys);
 
         return $array;
     }

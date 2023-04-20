@@ -7,7 +7,7 @@ use Goksagun\SchedulerBundle\Annotation\Schedule;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\HashHelper;
 
 trait AnnotatedCommandTrait
@@ -50,7 +50,7 @@ trait AnnotatedCommandTrait
                         if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
                             // Generate Id.
                             $id = HashHelper::generateIdFromProps(
-                                ArrayHelper::only($annotationTask, HashHelper::GENERATED_PROPS)
+                                ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS)
                             );
 
                             $task[$attribute] = $id;
@@ -84,7 +84,7 @@ trait AnnotatedCommandTrait
 
                     // Filter props if exists
                     if ($props) {
-                        $task = ArrayHelper::only($task, $props);
+                        $task = ArrayUtils::only($task, $props);
                     }
 
                     $this->tasks[] = $task;
