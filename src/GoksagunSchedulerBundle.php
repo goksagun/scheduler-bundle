@@ -4,7 +4,7 @@ namespace Goksagun\SchedulerBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class SchedulerBundle extends Bundle
+class GoksagunSchedulerBundle extends Bundle
 {
     public function getPath(): string
     {

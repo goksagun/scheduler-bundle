@@ -55,7 +55,7 @@ in the `config/bundles.php` file of your project:
 
 return [
     // ...
-    Goksagun\SchedulerBundle\SchedulerBundle::class => ['all' => true],
+    Goksagun\SchedulerBundle\GoksagunSchedulerBundle::class => ['all' => true],
 ];
 ```
 
