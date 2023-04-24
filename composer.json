@@ -34,7 +34,10 @@
     "autoload": {
         "psr-4": {
             "Goksagun\\SchedulerBundle\\": "src/"
-        }
+        },
+        "files": [
+            "config/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

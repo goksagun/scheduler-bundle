@@ -4,7 +4,7 @@ namespace Goksagun\SchedulerBundle\Service;
 
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository;
-use Goksagun\SchedulerBundle\Utils\StringHelper;
+use Goksagun\SchedulerBundle\Utils\StringUtils;
 
 class ScheduledTaskLogService
 {
@@ -70,7 +70,7 @@ class ScheduledTaskLogService
 
         $scheduledTaskLog->setStatus($status);
         if (null !== $message) {
-            $scheduledTaskLog->setMessage(StringHelper::limit($message, 252));
+            $scheduledTaskLog->setMessage(StringUtils::limit($message, 252));
         }
 
         if (null !== $output) {

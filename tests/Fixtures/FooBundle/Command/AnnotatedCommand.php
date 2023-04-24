@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @Schedule(name="schedule:annotate", expression="*\/10 * * * *")
+ * @Schedule(name="schedule:annotate", expression="* * * * *")
  * @Schedule(name="schedule:annotate --foo=bar", expression="* * * * *")
  */
 class AnnotatedCommand extends Command

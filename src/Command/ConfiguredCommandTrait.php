@@ -5,7 +5,7 @@ namespace Goksagun\SchedulerBundle\Command;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Utils\ArrayHelper;
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\HashHelper;
 
 trait ConfiguredCommandTrait
@@ -25,7 +25,7 @@ trait ConfiguredCommandTrait
                 if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
                     // Generate Id.
                     $id = HashHelper::generateIdFromProps(
-                        ArrayHelper::only($configTask, HashHelper::GENERATED_PROPS)
+                        ArrayUtils::only($configTask, HashHelper::GENERATED_PROPS)
                     );
 
                     $task[$attribute] = $id;
@@ -59,7 +59,7 @@ trait ConfiguredCommandTrait
 
             // Filter props if exists
             if ($props) {
-                $task = ArrayHelper::only($task, $props);
+                $task = ArrayUtils::only($task, $props);
             }
 
             $this->tasks[] = $task;

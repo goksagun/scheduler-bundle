@@ -21,11 +21,11 @@ final class TaskHelper
 
         $temp = [];
         foreach ($parts as $i => $part) {
-            if (StringHelper::startsWith($part, ['"', '\'']) && StringHelper::endsWith($part, ['"', '\''])) {
+            if (StringUtils::startsWith($part, ['"', '\'']) && StringUtils::endsWith($part, ['"', '\''])) {
                 continue;
             }
 
-            if (StringHelper::contains($part, ['"', '\''])) {
+            if (StringUtils::contains($part, ['"', '\''])) {
                 $temp[] = $part;
 
                 unset($parts[$i]);

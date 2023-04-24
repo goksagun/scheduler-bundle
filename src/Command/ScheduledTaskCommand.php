@@ -14,7 +14,6 @@ use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -42,12 +41,14 @@ class ScheduledTaskCommand extends Command
     use AnnotatedCommandTrait;
     use DatabasedCommandTrait;
 
+    private const WAIT_INTERVAL_SECONDS = 1;
     private string $projectDir;
 
     /**
      * @var array<int, array>
      */
     private array $tasks = [];
+
     /**
      * @var array<int, ProcessInfo>
      */
@@ -131,7 +132,7 @@ class ScheduledTaskCommand extends Command
         }
 
         if ($isAsync) {
-            $this->finishAsyncProcesses($output);
+            $this->waitForAsyncTasksCompletion($output);
         }
 
         return Command::SUCCESS;
@@ -192,7 +193,7 @@ class ScheduledTaskCommand extends Command
                 $this->runSyncTask($name, $scheduledTaskLog, $output);
             }
         } catch (\Exception $e) {
-            $this->handleTaskException($scheduledTaskLog, $e->getMessage(), $output, $name);
+            $this->handleTaskException($name, $scheduledTaskLog, $output, $e->getMessage());
         }
     }
 
@@ -227,39 +228,47 @@ class ScheduledTaskCommand extends Command
             $bufferedOutput->fetch()
         );
 
-        $output->writeln("The '{$name}' completed!");
+        $output->writeln("The '$name' completed!");
     }
 
     private function validateCommand(
         string $name,
         ScheduledTaskLog $scheduledTaskLog,
         OutputInterface $output
-    ): ?Command {
-        try {
-            return $this->getCommand($name);
-        } catch (CommandNotFoundException $e) {
-            $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $e->getMessage());
+    ): bool {
+        if (!$this->hasCommand($name)) {
+            $this->updateScheduledTaskLogStatusAsFailed(
+                $scheduledTaskLog,
+                sprintf('Command "%s" is not defined.', $name)
+            );
 
-            $output->writeln("The '{$name}' task not found!");
+            $output->writeln("The '$name' task not found!");
+
+            return false;
         }
 
-        return null;
+        return true;
     }
 
-    private function getCommand(mixed $name): Command
+    private function getCommand(string $name): Command
     {
         return $this->getApplication()->find(TaskHelper::getCommandName($name));
     }
 
+    private function hasCommand(string $name): bool
+    {
+        return $this->getApplication()->has(TaskHelper::getCommandName($name));
+    }
+
     private function handleTaskException(
+        string $name,
         ScheduledTaskLog $scheduledTaskLog,
-        string $message,
         OutputInterface $output,
-        mixed $name
+        string $message,
     ): void {
         $this->updateScheduledTaskLogStatusAsFailed($scheduledTaskLog, $message);
 
-        $output->writeln("The '{$name}'  failed!");
+        $output->writeln("The '$name'  failed!");
     }
 
     private function getTasks(): \Generator
@@ -322,58 +331,78 @@ class ScheduledTaskCommand extends Command
         return $phpBinaryPath;
     }
 
-    private function finishAsyncProcesses(OutputInterface $output): void
+    private function waitForAsyncTasksCompletion(OutputInterface $output): void
     {
-        do {
-            // Loop active process and remove if successful.
-            foreach ($this->processes as $j => $processInfo) {
+        while (count($this->processes)) {
+            $this->processes = array_filter($this->processes, function ($processInfo) use ($output) {
                 $process = $processInfo->getProcess();
 
                 if ($process->isRunning()) {
-                    continue;
+                    return true;
                 }
 
-                // Remove finished process from active processes list.
-                unset($this->processes[$j]);
+                $this->handleProcess($processInfo, $output);
 
-                $scheduledTaskLog = $processInfo->getScheduledTaskLog();
+                return false;
+            });
 
-                if (!$process->isSuccessful()) {
-                    $this->updateScheduledTaskLogStatusAsFailed(
-                        $scheduledTaskLog,
-                        'Task was failed executing as synchronously.',
-                        $process->getErrorOutput()
-                    );
+            sleep(self::WAIT_INTERVAL_SECONDS);
+        }
+    }
 
-                    $output->writeln(
-                        [
-                            " - Failed process: {$process->getCommandLine()}",
-                            '========== Error ==========',
-                            $process->getErrorOutput(),
-                        ]
-                    );
+    private function handleProcess(ProcessInfo $processInfo, OutputInterface $output): void
+    {
+        $process = $processInfo->getProcess();
 
-                    continue;
-                }
+        $scheduledTaskLog = $processInfo->getScheduledTaskLog();
 
-                $this->updateScheduledTaskLogStatusAsExecuted(
-                    $scheduledTaskLog,
-                    'Task was successfully executed as asynchronously.',
-                    $process->getOutput()
-                );
+        if (!$process->isSuccessful()) {
+            $this->handleFailedProcess($scheduledTaskLog, $process, $output);
 
-                $output->writeln(
-                    [
-                        " - Successful process: {$process->getCommandLine()}",
-                        '========== Output ==========',
-                        $process->getOutput(),
-                    ]
-                );
-            }
+            return;
+        }
 
-            // Check every second.
-            sleep(1);
-        } while (count($this->processes));
+        $this->handleSuccessfulProcess($scheduledTaskLog, $process, $output);
+    }
+
+    private function handleFailedProcess(
+        ScheduledTaskLog $scheduledTaskLog,
+        Process $process,
+        OutputInterface $output
+    ): void {
+        $this->updateScheduledTaskLogStatusAsFailed(
+            $scheduledTaskLog,
+            'Task was failed executing as synchronously.',
+            $process->getErrorOutput()
+        );
+
+        $output->writeln(
+            [
+                " - Failed process: {$process->getCommandLine()}",
+                '========== Error ==========',
+                $process->getErrorOutput(),
+            ]
+        );
+    }
+
+    private function handleSuccessfulProcess(
+        ScheduledTaskLog $scheduledTaskLog,
+        Process $process,
+        OutputInterface $output
+    ): void {
+        $this->updateScheduledTaskLogStatusAsExecuted(
+            $scheduledTaskLog,
+            'Task was successfully executed as asynchronously.',
+            $process->getOutput()
+        );
+
+        $output->writeln(
+            [
+                " - Successful process: {$process->getCommandLine()}",
+                '========== Output ==========',
+                $process->getOutput(),
+            ]
+        );
     }
 
     private function shouldStoreToDb(): bool
