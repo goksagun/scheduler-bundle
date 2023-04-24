@@ -1,3 +1,6 @@
+## 2.1.1 (April 25, 2023)
+  - Refactor helper methods (#21)
+
 ## 2.1.0 (April 19, 2023)
   - Add task delete command (#20)
 
