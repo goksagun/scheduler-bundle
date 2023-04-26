@@ -6,6 +6,7 @@ interface ResourceInterface
 {
     const RESOURCE_CONFIG = 'config';
     const RESOURCE_ANNOTATION = 'annotation';
+    const RESOURCE_ATTRIBUTE = 'attribute';
     const RESOURCE_DATABASE = 'database';
 
     const RESOURCES = [

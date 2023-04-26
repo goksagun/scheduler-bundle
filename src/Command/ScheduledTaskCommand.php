@@ -39,6 +39,7 @@ class ScheduledTaskCommand extends Command
 {
     use ConfiguredCommandTrait;
     use AnnotatedCommandTrait;
+    use AttributedCommandTrait;
     use DatabasedCommandTrait;
 
     private const WAIT_INTERVAL_SECONDS = 1;
@@ -141,6 +142,7 @@ class ScheduledTaskCommand extends Command
     private function setTasks(?string $resource): void
     {
         $this->setConfiguredTasks(StatusInterface::STATUS_ACTIVE, $resource);
+        $this->setAttributedTasks(StatusInterface::STATUS_ACTIVE, $resource);
         $this->setAnnotatedTasks(StatusInterface::STATUS_ACTIVE, $resource);
         $this->setDatabasedTasks(StatusInterface::STATUS_ACTIVE, $resource);
     }

@@ -15,6 +15,7 @@ class ScheduledTaskListCommand extends Command
 {
     use ConfiguredCommandTrait;
     use AnnotatedCommandTrait;
+    use AttributedCommandTrait;
     use DatabasedCommandTrait;
 
     const TABLE_HEADERS = ['#', 'Id', 'Name', 'Expression', 'Times', 'Start', 'Stop', 'Status', 'Resource'];
@@ -85,6 +86,7 @@ class ScheduledTaskListCommand extends Command
     {
         $this->setConfiguredTasks($status, $resource, $props);
         $this->setAnnotatedTasks($status, $resource, $props);
+        $this->setAttributedTasks($status, $resource, $props);
         $this->setDatabasedTasks($status, $resource, $props);
     }
 }

@@ -72,6 +72,19 @@ scheduler:
          - { name: another-command:name, expression: "@hourly" }
 ```
 
+Or use attribute:
+
+```php
+use Goksagun\SchedulerBundle\Attribute\Schedule;
+use Symfony\Component\Console\Command\Command;
+
+#[Schedule(name: 'command:name argument --option', expression: '*\/10 * * * *')]
+class AttributedCommand extends Command
+{
+    // 
+}
+```
+
 Or use annotation:
 
 ```php
@@ -98,6 +111,12 @@ If you want to edit task you can use `scheduler:edit` command:
 
 ```console
 php bin/console scheduler:edit [id] 'command:name argument --no-option' '@hourly'
+```
+
+If you want to delete task you can use `scheduler:delete` command:
+
+```console
+php bin/console scheduler:delete [id]
 ```
 
 If you want to list tasks you can use `scheduler:list` command:
