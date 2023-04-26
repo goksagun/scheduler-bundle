@@ -6,6 +6,7 @@ namespace Goksagun\SchedulerBundle\Service;
 
 use Cron\CronExpression;
 use Goksagun\SchedulerBundle\Command\AnnotatedCommandTrait;
+use Goksagun\SchedulerBundle\Command\AttributedCommandTrait;
 use Goksagun\SchedulerBundle\Command\ConfiguredCommandTrait;
 use Goksagun\SchedulerBundle\Command\DatabasedCommandTrait;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
@@ -21,6 +22,7 @@ class ScheduledTaskService
 {
     use ConfiguredCommandTrait;
     use AnnotatedCommandTrait;
+    use AttributedCommandTrait;
     use DatabasedCommandTrait;
 
     /**
@@ -119,6 +121,7 @@ class ScheduledTaskService
     {
         $this->setConfiguredTasks($status, $resource, $props);
         $this->setAnnotatedTasks($status, $resource, $props);
+        $this->setAttributedTasks($status, $resource, $props);
         $this->setDatabasedTasks($status, $resource, $props);
     }
 

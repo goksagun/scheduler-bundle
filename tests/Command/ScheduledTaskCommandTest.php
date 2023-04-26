@@ -13,6 +13,7 @@ use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayOptionCommand;
+use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\AttributeCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\DatabasedCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayGoodbyeCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
@@ -524,6 +525,38 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
         $this->assertStringContainsString("The 'schedule:annotate' completed!\n", $output);
         $this->assertStringContainsString("The 'schedule:annotate --foo=bar' completed!\n", $output);
+    }
+
+    public function testScheduleAttributedTaskCommand()
+    {
+        $config = $this->createConfigMock();
+        $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
+        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskLogService = $this->createScheduledTaskLogService();
+
+        $application->add(new AttributeCommand());
+        $application->add(
+            new ScheduledTaskCommand(
+                $config,
+                $entityManager,
+                $scheduledTaskService,
+                $scheduledTaskLogService
+            )
+        );
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString("The 'schedule:attribute' completed!\n", $output);
+        $this->assertStringContainsString("The 'schedule:attribute --foo=bar' completed!\n", $output);
     }
 
     public function testScheduleDatabasedTaskCommand()
