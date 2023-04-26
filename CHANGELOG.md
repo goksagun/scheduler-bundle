@@ -1,3 +1,6 @@
+## 2.2.0 (April 26, 2023)
+  - Implement Attribute schedule options (#23)
+
 ## 2.1.1 (April 25, 2023)
   - Refactor helper methods (#21)
 
