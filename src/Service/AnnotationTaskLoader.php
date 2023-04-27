@@ -21,7 +21,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             return [];
         }
 
-        $commands = $this->getApplication()->all();
+        $commands = $this->getCommands();
 
         if (!$commands) {
             return [];
@@ -95,5 +95,10 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
     private function supports(?string $resource): bool
     {
         return null === $resource || $resource === ResourceInterface::RESOURCE_ANNOTATION;
+    }
+
+    private function getCommands(): array
+    {
+        return $this->getApplication()->all();
     }
 }
