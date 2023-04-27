@@ -38,6 +38,11 @@ class ScheduledTaskService
     ) {
     }
 
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
     public function list($status = null, $resource = null, $props = []): array
     {
         $this->setTasks($status, $resource, $props);
@@ -135,7 +140,7 @@ class ScheduledTaskService
         return $this->container;
     }
 
-    private function getApplication(): Application
+    public function getApplication(): Application
     {
         return new Application($this->kernel);
     }

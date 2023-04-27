@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Goksagun\SchedulerBundle\Command;
 
+use Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -25,10 +29,8 @@ class ScheduledTaskListCommand extends Command
      */
     private array $tasks = [];
 
-    public function __construct(
-        private readonly array $config,
-        private readonly ScheduledTaskService $service
-    ) {
+    public function __construct(private readonly ScheduledTaskService $service)
+    {
         parent::__construct();
     }
 
@@ -82,11 +84,23 @@ class ScheduledTaskListCommand extends Command
         $table->render();
     }
 
+    public function getService(): ScheduledTaskService
+    {
+        return $this->service;
+    }
+
     private function setTasks($status, $resource, $props = []): void
     {
-        $this->setConfiguredTasks($status, $resource, $props);
-        $this->setAnnotatedTasks($status, $resource, $props);
-        $this->setAttributedTasks($status, $resource, $props);
-        $this->setDatabasedTasks($status, $resource, $props);
+        $configurationTaskLoader = new ConfigurationTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$configurationTaskLoader->load()];
+
+        $annotationTaskLoader = new AnnotationTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$annotationTaskLoader->load()];
+
+        $attributeTaskLoader = new AttributeTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$attributeTaskLoader->load()];
+
+        $databaseTaskLoader = new DatabaseTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$databaseTaskLoader->load()];
     }
 }

@@ -16,22 +16,11 @@ class ScheduledTaskListCommandTest extends KernelTestCase
 
     public function testScheduleTaskListOption()
     {
-        $config = $this->createConfigMock(
-            true,
-            false,
-            false,
-            [
-                [
-                    'name' => 'schedule:annotate --foo=baz',
-                    'expression' => '*/10 * * * *',
-                ],
-            ]
-        );
         $application = $this->getApplication();
         $scheduledTaskService = $this->createScheduledTaskService();
 
         $application->add(new ArrayArgumentCommand());
-        $application->add(new ScheduledTaskListCommand($config, $scheduledTaskService));
+        $application->add(new ScheduledTaskListCommand($scheduledTaskService));
 
         $command = $application->find('scheduler:list');
         $commandTester = new CommandTester($command);
@@ -71,26 +60,26 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         return ['enabled' => $enabled, 'async' => $async, 'log' => $log, 'tasks' => $tasks];
     }
 
-    private function createScheduledTaskService(array $data = []): ScheduledTaskService
+    private function createScheduledTaskService(): ScheduledTaskService
     {
-        $scheduledTasks = [];
-        foreach ($data as $datum) {
-            $scheduledTask = new ScheduledTask();
-            $scheduledTask->setName($datum['name']);
-            $scheduledTask->setExpression($datum['expression']);
-            $scheduledTask->setTimes($datum['times'] ?? null);
-            $scheduledTask->setStart($datum['start'] ?? null);
-            $scheduledTask->setStop($datum['stop'] ?? null);
-            $scheduledTask->setStatus($datum['status'] ?? StatusInterface::STATUS_ACTIVE);
-
-            $scheduledTasks[] = $scheduledTask;
-        }
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'schedule:annotate --foo=baz',
+                    'expression' => '*/10 * * * *',
+                ],
+            ]
+        );
 
         $scheduledTaskService = $this->createMock(ScheduledTaskService::class);
         $scheduledTaskService
             ->expects($this->any())
-            ->method('getScheduledTasks')
-            ->willReturn($scheduledTasks);
+            ->method('getConfig')
+            ->willReturn($config)
+        ;
 
         return $scheduledTaskService;
     }

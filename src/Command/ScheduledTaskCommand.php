@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Goksagun\SchedulerBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Command\Utils\TaskValidator;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
@@ -56,7 +60,6 @@ class ScheduledTaskCommand extends Command
     private array $processes = [];
 
     public function __construct(
-        private readonly array $config,
         private readonly EntityManagerInterface $entityManager,
         private readonly ScheduledTaskService $service,
         private readonly ScheduledTaskLogService $logService
@@ -103,7 +106,7 @@ class ScheduledTaskCommand extends Command
 
         $this->setTasks($resource);
 
-        if (!$this->config['enabled']) {
+        if (!$this->service->getConfig()['enabled']) {
             throw new RuntimeException(
                 'Scheduled task(s) disabled. You should enable in scheduler.yaml config before running this command.'
             );
@@ -141,16 +144,23 @@ class ScheduledTaskCommand extends Command
 
     private function setTasks(?string $resource): void
     {
-        $this->setConfiguredTasks(StatusInterface::STATUS_ACTIVE, $resource);
-        $this->setAttributedTasks(StatusInterface::STATUS_ACTIVE, $resource);
-        $this->setAnnotatedTasks(StatusInterface::STATUS_ACTIVE, $resource);
-        $this->setDatabasedTasks(StatusInterface::STATUS_ACTIVE, $resource);
+        $configurationTaskLoader = new ConfigurationTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$configurationTaskLoader->load()];
+
+        $annotationTaskLoader = new AnnotationTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$annotationTaskLoader->load()];
+
+        $attributeTaskLoader = new AttributeTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$attributeTaskLoader->load()];
+
+        $databaseTaskLoader = new DatabaseTaskLoader($this->service);
+        $this->tasks = [...$this->tasks, ...$databaseTaskLoader->load()];
     }
 
     private function getAsyncOption(InputInterface $input): bool
     {
-        if (null !== $this->config['async']) {
-            return $this->config['async'];
+        if (null !== $this->service->getConfig()['async']) {
+            return $this->service->getConfig()['async'];
         }
 
         return $input->getOption('async');
@@ -425,7 +435,7 @@ class ScheduledTaskCommand extends Command
 
     private function isLoggingEnabled(): bool
     {
-        return $this->config['log'];
+        return $this->service->getConfig()['log'];
     }
 
     private function getLogTableName(): string
