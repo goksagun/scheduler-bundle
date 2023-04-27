@@ -4,14 +4,14 @@ namespace Goksagun\SchedulerBundle\Tests\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Goksagun\SchedulerBundle\Command\ScheduledTaskCommand;
-use Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
+use Goksagun\SchedulerBundle\Service\AnnotationTaskLoader;
+use Goksagun\SchedulerBundle\Service\AttributeTaskLoader;
+use Goksagun\SchedulerBundle\Service\ConfigurationTaskLoader;
+use Goksagun\SchedulerBundle\Service\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Service\TaskLoader;
@@ -24,8 +24,8 @@ use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayGoodbye
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\NoOutputCommand;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Tester\CommandTester;
 

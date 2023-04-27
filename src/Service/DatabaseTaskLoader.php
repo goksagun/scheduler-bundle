@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Goksagun\SchedulerBundle\Command\Utils;
+namespace Goksagun\SchedulerBundle\Service;
 
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;

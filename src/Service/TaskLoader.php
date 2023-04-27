@@ -2,8 +2,6 @@
 
 namespace Goksagun\SchedulerBundle\Service;
 
-use Goksagun\SchedulerBundle\Command\Utils\TaskLoaderInterface;
-
 class TaskLoader implements TaskLoaderInterface
 {
     /**

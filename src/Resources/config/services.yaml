@@ -81,22 +81,22 @@ services:
         arguments: [ '@scheduler.service.scheduled_task_log' ]
 
     scheduler.loader.annotation_task_loader:
-        class: Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader
+        class: Goksagun\SchedulerBundle\Service\AnnotationTaskLoader
         arguments: [ '@scheduler.service.scheduled_task' ]
         tags: [ 'scheduler.task_loader' ]
 
     scheduler.loader.attribute_task_loader:
-        class: Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader
+        class: Goksagun\SchedulerBundle\Service\AttributeTaskLoader
         arguments: [ '@scheduler.service.scheduled_task' ]
         tags: [ 'scheduler.task_loader' ]
 
     scheduler.loader.configuration_task_loader:
-        class: Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader
+        class: Goksagun\SchedulerBundle\Service\ConfigurationTaskLoader
         arguments: [ '@scheduler.service.scheduled_task' ]
         tags: [ 'scheduler.task_loader' ]
 
     scheduler.loader.database_task_loader:
-        class: Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader
+        class: Goksagun\SchedulerBundle\Service\DatabaseTaskLoader
         arguments: [ '@scheduler.service.scheduled_task' ]
         tags: [ 'scheduler.task_loader' ]
 

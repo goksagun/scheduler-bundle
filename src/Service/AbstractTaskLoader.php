@@ -1,8 +1,7 @@
 <?php
 
-namespace Goksagun\SchedulerBundle\Command\Utils;
+namespace Goksagun\SchedulerBundle\Service;
 
-use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Symfony\Component\Console\Application;
 
 class AbstractTaskLoader

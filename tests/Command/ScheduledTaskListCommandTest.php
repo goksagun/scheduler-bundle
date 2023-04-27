@@ -3,10 +3,10 @@
 namespace Goksagun\SchedulerBundle\Tests\Command;
 
 use Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand;
-use Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader;
+use Goksagun\SchedulerBundle\Service\AnnotationTaskLoader;
+use Goksagun\SchedulerBundle\Service\AttributeTaskLoader;
+use Goksagun\SchedulerBundle\Service\ConfigurationTaskLoader;
+use Goksagun\SchedulerBundle\Service\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Goksagun\SchedulerBundle\Service\TaskLoader;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;

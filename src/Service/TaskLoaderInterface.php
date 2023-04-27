@@ -1,6 +1,6 @@
 <?php
 
-namespace Goksagun\SchedulerBundle\Command\Utils;
+namespace Goksagun\SchedulerBundle\Service;
 
 interface TaskLoaderInterface
 {

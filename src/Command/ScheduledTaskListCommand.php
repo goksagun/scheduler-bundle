@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Goksagun\SchedulerBundle\Command\Utils\TaskLoaderInterface;
+use Goksagun\SchedulerBundle\Service\TaskLoaderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
