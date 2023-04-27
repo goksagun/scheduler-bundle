@@ -33,9 +33,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         }
 
         foreach ($this->getCommands() as $command) {
-            $annotations = $this->getScheduleAnnotations($command);
-
-            if ($annotations) {
+            if ($annotations = $this->getScheduleAnnotations($command)) {
                 $this->addTaskFromAnnotations($annotations, $status);
             }
         }
