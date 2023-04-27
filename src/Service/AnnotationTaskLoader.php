@@ -49,8 +49,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             foreach ($annotations as $annotation) {
                 $task = $this->createTaskFromAnnotation($annotation);
 
-                // Filter by status
-                if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
+                if ($this->shouldFilterByStatus($status, $task)) {
                     continue;
                 }
 
@@ -116,5 +115,10 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
     private function getTaskStatus(array $annotationTask): string
     {
         return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
+    }
+
+    private function shouldFilterByStatus(?string $status, $task): bool
+    {
+        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
     }
 }
