@@ -115,10 +115,6 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 
     private function getTaskStatus(array $annotationTask): string
     {
-        if (!isset($annotationTask[AttributeInterface::ATTRIBUTE_STATUS])) {
-            return StatusInterface::STATUS_ACTIVE;
-        }
-
-        return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS];
+        return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }
 }
