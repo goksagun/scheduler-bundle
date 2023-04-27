@@ -16,6 +16,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 {
 
     private AnnotationReader $reader;
+    private array $tasks = [];
 
     public function __construct(ScheduledTaskService $service)
     {
@@ -35,26 +36,15 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             return [];
         }
 
-        $tasks = [];
         foreach ($commands as $command) {
             $annotations = $this->getScheduleAnnotations($command);
 
-            if (!$annotations) {
-                continue;
-            }
-
-            foreach ($annotations as $annotation) {
-                $task = $this->createTaskFromAnnotation($annotation);
-
-                if ($this->shouldFilterByStatus($status, $task)) {
-                    continue;
-                }
-
-                $tasks[] = $this->filterPropsIfExists($task);
+            if ($annotations) {
+                $this->addTaskFromAnnotations($annotations, $status);
             }
         }
 
-        return $tasks;
+        return $this->tasks;
     }
 
     private function supports(?string $resource): bool
@@ -72,6 +62,17 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         $annotations = $this->reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
 
         return array_filter($annotations, fn($annotation) => $annotation instanceof Schedule);
+    }
+
+    private function addTaskFromAnnotations(array $annotations, ?string $status): void
+    {
+        foreach ($annotations as $annotation) {
+            $task = $this->createTaskFromAnnotation($annotation);
+
+            if (!$this->shouldFilterByStatus($status, $task)) {
+                $this->tasks[] = $this->filterPropsIfExists($task);
+            }
+        }
     }
 
     private function createTaskFromAnnotation(Schedule $annotation): array
