@@ -15,6 +15,16 @@ use Goksagun\SchedulerBundle\Utils\HashHelper;
 class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private AnnotationReader $reader;
+
+    public function __construct(ScheduledTaskService $service)
+    {
+        $this->reader = new AnnotationReader();
+
+        parent::__construct($service);
+    }
+
+
     public function load(?string $status = null, ?string $resource = null): array
     {
         if (!$this->supports($resource)) {
@@ -27,12 +37,10 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             return [];
         }
 
-        $reader = new AnnotationReader();
-
         $tasks = [];
 
         foreach ($commands as $command) {
-            $annotations = $this->getScheduleAnnotations($reader, $command);
+            $annotations = $this->getScheduleAnnotations($command);
 
             if (!$annotations) {
                 continue;
@@ -102,8 +110,10 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         return $this->getApplication()->all();
     }
 
-    private function getScheduleAnnotations(AnnotationReader $reader, mixed $command): array
+    private function getScheduleAnnotations(mixed $command): array
     {
-        return $reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
+        $annotations = $this->reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
+
+        return array_filter($annotations, fn($annotation) => $annotation instanceof Schedule);
     }
 }
