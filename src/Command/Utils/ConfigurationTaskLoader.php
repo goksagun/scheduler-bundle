@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Command\Utils;
 
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
@@ -11,8 +13,12 @@ use Goksagun\SchedulerBundle\Utils\HashHelper;
 class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
-    public function load(): array
+    public function load(?string $status = null, ?string $resource = null): array
     {
+        if (null !== $resource && $resource !== ResourceInterface::RESOURCE_CONFIG) {
+            return [];
+        }
+
         $tasks = [];
         foreach ($this->getTasks() as $configTask) {
             $task = [];
@@ -48,7 +54,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
             }
 
             // Filter by status
-            if (null !== $this->status && $this->status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
+            if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
                 continue;
             }
 

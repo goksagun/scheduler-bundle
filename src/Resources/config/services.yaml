@@ -35,7 +35,7 @@ services:
 
     scheduler.command.scheduled_task_list:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand
-        arguments: [ '@scheduler.service.scheduled_task' ]
+        arguments: [ '@scheduler.loader.task_loader' ]
         tags:
             - { name: 'console.command', command: 'scheduler:list' }
 
@@ -81,4 +81,25 @@ services:
 
     scheduler.loader.annotation_task_loader:
         class: Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader
-        arguments: ['@scheduler.service.scheduled_task']
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.attribute_task_loader:
+        class: Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.configuration_task_loader:
+        class: Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.database_task_loader:
+        class: Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.task_loader:
+        class: Goksagun\SchedulerBundle\Service\TaskLoader
+        arguments:
+            - [ '@scheduler.loader.attribute_task_loader', '@scheduler.loader.annotation_task_loader', '@scheduler.loader.configuration_task_loader', '@scheduler.loader.database_task_loader' ]

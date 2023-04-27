@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Command\Utils;
 
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
@@ -10,8 +12,12 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
 class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
-    public function load(): array
+    public function load(?string $status = null, ?string $resource = null): array
     {
+        if (null !== $resource && $resource !== ResourceInterface::RESOURCE_DATABASE) {
+            return [];
+        }
+
         $tasks = [];
         foreach ($this->getTasks() as $database) {
             $databaseTask = $database->toArray();
@@ -48,7 +54,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
             }
 
             // Filter by status
-            if (null !== $this->status && $task[AttributeInterface::ATTRIBUTE_STATUS] !== $this->status) {
+            if (null !== $status && $task[AttributeInterface::ATTRIBUTE_STATUS] !== $status) {
                 continue;
             }
 

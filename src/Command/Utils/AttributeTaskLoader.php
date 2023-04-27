@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Goksagun\SchedulerBundle\Command\Utils;
 
 use Goksagun\SchedulerBundle\Attribute\Schedule;
@@ -12,8 +14,12 @@ use Goksagun\SchedulerBundle\Utils\HashHelper;
 class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
-    public function load(): array
+    public function load(?string $status = null, ?string $resource = null): array
     {
+        if (null !== $resource && $resource !== ResourceInterface::RESOURCE_ATTRIBUTE) {
+            return [];
+        }
+
         $commands = $this->getApplication()->all();
 
         if (!$commands) {
@@ -68,7 +74,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
                 }
 
                 // Filter by status
-                if (null !== $this->status && $this->status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
+                if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
                     continue;
                 }
 

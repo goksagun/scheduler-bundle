@@ -3,9 +3,12 @@
 namespace Goksagun\SchedulerBundle\Tests\Command;
 
 use Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand;
-use Goksagun\SchedulerBundle\Entity\ScheduledTask;
-use Goksagun\SchedulerBundle\Enum\StatusInterface;
+use Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader;
+use Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
+use Goksagun\SchedulerBundle\Service\TaskLoader;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Application;
@@ -17,10 +20,18 @@ class ScheduledTaskListCommandTest extends KernelTestCase
     public function testScheduleTaskListOption()
     {
         $application = $this->getApplication();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $service = $this->createScheduledTaskService();
+        $taskLoader = new TaskLoader(
+            [
+                new DatabaseTaskLoader($service),
+                new AttributeTaskLoader($service),
+                new AnnotationTaskLoader($service),
+                new ConfigurationTaskLoader($service),
+            ]
+        );
 
         $application->add(new ArrayArgumentCommand());
-        $application->add(new ScheduledTaskListCommand($scheduledTaskService));
+        $application->add(new ScheduledTaskListCommand($taskLoader));
 
         $command = $application->find('scheduler:list');
         $commandTester = new CommandTester($command);
@@ -55,8 +66,12 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         return new Application();
     }
 
-    private function createConfigMock(bool $enabled = true, bool $async = false, bool $log = false, array $tasks = []): array
-    {
+    private function createConfigMock(
+        bool $enabled = true,
+        bool $async = false,
+        bool $log = false,
+        array $tasks = []
+    ): array {
         return ['enabled' => $enabled, 'async' => $async, 'log' => $log, 'tasks' => $tasks];
     }
 
@@ -78,8 +93,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         $scheduledTaskService
             ->expects($this->any())
             ->method('getConfig')
-            ->willReturn($config)
-        ;
+            ->willReturn($config);
 
         return $scheduledTaskService;
     }
