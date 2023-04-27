@@ -26,6 +26,7 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@scheduler.service.scheduled_task'
             - '@scheduler.service.scheduled_task_log'
+            - '@scheduler.loader.task_loader'
         calls:
             -   method: setProjectDir
                 arguments:

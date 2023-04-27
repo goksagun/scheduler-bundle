@@ -5,17 +5,13 @@ declare(strict_types=1);
 namespace Goksagun\SchedulerBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Goksagun\SchedulerBundle\Command\Utils\AnnotationTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\AttributeTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\ConfigurationTaskLoader;
-use Goksagun\SchedulerBundle\Command\Utils\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Command\Utils\TaskValidator;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
-use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
+use Goksagun\SchedulerBundle\Service\TaskLoader;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\RuntimeException;
@@ -41,11 +37,6 @@ use Symfony\Component\Process\Process;
  */
 class ScheduledTaskCommand extends Command
 {
-    use ConfiguredCommandTrait;
-    use AnnotatedCommandTrait;
-    use AttributedCommandTrait;
-    use DatabasedCommandTrait;
-
     private const WAIT_INTERVAL_SECONDS = 1;
     private string $projectDir;
 
@@ -62,7 +53,8 @@ class ScheduledTaskCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ScheduledTaskService $service,
-        private readonly ScheduledTaskLogService $logService
+        private readonly ScheduledTaskLogService $logService,
+        private readonly TaskLoader $loader,
     ) {
         parent::__construct();
     }
@@ -104,7 +96,7 @@ class ScheduledTaskCommand extends Command
             );
         }
 
-        $this->setTasks($resource);
+        $this->loadTasks($resource);
 
         if (!$this->service->getConfig()['enabled']) {
             throw new RuntimeException(
@@ -142,19 +134,9 @@ class ScheduledTaskCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function setTasks(?string $resource): void
+    private function loadTasks(?string $resource): void
     {
-        $configurationTaskLoader = new ConfigurationTaskLoader($this->service);
-        $this->tasks = [...$this->tasks, ...$configurationTaskLoader->load()];
-
-        $annotationTaskLoader = new AnnotationTaskLoader($this->service);
-        $this->tasks = [...$this->tasks, ...$annotationTaskLoader->load()];
-
-        $attributeTaskLoader = new AttributeTaskLoader($this->service);
-        $this->tasks = [...$this->tasks, ...$attributeTaskLoader->load()];
-
-        $databaseTaskLoader = new DatabaseTaskLoader($this->service);
-        $this->tasks = [...$this->tasks, ...$databaseTaskLoader->load()];
+        $this->tasks = $this->loader->load(resource: $resource);
     }
 
     private function getAsyncOption(InputInterface $input): bool
