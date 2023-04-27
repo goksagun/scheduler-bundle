@@ -47,39 +47,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             }
 
             foreach ($annotations as $annotation) {
-                $annotationTask = $annotation->toArray();
-
-                $task = [];
-                foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-                    if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
-                        // Generate Id.
-                        $id = HashHelper::generateIdFromProps(
-                            ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS)
-                        );
-
-                        $task[$attribute] = $id;
-
-                        continue;
-                    }
-
-                    if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
-                        if (!isset($annotationTask[$attribute])) {
-                            $task[$attribute] = StatusInterface::STATUS_ACTIVE;
-                        } else {
-                            $task[$attribute] = $annotationTask[$attribute];
-                        }
-
-                        continue;
-                    }
-
-                    if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
-                        $task[$attribute] = ResourceInterface::RESOURCE_ANNOTATION;
-
-                        continue;
-                    }
-
-                    $task[$attribute] = $annotationTask[$attribute] ?? null;
-                }
+                $task = $this->createTaskFromAnnotation($annotation);
 
                 // Filter by status
                 if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
@@ -113,5 +81,43 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         $annotations = $this->reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
 
         return array_filter($annotations, fn($annotation) => $annotation instanceof Schedule);
+    }
+
+    private function createTaskFromAnnotation(Schedule $annotation): array
+    {
+        $annotationTask = $annotation->toArray();
+
+        $task = [];
+        foreach (AttributeInterface::ATTRIBUTES as $attribute) {
+            if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
+                // Generate Id.
+                $id = HashHelper::generateIdFromProps(
+                    ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS)
+                );
+
+                $task[$attribute] = $id;
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
+                if (!isset($annotationTask[$attribute])) {
+                    $task[$attribute] = StatusInterface::STATUS_ACTIVE;
+                } else {
+                    $task[$attribute] = $annotationTask[$attribute];
+                }
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
+                $task[$attribute] = ResourceInterface::RESOURCE_ANNOTATION;
+
+                continue;
+            }
+
+            $task[$attribute] = $annotationTask[$attribute] ?? null;
+        }
+        return $task;
     }
 }
