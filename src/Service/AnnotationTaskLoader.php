@@ -89,26 +89,22 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-            if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
-                $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($annotationTask);
-
-                continue;
+            switch ($attribute) {
+                case AttributeInterface::ATTRIBUTE_ID:
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($annotationTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_STATUS:
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($annotationTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_RESOURCE:
+                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ANNOTATION;
+                    break;
+                default:
+                    $task[$attribute] = $annotationTask[$attribute] ?? null;
+                    break;
             }
-
-            if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
-                $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($annotationTask);
-
-                continue;
-            }
-
-            if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
-                $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ANNOTATION;
-
-                continue;
-            }
-
-            $task[$attribute] = $annotationTask[$attribute] ?? null;
         }
+
         return $task;
     }
 
