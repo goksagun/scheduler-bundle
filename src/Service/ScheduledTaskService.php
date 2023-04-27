@@ -5,10 +5,6 @@ declare(strict_types=1);
 namespace Goksagun\SchedulerBundle\Service;
 
 use Cron\CronExpression;
-use Goksagun\SchedulerBundle\Command\AnnotatedCommandTrait;
-use Goksagun\SchedulerBundle\Command\AttributedCommandTrait;
-use Goksagun\SchedulerBundle\Command\ConfiguredCommandTrait;
-use Goksagun\SchedulerBundle\Command\DatabasedCommandTrait;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\DateHelper;

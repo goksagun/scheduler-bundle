@@ -1,6 +1,6 @@
 <?php
 
-namespace Goksagun\SchedulerBundle\Command;
+namespace Goksagun\SchedulerBundle\Service;
 
 use Goksagun\SchedulerBundle\Attribute\Schedule;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;

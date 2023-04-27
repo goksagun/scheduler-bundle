@@ -1,6 +1,6 @@
 <?php
 
-namespace Goksagun\SchedulerBundle\Command;
+namespace Goksagun\SchedulerBundle\Service;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Goksagun\SchedulerBundle\Annotation\Schedule;
