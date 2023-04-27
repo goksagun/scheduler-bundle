@@ -31,14 +31,11 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             return [];
         }
 
-        $commands = $this->getCommands();
-
-        if (!$commands) {
+        if (!$commands = $this->getCommands()) {
             return [];
         }
 
         $tasks = [];
-
         foreach ($commands as $command) {
             $annotations = $this->getScheduleAnnotations($command);
 
@@ -53,12 +50,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
                     continue;
                 }
 
-                // Filter props if exists
-                if ($this->props) {
-                    $task = ArrayUtils::only($task, $this->props);
-                }
-
-                $tasks[] = $task;
+                $tasks[] = $this->filterPropsIfExists($task);
             }
         }
 
@@ -120,5 +112,14 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
     private function shouldFilterByStatus(?string $status, $task): bool
     {
         return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
+    }
+
+    private function filterPropsIfExists(array $task): array
+    {
+        if ($this->props) {
+            $task = ArrayUtils::only($task, $this->props);
+        }
+
+        return $task;
     }
 }
