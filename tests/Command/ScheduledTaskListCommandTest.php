@@ -290,6 +290,114 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         $this->assertStringNotContainsString("schedule:database", $output);
     }
 
+    public function testScheduleTaskListWithOptionStatusActive()
+    {
+        $config = $this->createConfigMock(
+            tasks: [
+                [
+                    'name' => 'schedule:config --foo=baz',
+                    'expression' => '*/10 * * * *',
+                    'status' => 'inactive',
+                ],
+            ]
+        );
+        $data = [
+            [
+                'name' => 'schedule:database',
+                'expression' => '* * * * *',
+                'resource' => 'database',
+                'status' => 'inactive',
+            ],
+        ];
+        $application = $this->getApplication();
+        $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
+        $taskLoader = new TaskLoader(
+            [
+                new DatabaseTaskLoader($service),
+                new AttributeTaskLoader($service),
+                new AnnotationTaskLoader($service),
+                new ConfigurationTaskLoader($service),
+            ]
+        );
+
+        $application->add(new AnnotatedCommand());
+        $application->add(new AttributeCommand());
+        $application->add(new ScheduledTaskListCommand($taskLoader));
+
+        $command = $application->find('scheduler:list');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+                '--status' => 'active',
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString("c6cfb66ac599e49ae735494e70a53183", $output);
+        $this->assertStringContainsString("c72bc821d47eee2ebe9e13b5ca4cfa7b", $output);
+        $this->assertStringContainsString("0c3f5195b5f1205aff62d743ce141a95", $output);
+        $this->assertStringContainsString("8b748ae733ea60089ee4c399cb929c2f", $output);
+
+        $this->assertStringNotContainsString("8ee1b1f7329073f90b1acee62280ca38", $output);
+        $this->assertStringNotContainsString("3ec311e111f08085d5b066455f44a8c8", $output);
+    }
+
+    public function testScheduleTaskListWithOptionStatusInActive()
+    {
+        $config = $this->createConfigMock(
+            tasks: [
+                [
+                    'name' => 'schedule:config --foo=baz',
+                    'expression' => '*/10 * * * *',
+                    'status' => 'inactive',
+                ],
+            ]
+        );
+        $data = [
+            [
+                'name' => 'schedule:database',
+                'expression' => '* * * * *',
+                'resource' => 'database',
+                'status' => 'inactive',
+            ],
+        ];
+        $application = $this->getApplication();
+        $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
+        $taskLoader = new TaskLoader(
+            [
+                new DatabaseTaskLoader($service),
+                new AttributeTaskLoader($service),
+                new AnnotationTaskLoader($service),
+                new ConfigurationTaskLoader($service),
+            ]
+        );
+
+        $application->add(new AnnotatedCommand());
+        $application->add(new AttributeCommand());
+        $application->add(new ScheduledTaskListCommand($taskLoader));
+
+        $command = $application->find('scheduler:list');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+                '--status' => 'inactive',
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertStringContainsString("8ee1b1f7329073f90b1acee62280ca38", $output);
+        $this->assertStringContainsString("3ec311e111f08085d5b066455f44a8c8", $output);
+
+        $this->assertStringNotContainsString("c6cfb66ac599e49ae735494e70a53183", $output);
+        $this->assertStringNotContainsString("c72bc821d47eee2ebe9e13b5ca4cfa7b", $output);
+        $this->assertStringNotContainsString("0c3f5195b5f1205aff62d743ce141a95", $output);
+        $this->assertStringNotContainsString("8b748ae733ea60089ee4c399cb929c2f", $output);
+    }
+
     private function getApplication(): Application
     {
         return new Application(static::createKernel());
