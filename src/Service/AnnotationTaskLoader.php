@@ -90,28 +90,19 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attribute) {
             if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
-                // Generate Id.
-                $id = HashHelper::generateIdFromProps(
-                    ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS)
-                );
-
-                $task[$attribute] = $id;
+                $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($annotationTask);
 
                 continue;
             }
 
             if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
-                if (!isset($annotationTask[$attribute])) {
-                    $task[$attribute] = StatusInterface::STATUS_ACTIVE;
-                } else {
-                    $task[$attribute] = $annotationTask[$attribute];
-                }
+                $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($annotationTask);
 
                 continue;
             }
 
             if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
-                $task[$attribute] = ResourceInterface::RESOURCE_ANNOTATION;
+                $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ANNOTATION;
 
                 continue;
             }
@@ -119,5 +110,19 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             $task[$attribute] = $annotationTask[$attribute] ?? null;
         }
         return $task;
+    }
+
+    private function generateTaskId(array $annotationTask): string
+    {
+        return HashHelper::generateIdFromProps(ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS));
+    }
+
+    private function getTaskStatus(array $annotationTask): string
+    {
+        if (!isset($annotationTask[AttributeInterface::ATTRIBUTE_STATUS])) {
+            return StatusInterface::STATUS_ACTIVE;
+        }
+
+        return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS];
     }
 }
