@@ -76,7 +76,7 @@ class ScheduledTaskListCommand extends Command
         $table->render();
     }
 
-    private function setTasks($status, $resource, $props = []): void
+    private function setTasks($status, $resource): void
     {
         $this->tasks = $this->loader->load($status, $resource);
     }
