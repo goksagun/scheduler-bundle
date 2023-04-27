@@ -32,11 +32,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
             return [];
         }
 
-        if (!$commands = $this->getCommands()) {
-            return [];
-        }
-
-        foreach ($commands as $command) {
+        foreach ($this->getCommands() as $command) {
             $annotations = $this->getScheduleAnnotations($command);
 
             if ($annotations) {
