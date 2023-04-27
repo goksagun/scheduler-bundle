@@ -32,7 +32,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         $tasks = [];
 
         foreach ($commands as $command) {
-            $annotations = $reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
+            $annotations = $this->getScheduleAnnotations($reader, $command);
 
             if (!$annotations) {
                 continue;
@@ -100,5 +100,10 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
     private function getCommands(): array
     {
         return $this->getApplication()->all();
+    }
+
+    private function getScheduleAnnotations(AnnotationReader $reader, mixed $command): array
+    {
+        return $reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
     }
 }
