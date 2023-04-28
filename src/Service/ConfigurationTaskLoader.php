@@ -24,16 +24,9 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         foreach ($this->getTasks() as $configTask) {
             $task = $this->createTaskFromConfiguration($configTask);
 
-            if ($this->shouldFilterByStatus($status, $task)) {
-                continue;
+            if (!$this->shouldFilterByStatus($status, $task)) {
+                $this->tasks[] = $this->filterPropsIfExists($task);
             }
-
-            // Filter props if exists
-            if ($this->props) {
-                $task = ArrayUtils::only($task, $this->props);
-            }
-
-            $this->tasks[] = $task;
         }
 
         return $this->tasks;
@@ -85,5 +78,14 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
     private function shouldFilterByStatus(?string $status, array $task): bool
     {
         return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
+    }
+
+    private function filterPropsIfExists(array $task): array
+    {
+        if ($this->props) {
+            $task = ArrayUtils::only($task, $this->props);
+        }
+
+        return $task;
     }
 }
