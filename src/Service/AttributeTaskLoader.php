@@ -80,11 +80,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
             }
 
             if (AttributeInterface::ATTRIBUTE_STATUS === $attr) {
-                if (!isset($attributes[AttributeInterface::ATTRIBUTE_STATUS])) {
-                    $task[$attr] = StatusInterface::STATUS_ACTIVE;
-                } else {
-                    $task[$attr] = $attributeTask[AttributeInterface::ATTRIBUTE_STATUS];
-                }
+                $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($attributeTask);
 
                 continue;
             }
@@ -103,5 +99,10 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function generateTaskId(array $attributeTask): string
     {
         return HashHelper::generateIdFromProps(ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS));
+    }
+
+    private function getTaskStatus($attributeTask): string
+    {
+        return $attributeTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }
 }
