@@ -12,7 +12,7 @@ abstract class AbstractTaskLoader
 {
     protected ScheduledTaskService $service;
 
-    protected array $props = [];
+    protected iterable $props = [];
     protected iterable $tasks = [];
 
     public function __construct(ScheduledTaskService $service)
