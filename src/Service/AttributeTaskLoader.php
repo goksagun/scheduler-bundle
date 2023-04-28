@@ -51,19 +51,11 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function addTaskFromAttributes(array $attributes, ?string $status): void
     {
         foreach ($attributes as $attribute) {
-            $task = $this->createTaskFromAttribute($attribute, $attributes);
+            $task = $this->createTaskFromAttribute($attribute);
 
-            // Filter by status
-            if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
-                continue;
+            if (!$this->shouldFilterByStatus($status, $task)) {
+                $this->tasks[] = $this->filterPropsIfExists($task);
             }
-
-            // Filter props if exists
-            if ($this->props) {
-                $task = ArrayUtils::only($task, $this->props);
-            }
-
-            $this->tasks[] = $task;
         }
     }
 
@@ -99,5 +91,19 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function getTaskStatus($attributeTask): string
     {
         return $attributeTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
+    }
+
+    private function shouldFilterByStatus(?string $status, array $task): bool
+    {
+        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
+    }
+
+    private function filterPropsIfExists(array $task): array
+    {
+        if ($this->props) {
+            $task = ArrayUtils::only($task, $this->props);
+        }
+
+        return $task;
     }
 }
