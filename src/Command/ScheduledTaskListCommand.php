@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Goksagun\SchedulerBundle\Command;
 
-use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
+use Goksagun\SchedulerBundle\Service\TaskLoaderInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,11 +13,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ScheduledTaskListCommand extends Command
 {
-    use ConfiguredCommandTrait;
-    use AnnotatedCommandTrait;
-    use AttributedCommandTrait;
-    use DatabasedCommandTrait;
-
     const TABLE_HEADERS = ['#', 'Id', 'Name', 'Expression', 'Times', 'Start', 'Stop', 'Status', 'Resource'];
 
     /**
@@ -26,8 +21,7 @@ class ScheduledTaskListCommand extends Command
     private array $tasks = [];
 
     public function __construct(
-        private readonly array $config,
-        private readonly ScheduledTaskService $service
+        private readonly TaskLoaderInterface $loader
     ) {
         parent::__construct();
     }
@@ -82,11 +76,8 @@ class ScheduledTaskListCommand extends Command
         $table->render();
     }
 
-    private function setTasks($status, $resource, $props = []): void
+    private function setTasks($status, $resource): void
     {
-        $this->setConfiguredTasks($status, $resource, $props);
-        $this->setAnnotatedTasks($status, $resource, $props);
-        $this->setAttributedTasks($status, $resource, $props);
-        $this->setDatabasedTasks($status, $resource, $props);
+        $this->tasks = $this->loader->load($status, $resource);
     }
 }

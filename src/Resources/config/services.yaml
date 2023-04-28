@@ -18,53 +18,53 @@ services:
 
     Goksagun\SchedulerBundle\Controller\:
         resource: '../../Controller'
-        tags: ['controller.service_arguments']
+        tags: [ 'controller.service_arguments' ]
 
     scheduler.command.scheduled_task:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskCommand
         arguments:
-            - '%scheduler%'
             - '@doctrine.orm.entity_manager'
             - '@scheduler.service.scheduled_task'
             - '@scheduler.service.scheduled_task_log'
+            - '@scheduler.loader.task_loader'
         calls:
-            - method: setProjectDir
-              arguments:
-                  - '%kernel.project_dir%'
+            -   method: setProjectDir
+                arguments:
+                    - '%kernel.project_dir%'
         tags:
             - { name: 'console.command', command: 'scheduler:run' }
 
     scheduler.command.scheduled_task_list:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskListCommand
-        arguments: ['%scheduler%', '@scheduler.service.scheduled_task']
+        arguments: [ '@scheduler.loader.task_loader' ]
         tags:
             - { name: 'console.command', command: 'scheduler:list' }
 
     scheduler.command.scheduled_task_add:
         class: Goksagun\SchedulerBundle\Command\SchedulerTaskAddCommand
-        arguments: ['@scheduler.service.scheduled_task']
+        arguments: [ '@scheduler.service.scheduled_task' ]
         tags:
             - { name: 'console.command', command: 'scheduler:add' }
 
     scheduler.command.scheduled_task_edit:
         class: Goksagun\SchedulerBundle\Command\SchedulerTaskEditCommand
-        arguments: ['@scheduler.service.scheduled_task']
+        arguments: [ '@scheduler.service.scheduled_task' ]
         tags:
             - { name: 'console.command', command: 'scheduler:edit' }
 
     scheduler.command.scheduled_task_delete:
         class: Goksagun\SchedulerBundle\Command\ScheduledTaskDeleteCommand
-        arguments: ['@scheduler.service.scheduled_task']
+        arguments: [ '@scheduler.service.scheduled_task' ]
         tags:
             - { name: 'console.command', command: 'scheduler:delete' }
 
     scheduler.service.scheduled_task:
         class: Goksagun\SchedulerBundle\Service\ScheduledTaskService
-        arguments: ['%scheduler%', '@kernel', '@service_container', '@scheduler.repository.scheduled_task']
+        arguments: [ '%scheduler%', '@kernel', '@scheduler.repository.scheduled_task' ]
 
     scheduler.service.scheduled_task_log:
         class: Goksagun\SchedulerBundle\Service\ScheduledTaskLogService
-        arguments: ['%scheduler%', '@scheduler.repository.scheduled_task_log']
+        arguments: [ '%scheduler%', '@scheduler.repository.scheduled_task_log' ]
 
     scheduler.repository.scheduled_task:
         class: Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository
@@ -74,8 +74,33 @@ services:
     scheduler.repository.scheduled_task_log:
         class: Goksagun\SchedulerBundle\Repository\ScheduledTaskLogRepository
         tags:
-              - { name: 'doctrine.repository_service' }
+            - { name: 'doctrine.repository_service' }
 
     scheduler.validator.scheduled_task_validator:
         class: Goksagun\SchedulerBundle\Command\Utils\TaskValidator
-        arguments: ['@scheduler.service.scheduled_task_log']
+        arguments: [ '@scheduler.service.scheduled_task_log' ]
+
+    scheduler.loader.annotation_task_loader:
+        class: Goksagun\SchedulerBundle\Service\AnnotationTaskLoader
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.attribute_task_loader:
+        class: Goksagun\SchedulerBundle\Service\AttributeTaskLoader
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.configuration_task_loader:
+        class: Goksagun\SchedulerBundle\Service\ConfigurationTaskLoader
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.database_task_loader:
+        class: Goksagun\SchedulerBundle\Service\DatabaseTaskLoader
+        arguments: [ '@scheduler.service.scheduled_task' ]
+        tags: [ 'scheduler.task_loader' ]
+
+    scheduler.loader.task_loader:
+        class: Goksagun\SchedulerBundle\Service\TaskLoaderService
+        arguments:
+            - !tagged_iterator scheduler.task_loader

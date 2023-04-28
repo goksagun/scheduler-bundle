@@ -5,44 +5,26 @@ declare(strict_types=1);
 namespace Goksagun\SchedulerBundle\Service;
 
 use Cron\CronExpression;
-use Goksagun\SchedulerBundle\Command\AnnotatedCommandTrait;
-use Goksagun\SchedulerBundle\Command\AttributedCommandTrait;
-use Goksagun\SchedulerBundle\Command\ConfiguredCommandTrait;
-use Goksagun\SchedulerBundle\Command\DatabasedCommandTrait;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class ScheduledTaskService
 {
-    use ConfiguredCommandTrait;
-    use AnnotatedCommandTrait;
-    use AttributedCommandTrait;
-    use DatabasedCommandTrait;
-
-    /**
-     * @var array<int, array>
-     */
-    private array $tasks = [];
-
     public function __construct(
         private readonly array $config,
         private readonly KernelInterface $kernel,
-        private readonly ContainerInterface $container,
         private readonly ScheduledTaskRepository $repository,
     ) {
     }
 
-    public function list($status = null, $resource = null, $props = []): array
+    public function getConfig(): array
     {
-        $this->setTasks($status, $resource, $props);
-
-        return $this->tasks;
+        return $this->config;
     }
 
     public function create(
@@ -117,25 +99,12 @@ class ScheduledTaskService
         return CronExpression::isValidExpression($expression);
     }
 
-    private function setTasks(?string $status = null, ?string $resource = null, array $props = []): void
-    {
-        $this->setConfiguredTasks($status, $resource, $props);
-        $this->setAnnotatedTasks($status, $resource, $props);
-        $this->setAttributedTasks($status, $resource, $props);
-        $this->setDatabasedTasks($status, $resource, $props);
-    }
-
     public function getScheduledTasks(): array
     {
         return $this->repository->findAll();
     }
 
-    private function getContainer(): ContainerInterface
-    {
-        return $this->container;
-    }
-
-    private function getApplication(): Application
+    public function getApplication(): Application
     {
         return new Application($this->kernel);
     }

@@ -8,8 +8,13 @@ use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
+use Goksagun\SchedulerBundle\Service\AnnotationTaskLoader;
+use Goksagun\SchedulerBundle\Service\AttributeTaskLoader;
+use Goksagun\SchedulerBundle\Service\ConfigurationTaskLoader;
+use Goksagun\SchedulerBundle\Service\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
+use Goksagun\SchedulerBundle\Service\TaskLoaderService;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayOptionCommand;
@@ -19,8 +24,8 @@ use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayGoodbye
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\GreetingSayHelloCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\NoOutputCommand;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -36,15 +41,16 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $config = $this->createConfigMock(false);
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -65,15 +71,16 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $config = $this->createConfigMock();
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -104,15 +111,16 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -147,16 +155,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new NoOutputCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -198,16 +207,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new GreetingSayHelloCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -243,16 +253,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new GreetingSayHelloCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -287,16 +298,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new GreetingSayGoodbyeCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -331,16 +343,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new GreetingSayGoodbyeCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -381,16 +394,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new GreetingSayGoodbyeCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -425,16 +439,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new GreetingSayGoodbyeCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -469,16 +484,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new GreetingSayGoodbyeCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -500,16 +516,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $config = $this->createConfigMock();
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new AnnotatedCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -532,16 +549,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $config = $this->createConfigMock();
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new AttributeCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -563,29 +581,32 @@ class ScheduledTaskCommandTest extends KernelTestCase
     {
         $config = $this->createConfigMock();
         $application = $this->getApplication();
-        $entityManager = $this->createEntityManagerMock([
+        $data = [
             [
                 'name' => 'schedule:database',
                 'expression' => '* * * * *',
                 'resource' => 'database',
+                'start' => null,
+                'stop' => null,
+                'times' => null,
             ],
-        ]);
-        $scheduledTaskService = $this->createScheduledTaskService([
-            [
-                'name' => 'schedule:database',
-                'expression' => '* * * * *',
-                'resource' => 'database',
-            ],
-        ]);
+        ];
+        $entityManager = $this->createEntityManagerMock($data);
+        $scheduledTaskService = $this->createScheduledTaskService(
+            $data,
+            $config,
+            $application
+        );
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new DatabasedCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -620,16 +641,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new ArrayArgumentCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -664,16 +686,17 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $application->add(new ArrayOptionCommand());
         $application->add(
             new ScheduledTaskCommand(
-                $config,
                 $entityManager,
                 $scheduledTaskService,
-                $scheduledTaskLogService
+                $scheduledTaskLogService,
+                $taskLoader
             )
         );
 
@@ -708,14 +731,15 @@ class ScheduledTaskCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $entityManager = $this->createEntityManagerMock();
-        $scheduledTaskService = $this->createScheduledTaskService();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
         $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
 
         $scheduledTaskCommand = new ScheduledTaskCommand(
-            $config,
             $entityManager,
             $scheduledTaskService,
-            $scheduledTaskLogService
+            $scheduledTaskLogService,
+            $taskLoader
         );
         $scheduledTaskCommand->setProjectDir($this->getContainer()->getParameter('kernel.project_dir'));
 
@@ -737,7 +761,7 @@ class ScheduledTaskCommandTest extends KernelTestCase
 
     private function getApplication(): Application
     {
-        return new Application();
+        return new Application($this->createKernel());
     }
 
     private function createConfigMock(
@@ -778,8 +802,11 @@ class ScheduledTaskCommandTest extends KernelTestCase
         return $entityManager;
     }
 
-    private function createScheduledTaskService(array $data = []): ScheduledTaskService
-    {
+    private function createScheduledTaskService(
+        array $data = [],
+        array $config = [],
+        Application $application = null
+    ): ScheduledTaskService {
         $scheduledTasks = [];
         foreach ($data as $datum) {
             $scheduledTask = new ScheduledTask();
@@ -793,11 +820,19 @@ class ScheduledTaskCommandTest extends KernelTestCase
             $scheduledTasks[] = $scheduledTask;
         }
 
-        $scheduledTaskService = $this->createMock(ScheduledTaskService::class);
-        $scheduledTaskService
-            ->expects($this->any())
-            ->method('getScheduledTasks')
-            ->willReturn($scheduledTasks);
+        $scheduledTaskService = $this->createConfiguredMock(ScheduledTaskService::class, ['getConfig' => $config]);
+
+        if ($scheduledTasks) {
+            $scheduledTaskService
+                ->expects($this->any())
+                ->method('getScheduledTasks')
+                ->willReturn($scheduledTasks);
+        } elseif ($application) {
+            $scheduledTaskService
+                ->expects($this->any())
+                ->method('getApplication')
+                ->willReturn($application);
+        }
 
         return $scheduledTaskService;
     }
@@ -811,5 +846,18 @@ class ScheduledTaskCommandTest extends KernelTestCase
             ->willReturn((new ScheduledTaskLog())->setName('Foo'));
 
         return $scheduledTaskLogService;
+    }
+
+    private function getTaskLoader(ScheduledTaskService $scheduledTaskService): TaskLoaderService
+    {
+        $taskLoader = new TaskLoaderService(
+            [
+                new DatabaseTaskLoader($scheduledTaskService),
+                new AttributeTaskLoader($scheduledTaskService),
+                new AnnotationTaskLoader($scheduledTaskService),
+                new ConfigurationTaskLoader($scheduledTaskService),
+            ]
+        );
+        return $taskLoader;
     }
 }
