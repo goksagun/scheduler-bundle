@@ -7,7 +7,6 @@ namespace Goksagun\SchedulerBundle\Service;
 use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
-use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 
 class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
@@ -87,14 +86,5 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
     private function shouldFilterByStatus(?string $status, array $task): bool
     {
         return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
-    }
-
-    private function filterPropsIfExists(array $task): array
-    {
-        if ($this->props) {
-            $task = ArrayUtils::only($task, $this->props);
-        }
-
-        return $task;
     }
 }

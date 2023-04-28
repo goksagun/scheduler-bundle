@@ -7,8 +7,6 @@ namespace Goksagun\SchedulerBundle\Service;
 use Goksagun\SchedulerBundle\Attribute\Schedule;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
-use Goksagun\SchedulerBundle\Enum\StatusInterface;
-use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Symfony\Component\Console\Command\Command;
 
 class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
@@ -86,14 +84,5 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function shouldFilterByStatus(?string $status, array $task): bool
     {
         return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
-    }
-
-    private function filterPropsIfExists(array $task): array
-    {
-        if ($this->props) {
-            $task = ArrayUtils::only($task, $this->props);
-        }
-
-        return $task;
     }
 }

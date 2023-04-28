@@ -38,4 +38,13 @@ abstract class AbstractTaskLoader
     {
         return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }
+
+    protected function filterPropsIfExists(array $task): array
+    {
+        if ($this->props) {
+            $task = ArrayUtils::only($task, $this->props);
+        }
+
+        return $task;
+    }
 }
