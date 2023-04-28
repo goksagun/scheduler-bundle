@@ -46,6 +46,12 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
             switch ($attr) {
+                case AttributeInterface::ATTRIBUTE_ID:
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($databaseTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_STATUS:
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($databaseTask);
+                    break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
                     $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
