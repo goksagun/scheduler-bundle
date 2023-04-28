@@ -23,9 +23,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         }
 
         foreach ($this->getCommands() as $command) {
-            $attributes = $this->getScheduleAttributes($command);
-
-            if (!$attributes) {
+            if (!$attributes = $this->getScheduleAttributes($command)) {
                 continue;
             }
 
