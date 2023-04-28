@@ -22,9 +22,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
             return [];
         }
 
-        $commands = $this->getApplication()->all();
-
-        if (!$commands) {
+        if (!$commands = $this->getCommands()) {
             return [];
         }
 
@@ -94,5 +92,11 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     public function supports(?string $resource): bool
     {
         return null === $resource || $resource === ResourceInterface::RESOURCE_ATTRIBUTE;
+    }
+
+    private function getCommands(): array
+    {
+        $commands = $this->getApplication()->all();
+        return $commands;
     }
 }
