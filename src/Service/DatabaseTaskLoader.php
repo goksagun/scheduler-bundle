@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Goksagun\SchedulerBundle\Service;
 
+use Goksagun\SchedulerBundle\Entity\ScheduledTask;
 use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
@@ -21,38 +22,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         }
 
         foreach ($this->getTasks() as $database) {
-            $databaseTask = $database->toArray();
-
-            $task = [];
-            foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-                if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
-                    $task[$attribute] = ResourceInterface::RESOURCE_DATABASE;
-
-                    continue;
-                }
-
-                if (AttributeInterface::ATTRIBUTE_START == $attribute
-                    && $databaseTask[AttributeInterface::ATTRIBUTE_START] instanceof \DateTimeInterface
-                ) {
-                    $task[AttributeInterface::ATTRIBUTE_START] = $databaseTask[AttributeInterface::ATTRIBUTE_START]->format(
-                        DateHelper::DATETIME_FORMAT
-                    );
-
-                    continue;
-                }
-
-                if (AttributeInterface::ATTRIBUTE_STOP == $attribute
-                    && $databaseTask[AttributeInterface::ATTRIBUTE_STOP] instanceof \DateTimeInterface
-                ) {
-                    $task[AttributeInterface::ATTRIBUTE_STOP] = $databaseTask[AttributeInterface::ATTRIBUTE_STOP]->format(
-                        DateHelper::DATETIME_FORMAT
-                    );
-
-                    continue;
-                }
-
-                $task[$attribute] = $databaseTask[$attribute] ?? null;
-            }
+            $task = $this->createTaskFromDatabase($database);
 
             // Filter by status
             if (null !== $status && $task[AttributeInterface::ATTRIBUTE_STATUS] !== $status) {
@@ -70,6 +40,9 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         return $this->tasks;
     }
 
+    /**
+     * @return array<int, ScheduledTask>
+     */
     public function getTasks(): array
     {
         return $this->service->getScheduledTasks();
@@ -78,5 +51,42 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
     public function supports(?string $resource): bool
     {
         return null === $resource || $resource === ResourceInterface::RESOURCE_DATABASE;
+    }
+
+    private function createTaskFromDatabase(ScheduledTask $database): array
+    {
+        $databaseTask = $database->toArray();
+
+        $task = [];
+        foreach (AttributeInterface::ATTRIBUTES as $attribute) {
+            if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
+                $task[$attribute] = ResourceInterface::RESOURCE_DATABASE;
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_START == $attribute
+                && $databaseTask[AttributeInterface::ATTRIBUTE_START] instanceof \DateTimeInterface
+            ) {
+                $task[AttributeInterface::ATTRIBUTE_START] = $databaseTask[AttributeInterface::ATTRIBUTE_START]->format(
+                    DateHelper::DATETIME_FORMAT
+                );
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_STOP == $attribute
+                && $databaseTask[AttributeInterface::ATTRIBUTE_STOP] instanceof \DateTimeInterface
+            ) {
+                $task[AttributeInterface::ATTRIBUTE_STOP] = $databaseTask[AttributeInterface::ATTRIBUTE_STOP]->format(
+                    DateHelper::DATETIME_FORMAT
+                );
+
+                continue;
+            }
+
+            $task[$attribute] = $databaseTask[$attribute] ?? null;
+        }
+        return $task;
     }
 }
