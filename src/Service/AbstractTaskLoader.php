@@ -20,7 +20,7 @@ abstract class AbstractTaskLoader
         $this->service = $service;
     }
 
-    public function supports(?string $resource): bool
+    protected function supports(?string $resource): bool
     {
         return null === $resource || $resource === static::RESOURCE;
     }
@@ -40,6 +40,11 @@ abstract class AbstractTaskLoader
         return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }
 
+    protected function shouldFilterByStatus(?string $status, array $task): bool
+    {
+        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
+    }
+
     protected function filterPropsIfExists(array $task): array
     {
         if ($this->props) {
@@ -47,10 +52,5 @@ abstract class AbstractTaskLoader
         }
 
         return $task;
-    }
-
-    protected function shouldFilterByStatus(?string $status, array $task): bool
-    {
-        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
     }
 }
