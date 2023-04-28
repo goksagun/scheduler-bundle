@@ -7,7 +7,6 @@ use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class ScheduledTaskServiceTest extends KernelTestCase
@@ -23,13 +22,12 @@ class ScheduledTaskServiceTest extends KernelTestCase
             ->willReturn([
                 (new ScheduledTask())
                     ->setName('Foo')
-                    ->setExpression('@daily')
+                    ->setExpression('@daily'),
             ]);
 
-        $container = $this->createMock(ContainerInterface::class);
         $kernel = $this->createMock(KernelInterface::class);
 
-        $this->service = new ScheduledTaskService([], $kernel, $container, $repository);
+        $this->service = new ScheduledTaskService([], $kernel, $repository);
     }
 
     public function testCreateWithAllParams()
@@ -84,10 +82,9 @@ class ScheduledTaskServiceTest extends KernelTestCase
                     ->setStatus(StatusInterface::STATUS_INACTIVE)
             );
 
-        $container = $this->createMock(ContainerInterface::class);
         $kernel = $this->createMock(KernelInterface::class);
 
-        $this->service = new ScheduledTaskService([], $kernel, $container, $repository);
+        $this->service = new ScheduledTaskService([], $kernel, $repository);
 
         $scheduledTask = $this->service->update(
             1,
@@ -121,10 +118,9 @@ class ScheduledTaskServiceTest extends KernelTestCase
                     ->setExpression('@hourly')
             );
 
-        $container = $this->createMock(ContainerInterface::class);
         $kernel = $this->createMock(KernelInterface::class);
 
-        $this->service = new ScheduledTaskService([], $kernel, $container, $repository);
+        $this->service = new ScheduledTaskService([], $kernel, $repository);
 
         $scheduledTask = $this->service->update(
             1,

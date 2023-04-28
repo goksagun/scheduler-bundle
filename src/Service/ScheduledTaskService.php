@@ -10,26 +10,14 @@ use Goksagun\SchedulerBundle\Repository\ScheduledTaskRepository;
 use Goksagun\SchedulerBundle\Utils\DateHelper;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class ScheduledTaskService
 {
-    use ConfiguredCommandTrait;
-    use AnnotatedCommandTrait;
-    use AttributedCommandTrait;
-    use DatabasedCommandTrait;
-
-    /**
-     * @var array<int, array>
-     */
-    private array $tasks = [];
-
     public function __construct(
         private readonly array $config,
         private readonly KernelInterface $kernel,
-        private readonly ContainerInterface $container,
         private readonly ScheduledTaskRepository $repository,
     ) {
     }
@@ -37,13 +25,6 @@ class ScheduledTaskService
     public function getConfig(): array
     {
         return $this->config;
-    }
-
-    public function list($status = null, $resource = null, $props = []): array
-    {
-        $this->setTasks($status, $resource, $props);
-
-        return $this->tasks;
     }
 
     public function create(
@@ -118,22 +99,9 @@ class ScheduledTaskService
         return CronExpression::isValidExpression($expression);
     }
 
-    private function setTasks(?string $status = null, ?string $resource = null, array $props = []): void
-    {
-        $this->setConfiguredTasks($status, $resource, $props);
-        $this->setAnnotatedTasks($status, $resource, $props);
-        $this->setAttributedTasks($status, $resource, $props);
-        $this->setDatabasedTasks($status, $resource, $props);
-    }
-
     public function getScheduledTasks(): array
     {
         return $this->repository->findAll();
-    }
-
-    private function getContainer(): ContainerInterface
-    {
-        return $this->container;
     }
 
     public function getApplication(): Application

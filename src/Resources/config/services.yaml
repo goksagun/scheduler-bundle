@@ -60,7 +60,7 @@ services:
 
     scheduler.service.scheduled_task:
         class: Goksagun\SchedulerBundle\Service\ScheduledTaskService
-        arguments: [ '%scheduler%', '@kernel', '@service_container', '@scheduler.repository.scheduled_task' ]
+        arguments: [ '%scheduler%', '@kernel', '@scheduler.repository.scheduled_task' ]
 
     scheduler.service.scheduled_task_log:
         class: Goksagun\SchedulerBundle\Service\ScheduledTaskLogService
