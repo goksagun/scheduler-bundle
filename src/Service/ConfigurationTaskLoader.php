@@ -13,13 +13,14 @@ use Goksagun\SchedulerBundle\Utils\HashHelper;
 class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private iterable $tasks = [];
+
     public function load(?string $status = null, ?string $resource = null): array
     {
         if (!$this->supports($resource)) {
             return [];
         }
 
-        $tasks = [];
         foreach ($this->getTasks() as $configTask) {
             $task = [];
             foreach (AttributeInterface::ATTRIBUTES as $attribute) {
@@ -63,10 +64,10 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
                 $task = ArrayUtils::only($task, $this->props);
             }
 
-            $tasks[] = $task;
+            $this->tasks[] = $task;
         }
 
-        return $tasks;
+        return $this->tasks;
     }
 
     private function getTasks(): array
