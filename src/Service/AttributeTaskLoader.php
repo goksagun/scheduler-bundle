@@ -23,60 +23,58 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         }
 
         foreach ($this->getCommands() as $command) {
-            if (!$attributes = $this->getScheduleAttributes($command)) {
-                continue;
-            }
-
-            foreach ($attributes as $attribute) {
-                if ($attribute->getName() !== Schedule::class) {
-                    continue;
-                }
-
-                $attributeTask = $attribute->getArguments();
-
-                $task = [];
-                foreach (AttributeInterface::ATTRIBUTES as $attr) {
-                    if (AttributeInterface::ATTRIBUTE_ID === $attr) {
-                        // Generate Id.
-                        $id = HashHelper::generateIdFromProps(
-                            ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS)
-                        );
-
-                        $task[$attr] = $id;
-
+            if ($attributes = $this->getScheduleAttributes($command)) {
+                foreach ($attributes as $attribute) {
+                    if ($attribute->getName() !== Schedule::class) {
                         continue;
                     }
 
-                    if (AttributeInterface::ATTRIBUTE_STATUS === $attr) {
-                        if (!isset($attributes[$attr])) {
-                            $task[$attr] = StatusInterface::STATUS_ACTIVE;
-                        } else {
-                            $task[$attr] = $attributeTask[$attr];
+                    $attributeTask = $attribute->getArguments();
+
+                    $task = [];
+                    foreach (AttributeInterface::ATTRIBUTES as $attr) {
+                        if (AttributeInterface::ATTRIBUTE_ID === $attr) {
+                            // Generate Id.
+                            $id = HashHelper::generateIdFromProps(
+                                ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS)
+                            );
+
+                            $task[$attr] = $id;
+
+                            continue;
                         }
 
+                        if (AttributeInterface::ATTRIBUTE_STATUS === $attr) {
+                            if (!isset($attributes[$attr])) {
+                                $task[$attr] = StatusInterface::STATUS_ACTIVE;
+                            } else {
+                                $task[$attr] = $attributeTask[$attr];
+                            }
+
+                            continue;
+                        }
+
+                        if (AttributeInterface::ATTRIBUTE_RESOURCE === $attr) {
+                            $task[$attr] = ResourceInterface::RESOURCE_ATTRIBUTE;
+
+                            continue;
+                        }
+
+                        $task[$attr] = $attributeTask[$attr] ?? null;
+                    }
+
+                    // Filter by status
+                    if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
                         continue;
                     }
 
-                    if (AttributeInterface::ATTRIBUTE_RESOURCE === $attr) {
-                        $task[$attr] = ResourceInterface::RESOURCE_ATTRIBUTE;
-
-                        continue;
+                    // Filter props if exists
+                    if ($this->props) {
+                        $task = ArrayUtils::only($task, $this->props);
                     }
 
-                    $task[$attr] = $attributeTask[$attr] ?? null;
+                    $this->tasks[] = $task;
                 }
-
-                // Filter by status
-                if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
-                    continue;
-                }
-
-                // Filter props if exists
-                if ($this->props) {
-                    $task = ArrayUtils::only($task, $this->props);
-                }
-
-                $this->tasks[] = $task;
             }
         }
 
