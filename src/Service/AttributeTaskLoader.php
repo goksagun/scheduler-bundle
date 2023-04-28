@@ -23,7 +23,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         }
 
         foreach ($this->getCommands() as $command) {
-            $attributes = (new \ReflectionObject($command))->getAttributes();
+            $attributes = $this->getScheduleAttributes($command);
 
             if (!$attributes) {
                 continue;
@@ -94,5 +94,11 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     {
         $commands = $this->getApplication()->all();
         return $commands;
+    }
+
+    private function getScheduleAttributes(mixed $command): array
+    {
+        $attributes = (new \ReflectionObject($command))->getAttributes();
+        return $attributes;
     }
 }
