@@ -55,27 +55,25 @@ abstract class AbstractTaskLoader
     protected function createTask(array $data): array
     {
         $task = [];
-        foreach (AttributeInterface::ATTRIBUTES as $attr) {
-            switch ($attr) {
-                case AttributeInterface::ATTRIBUTE_ID:
-                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($data);
-                    break;
-                case AttributeInterface::ATTRIBUTE_STATUS:
-                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($data);
-                    break;
-                case AttributeInterface::ATTRIBUTE_START:
-                    $task[AttributeInterface::ATTRIBUTE_START] = $this->getTaskStartTime($data);
-                    break;
-                case AttributeInterface::ATTRIBUTE_STOP:
-                    $task[AttributeInterface::ATTRIBUTE_STOP] = $this->getTaskStopTime($data);
-                    break;
-                case AttributeInterface::ATTRIBUTE_RESOURCE:
-                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = static::RESOURCE;
-                    break;
-                default:
-                    $task[$attr] = $data[$attr] ?? null;
-                    break;
-            }
+        foreach (AttributeInterface::ATTRIBUTES as $attr) switch ($attr) {
+            case AttributeInterface::ATTRIBUTE_ID:
+                $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($data);
+                break;
+            case AttributeInterface::ATTRIBUTE_STATUS:
+                $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($data);
+                break;
+            case AttributeInterface::ATTRIBUTE_START:
+                $task[AttributeInterface::ATTRIBUTE_START] = $this->getTaskStartTime($data);
+                break;
+            case AttributeInterface::ATTRIBUTE_STOP:
+                $task[AttributeInterface::ATTRIBUTE_STOP] = $this->getTaskStopTime($data);
+                break;
+            case AttributeInterface::ATTRIBUTE_RESOURCE:
+                $task[AttributeInterface::ATTRIBUTE_RESOURCE] = static::RESOURCE;
+                break;
+            default:
+                $task[$attr] = $data[$attr] ?? null;
+                break;
         }
 
         return $task;
