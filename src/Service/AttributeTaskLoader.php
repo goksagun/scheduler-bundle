@@ -22,11 +22,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
             return [];
         }
 
-        if (!$commands = $this->getCommands()) {
-            return [];
-        }
-
-        foreach ($commands as $command) {
+        foreach ($this->getCommands() as $command) {
             $attributes = (new \ReflectionObject($command))->getAttributes();
 
             if (!$attributes) {
