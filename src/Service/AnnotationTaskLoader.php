@@ -16,7 +16,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 {
 
     private AnnotationReader $reader;
-    private array $tasks = [];
+    private iterable $tasks = [];
 
     public function __construct(ScheduledTaskService $service)
     {
