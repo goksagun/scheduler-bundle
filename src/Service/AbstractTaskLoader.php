@@ -10,14 +10,11 @@ use Symfony\Component\Console\Application;
 
 abstract class AbstractTaskLoader
 {
-    protected ScheduledTaskService $service;
-
-    protected iterable $props = [];
-    protected iterable $tasks = [];
-
-    public function __construct(ScheduledTaskService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        protected readonly ScheduledTaskService $service,
+        protected iterable $props = [],
+        protected iterable $tasks = []
+    ) {
     }
 
     protected function supports(?string $resource): bool
