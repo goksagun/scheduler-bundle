@@ -92,8 +92,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
 
     private function getCommands(): array
     {
-        $commands = $this->getApplication()->all();
-        return $commands;
+        return $this->getApplication()->all();
     }
 
     private function getScheduleAttributes(mixed $command): array
