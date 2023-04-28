@@ -54,25 +54,20 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
     {
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-            if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
-                $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($configTask);
-
-                continue;
+            switch ($attribute) {
+                case AttributeInterface::ATTRIBUTE_ID:
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($configTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_STATUS:
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($configTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_RESOURCE:
+                    $task[$attribute] = ResourceInterface::RESOURCE_CONFIG;
+                    break;
+                default:
+                    $task[$attribute] = $configTask[$attribute] ?? null;
+                    break;
             }
-
-            if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
-                $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($configTask);
-
-                continue;
-            }
-
-            if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
-                $task[$attribute] = ResourceInterface::RESOURCE_CONFIG;
-
-                continue;
-            }
-
-            $task[$attribute] = $configTask[$attribute] ?? null;
         }
 
         return $task;
