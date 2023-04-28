@@ -2,6 +2,8 @@
 
 namespace Goksagun\SchedulerBundle\Service;
 
+use Goksagun\SchedulerBundle\Enum\AttributeInterface;
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\HashHelper;
 use Symfony\Component\Console\Application;
@@ -30,5 +32,10 @@ abstract class AbstractTaskLoader
     protected function generateTaskId(array $annotationTask): string
     {
         return HashHelper::generateIdFromProps(ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS));
+    }
+
+    protected function getTaskStatus(array $annotationTask): string
+    {
+        return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }
 }

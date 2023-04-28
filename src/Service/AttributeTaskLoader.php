@@ -83,11 +83,6 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         return $task;
     }
 
-    private function getTaskStatus(array $attributeTask): string
-    {
-        return $attributeTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
-    }
-
     private function shouldFilterByStatus(?string $status, array $task): bool
     {
         return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
