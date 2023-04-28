@@ -47,7 +47,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
     private function addTaskFromAnnotations(array $annotations, ?string $status): void
     {
         foreach ($annotations as $annotation) {
-            $task = $this->createTask($this->getTask($annotation));
+            $task = $this->createTask($this->getTaskDataFrom($annotation));
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);
@@ -55,7 +55,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         }
     }
 
-    private function getTask(Schedule $annotation): array
+    private function getTaskDataFrom(Schedule $annotation): array
     {
         return $annotation->toArray();
     }

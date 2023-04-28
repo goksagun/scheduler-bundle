@@ -17,8 +17,8 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
             return [];
         }
 
-        foreach ($this->getTasks() as $configTask) {
-            $task = $this->createTask($configTask);
+        foreach ($this->getTasks() as $config) {
+            $task = $this->createTask($config);
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);

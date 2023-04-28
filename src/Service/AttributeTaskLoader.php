@@ -46,7 +46,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function addTaskFromAttributes(array $attributes, ?string $status): void
     {
         foreach ($attributes as $attribute) {
-            $task = $this->createTask($this->getTask($attribute));
+            $task = $this->createTask($this->getTaskDataFrom($attribute));
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);
@@ -54,7 +54,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         }
     }
 
-    private function getTask(\ReflectionAttribute $attribute): array
+    private function getTaskDataFrom(\ReflectionAttribute $attribute): array
     {
         return $attribute->getArguments();
     }

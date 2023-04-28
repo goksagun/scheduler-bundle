@@ -19,7 +19,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         }
 
         foreach ($this->getTasks() as $database) {
-            $task = $this->createTask($this->getTask($database));
+            $task = $this->createTask($this->getTaskDataFrom($database));
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);
@@ -37,7 +37,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         return $this->service->getScheduledTasks();
     }
 
-    private function getTask(ScheduledTask $database): array
+    private function getTaskDataFrom(ScheduledTask $database): array
     {
         return $database->toArray();
     }
