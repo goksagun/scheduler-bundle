@@ -8,12 +8,11 @@ use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
-use Goksagun\SchedulerBundle\Utils\HashHelper;
 
 class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
-    private const RESOURCE = ResourceInterface::RESOURCE_CONFIG;
+    protected const RESOURCE = ResourceInterface::RESOURCE_CONFIG;
     private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
@@ -59,11 +58,6 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         }
 
         return $task;
-    }
-
-    private function generateTaskId(array $configTask): string
-    {
-        return HashHelper::generateIdFromProps(ArrayUtils::only($configTask, HashHelper::GENERATED_PROPS));
     }
 
     private function getTaskStatus(array $configTask): string

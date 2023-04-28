@@ -13,7 +13,7 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
 class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
-    private const RESOURCE = ResourceInterface::RESOURCE_DATABASE;
+    protected const RESOURCE = ResourceInterface::RESOURCE_DATABASE;
     private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array

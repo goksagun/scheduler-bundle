@@ -9,13 +9,12 @@ use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
-use Goksagun\SchedulerBundle\Utils\HashHelper;
 use Symfony\Component\Console\Command\Command;
 
 class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
-    private const RESOURCE = ResourceInterface::RESOURCE_ATTRIBUTE;
+    protected const RESOURCE = ResourceInterface::RESOURCE_ATTRIBUTE;
     private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
@@ -82,11 +81,6 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         }
 
         return $task;
-    }
-
-    private function generateTaskId(array $attributeTask): string
-    {
-        return HashHelper::generateIdFromProps(ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS));
     }
 
     private function getTaskStatus(array $attributeTask): string

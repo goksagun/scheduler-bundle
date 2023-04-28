@@ -2,6 +2,8 @@
 
 namespace Goksagun\SchedulerBundle\Service;
 
+use Goksagun\SchedulerBundle\Utils\ArrayUtils;
+use Goksagun\SchedulerBundle\Utils\HashHelper;
 use Symfony\Component\Console\Application;
 
 abstract class AbstractTaskLoader
@@ -23,5 +25,10 @@ abstract class AbstractTaskLoader
     protected function getApplication(): ?Application
     {
         return $this->service->getApplication();
+    }
+
+    protected function generateTaskId(array $annotationTask): string
+    {
+        return HashHelper::generateIdFromProps(ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS));
     }
 }

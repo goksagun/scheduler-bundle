@@ -10,7 +10,6 @@ use Goksagun\SchedulerBundle\Enum\AttributeInterface;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
-use Goksagun\SchedulerBundle\Utils\HashHelper;
 use Symfony\Component\Console\Command\Command;
 
 class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
@@ -92,11 +91,6 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         }
 
         return $task;
-    }
-
-    private function generateTaskId(array $annotationTask): string
-    {
-        return HashHelper::generateIdFromProps(ArrayUtils::only($annotationTask, HashHelper::GENERATED_PROPS));
     }
 
     private function getTaskStatus(array $annotationTask): string
