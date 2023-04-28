@@ -13,15 +13,6 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 {
 
     protected const RESOURCE = ResourceInterface::RESOURCE_ANNOTATION;
-    private AnnotationReader $reader;
-
-    public function __construct(ScheduledTaskService $service)
-    {
-        $this->reader = new AnnotationReader();
-
-        parent::__construct($service);
-    }
-
 
     public function load(?string $status = null, ?string $resource = null): array
     {
@@ -48,7 +39,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 
     private function getScheduleAnnotations(Command $command): array
     {
-        $annotations = $this->reader->getClassAnnotations(new \ReflectionObject($command));
+        $annotations = (new AnnotationReader())->getClassAnnotations(new \ReflectionObject($command));
 
         return array_filter($annotations, fn($annotation) => $annotation instanceof Schedule);
     }
