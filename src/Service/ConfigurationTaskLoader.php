@@ -28,6 +28,9 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         return $this->tasks;
     }
 
+    /**
+     * @return array<int, array>
+     */
     private function getTasks(): array
     {
         return $this->service->getConfig()['tasks'];
