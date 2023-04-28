@@ -16,6 +16,7 @@ use Symfony\Component\Console\Command\Command;
 class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private const RESOURCE = ResourceInterface::RESOURCE_ANNOTATION;
     private AnnotationReader $reader;
     private iterable $tasks = [];
 
@@ -44,7 +45,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 
     public function supports(?string $resource): bool
     {
-        return null === $resource || $resource === ResourceInterface::RESOURCE_ANNOTATION;
+        return null === $resource || $resource === self::RESOURCE;
     }
 
     /**
@@ -87,7 +88,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
                     $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($annotationTask);
                     break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
-                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ANNOTATION;
+                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 default:
                     $task[$attr] = $annotationTask[$attr] ?? null;

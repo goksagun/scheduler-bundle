@@ -13,6 +13,7 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
 class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private const RESOURCE = ResourceInterface::RESOURCE_DATABASE;
     private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
@@ -42,7 +43,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
 
     public function supports(?string $resource): bool
     {
-        return null === $resource || $resource === ResourceInterface::RESOURCE_DATABASE;
+        return null === $resource || $resource === self::RESOURCE;
     }
 
     private function createTaskFromDatabase(ScheduledTask $database): array
@@ -53,7 +54,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
             switch ($attr) {
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
-                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_DATABASE;
+                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 case AttributeInterface::ATTRIBUTE_START:
                     $task[AttributeInterface::ATTRIBUTE_START] = $this->getTaskStartTime($databaseTask);

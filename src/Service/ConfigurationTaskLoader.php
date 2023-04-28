@@ -13,6 +13,7 @@ use Goksagun\SchedulerBundle\Utils\HashHelper;
 class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private const RESOURCE = ResourceInterface::RESOURCE_CONFIG;
     private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
@@ -39,7 +40,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
 
     public function supports(?string $resource): bool
     {
-        return null === $resource || $resource === ResourceInterface::RESOURCE_CONFIG;
+        return null === $resource || $resource === self::RESOURCE;
     }
 
     private function createTaskFromConfiguration(array $configTask): array
@@ -54,7 +55,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
                     $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($configTask);
                     break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
-                    $task[$attr] = ResourceInterface::RESOURCE_CONFIG;
+                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 default:
                     $task[$attr] = $configTask[$attr] ?? null;

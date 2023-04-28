@@ -15,6 +15,7 @@ use Symfony\Component\Console\Command\Command;
 class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private const RESOURCE = ResourceInterface::RESOURCE_ATTRIBUTE;
     private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
@@ -34,7 +35,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
 
     public function supports(?string $resource): bool
     {
-        return null === $resource || $resource === ResourceInterface::RESOURCE_ATTRIBUTE;
+        return null === $resource || $resource === self::RESOURCE;
     }
 
     /**
@@ -77,7 +78,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
                     $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($attributeTask);
                     break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
-                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ATTRIBUTE;
+                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 default:
                     $task[$attr] = $attributeTask[$attr] ?? null;
