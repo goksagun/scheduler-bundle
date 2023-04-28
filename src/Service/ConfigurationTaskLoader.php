@@ -24,8 +24,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         foreach ($this->getTasks() as $configTask) {
             $task = $this->createTaskFromConfiguration($configTask);
 
-            // Filter by status
-            if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
+            if ($this->shouldFilterByStatus($status, $task)) {
                 continue;
             }
 
@@ -81,5 +80,10 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
     private function getTaskStatus(array $configTask): string
     {
         return $configTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
+    }
+
+    private function shouldFilterByStatus(?string $status, array $task): bool
+    {
+        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
     }
 }
