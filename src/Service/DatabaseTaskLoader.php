@@ -24,17 +24,9 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         foreach ($this->getTasks() as $database) {
             $task = $this->createTaskFromDatabase($database);
 
-            // Filter by status
-            if (null !== $status && $task[AttributeInterface::ATTRIBUTE_STATUS] !== $status) {
-                continue;
+            if (!$this->shouldFilterByStatus($status, $task)) {
+                $this->tasks[] = $this->filterPropsIfExists($task);
             }
-
-            // Filter props if exists
-            if ($this->props) {
-                $task = ArrayUtils::only($task, $this->props);
-            }
-
-            $this->tasks[] = $task;
         }
 
         return $this->tasks;
@@ -94,5 +86,19 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         }
 
         return null;
+    }
+
+    private function shouldFilterByStatus(?string $status, array $task): bool
+    {
+        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
+    }
+
+    private function filterPropsIfExists(array $task): array
+    {
+        if ($this->props) {
+            $task = ArrayUtils::only($task, $this->props);
+        }
+
+        return $task;
     }
 }
