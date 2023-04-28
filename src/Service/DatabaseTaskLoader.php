@@ -21,7 +21,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         }
 
         foreach ($this->getTasks() as $database) {
-            $task = $this->createTaskFromDatabase($database);
+            $task = $this->createTask($this->getTask($database));
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);
@@ -39,30 +39,28 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         return $this->service->getScheduledTasks();
     }
 
-    private function createTaskFromDatabase(ScheduledTask $database): array
+    private function createTask(array $data): array
     {
-        $databaseTask = $database->toArray();
-
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
             switch ($attr) {
                 case AttributeInterface::ATTRIBUTE_ID:
-                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($databaseTask);
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_STATUS:
-                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($databaseTask);
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
                     $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 case AttributeInterface::ATTRIBUTE_START:
-                    $task[AttributeInterface::ATTRIBUTE_START] = $this->getTaskStartTime($databaseTask);
+                    $task[AttributeInterface::ATTRIBUTE_START] = $this->getTaskStartTime($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_STOP:
-                    $task[AttributeInterface::ATTRIBUTE_STOP] = $this->getTaskStopTime($databaseTask);
+                    $task[AttributeInterface::ATTRIBUTE_STOP] = $this->getTaskStopTime($data);
                     break;
                 default:
-                    $task[$attr] = $databaseTask[$attr] ?? null;
+                    $task[$attr] = $data[$attr] ?? null;
                     break;
             }
         }
@@ -86,5 +84,10 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         }
 
         return null;
+    }
+
+    private function getTask(ScheduledTask $database): array
+    {
+        return $database->toArray();
     }
 }

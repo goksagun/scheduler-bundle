@@ -57,7 +57,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
     private function addTaskFromAnnotations(array $annotations, ?string $status): void
     {
         foreach ($annotations as $annotation) {
-            $task = $this->createTaskFromAnnotation($annotation);
+            $task = $this->createTask($this->getTask($annotation));
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);
@@ -65,28 +65,31 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         }
     }
 
-    private function createTaskFromAnnotation(Schedule $annotation): array
+    private function createTask(array $data): array
     {
-        $annotationTask = $annotation->toArray();
-
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
             switch ($attr) {
                 case AttributeInterface::ATTRIBUTE_ID:
-                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($annotationTask);
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_STATUS:
-                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($annotationTask);
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
                     $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 default:
-                    $task[$attr] = $annotationTask[$attr] ?? null;
+                    $task[$attr] = $data[$attr] ?? null;
                     break;
             }
         }
 
         return $task;
+    }
+
+    private function getTask(Schedule $annotation): array
+    {
+        return $annotation->toArray();
     }
 }

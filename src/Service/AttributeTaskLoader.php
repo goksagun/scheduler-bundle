@@ -47,7 +47,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function addTaskFromAttributes(array $attributes, ?string $status): void
     {
         foreach ($attributes as $attribute) {
-            $task = $this->createTaskFromAttribute($attribute);
+            $task = $this->createTask($this->getTask($attribute));
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);
@@ -55,28 +55,31 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         }
     }
 
-    private function createTaskFromAttribute(\ReflectionAttribute $attribute): array
+    private function createTask(array $data): array
     {
-        $attributeTask = $attribute->getArguments();
-
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
             switch ($attr) {
                 case AttributeInterface::ATTRIBUTE_ID:
-                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($attributeTask);
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_STATUS:
-                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($attributeTask);
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
                     $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 default:
-                    $task[$attr] = $attributeTask[$attr] ?? null;
+                    $task[$attr] = $data[$attr] ?? null;
                     break;
             }
         }
 
         return $task;
+    }
+
+    private function getTask(\ReflectionAttribute $attribute): array
+    {
+        return $attribute->getArguments();
     }
 }

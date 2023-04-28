@@ -19,7 +19,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         }
 
         foreach ($this->getTasks() as $configTask) {
-            $task = $this->createTaskFromConfiguration($configTask);
+            $task = $this->createTask($configTask);
 
             if (!$this->shouldFilterByStatus($status, $task)) {
                 $this->tasks[] = $this->filterPropsIfExists($task);
@@ -34,22 +34,22 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         return $this->service->getConfig()['tasks'];
     }
 
-    private function createTaskFromConfiguration(array $configTask): array
+    private function createTask(array $data): array
     {
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
             switch ($attr) {
                 case AttributeInterface::ATTRIBUTE_ID:
-                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($configTask);
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_STATUS:
-                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($configTask);
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($data);
                     break;
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
                     $task[AttributeInterface::ATTRIBUTE_RESOURCE] = self::RESOURCE;
                     break;
                 default:
-                    $task[$attr] = $configTask[$attr] ?? null;
+                    $task[$attr] = $data[$attr] ?? null;
                     break;
             }
         }
