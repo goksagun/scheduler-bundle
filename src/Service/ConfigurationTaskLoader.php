@@ -50,7 +50,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         return null === $resource || $resource === ResourceInterface::RESOURCE_CONFIG;
     }
 
-    private function createTaskFromConfiguration(mixed $configTask): array
+    private function createTaskFromConfiguration(array $configTask): array
     {
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attribute) {
