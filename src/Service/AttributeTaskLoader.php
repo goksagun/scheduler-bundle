@@ -51,39 +51,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function addTaskFromAttributes(array $attributes, ?string $status): void
     {
         foreach ($attributes as $attribute) {
-            $attributeTask = $attribute->getArguments();
-
-            $task = [];
-            foreach (AttributeInterface::ATTRIBUTES as $attr) {
-                if (AttributeInterface::ATTRIBUTE_ID === $attr) {
-                    // Generate Id.
-                    $id = HashHelper::generateIdFromProps(
-                        ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS)
-                    );
-
-                    $task[$attr] = $id;
-
-                    continue;
-                }
-
-                if (AttributeInterface::ATTRIBUTE_STATUS === $attr) {
-                    if (!isset($attributes[$attr])) {
-                        $task[$attr] = StatusInterface::STATUS_ACTIVE;
-                    } else {
-                        $task[$attr] = $attributeTask[$attr];
-                    }
-
-                    continue;
-                }
-
-                if (AttributeInterface::ATTRIBUTE_RESOURCE === $attr) {
-                    $task[$attr] = ResourceInterface::RESOURCE_ATTRIBUTE;
-
-                    continue;
-                }
-
-                $task[$attr] = $attributeTask[$attr] ?? null;
-            }
+            $task = $this->createTaskFromAttribute($attribute, $attributes);
 
             // Filter by status
             if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
@@ -97,5 +65,43 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
 
             $this->tasks[] = $task;
         }
+    }
+
+    private function createTaskFromAttribute(\ReflectionAttribute $attribute): array
+    {
+        $attributeTask = $attribute->getArguments();
+
+        $task = [];
+        foreach (AttributeInterface::ATTRIBUTES as $attr) {
+            if (AttributeInterface::ATTRIBUTE_ID === $attr) {
+                // Generate Id.
+                $id = HashHelper::generateIdFromProps(
+                    ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS)
+                );
+
+                $task[$attr] = $id;
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_STATUS === $attr) {
+                if (!isset($attributes[AttributeInterface::ATTRIBUTE_STATUS])) {
+                    $task[$attr] = StatusInterface::STATUS_ACTIVE;
+                } else {
+                    $task[$attr] = $attributeTask[AttributeInterface::ATTRIBUTE_STATUS];
+                }
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_RESOURCE === $attr) {
+                $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ATTRIBUTE;
+
+                continue;
+            }
+
+            $task[$attr] = $attributeTask[$attr] ?? null;
+        }
+        return $task;
     }
 }
