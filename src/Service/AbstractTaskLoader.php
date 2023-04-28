@@ -15,7 +15,10 @@ abstract class AbstractTaskLoader
         $this->service = $service;
     }
 
-    public abstract function supports(?string $resource): bool;
+    public function supports(?string $resource): bool
+    {
+        return null === $resource || $resource === static::RESOURCE;
+    }
 
     protected function getApplication(): ?Application
     {

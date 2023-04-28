@@ -16,7 +16,7 @@ use Symfony\Component\Console\Command\Command;
 class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
-    private const RESOURCE = ResourceInterface::RESOURCE_ANNOTATION;
+    protected const RESOURCE = ResourceInterface::RESOURCE_ANNOTATION;
     private AnnotationReader $reader;
     private iterable $tasks = [];
 
@@ -41,11 +41,6 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         }
 
         return $this->tasks;
-    }
-
-    public function supports(?string $resource): bool
-    {
-        return null === $resource || $resource === self::RESOURCE;
     }
 
     /**

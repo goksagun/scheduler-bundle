@@ -41,11 +41,6 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         return $this->service->getScheduledTasks();
     }
 
-    public function supports(?string $resource): bool
-    {
-        return null === $resource || $resource === self::RESOURCE;
-    }
-
     private function createTaskFromDatabase(ScheduledTask $database): array
     {
         $databaseTask = $database->toArray();

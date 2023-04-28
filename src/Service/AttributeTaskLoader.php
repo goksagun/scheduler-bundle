@@ -33,11 +33,6 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         return $this->tasks;
     }
 
-    public function supports(?string $resource): bool
-    {
-        return null === $resource || $resource === self::RESOURCE;
-    }
-
     /**
      * @return array<int, Command>
      */

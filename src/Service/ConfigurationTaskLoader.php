@@ -38,11 +38,6 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         return $this->service->getConfig()['tasks'];
     }
 
-    public function supports(?string $resource): bool
-    {
-        return null === $resource || $resource === self::RESOURCE;
-    }
-
     private function createTaskFromConfiguration(array $configTask): array
     {
         $task = [];
