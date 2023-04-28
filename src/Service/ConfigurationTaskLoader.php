@@ -61,11 +61,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
             }
 
             if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
-                if (!isset($configTask[$attribute])) {
-                    $task[$attribute] = StatusInterface::STATUS_ACTIVE;
-                } else {
-                    $task[$attribute] = $configTask[$attribute];
-                }
+                $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($configTask);
 
                 continue;
             }
@@ -85,5 +81,10 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
     private function generateTaskId(array $configTask): string
     {
         return HashHelper::generateIdFromProps(ArrayUtils::only($configTask, HashHelper::GENERATED_PROPS));
+    }
+
+    private function getTaskStatus(array $configTask): string
+    {
+        return $configTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }
 }
