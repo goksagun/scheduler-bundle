@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="./vendor/autoload.php" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
-  <coverage>
-    <include>
-      <directory>./</directory>
-    </include>
-    <exclude>
-      <directory>./vendor</directory>
-    </exclude>
-  </coverage>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="./vendor/autoload.php" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd">
+  <coverage/>
   <testsuites>
     <testsuite name="SchedulerBundle">
       <directory suffix="Test.php">./tests</directory>
@@ -17,4 +10,12 @@
     <server name="KERNEL_CLASS" value="Goksagun\SchedulerBundle\Tests\Fixtures\TestKernel"/>
     <server name="KERNEL_DIR" value="Tests/Fixtures/"/>
   </php>
+  <source>
+    <include>
+      <directory>./</directory>
+    </include>
+    <exclude>
+      <directory>./vendor</directory>
+    </exclude>
+  </source>
 </phpunit>
