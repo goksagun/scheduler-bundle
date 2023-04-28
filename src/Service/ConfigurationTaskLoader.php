@@ -22,37 +22,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         }
 
         foreach ($this->getTasks() as $configTask) {
-            $task = [];
-            foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-                if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
-                    // Generate Id.
-                    $id = HashHelper::generateIdFromProps(
-                        ArrayUtils::only($configTask, HashHelper::GENERATED_PROPS)
-                    );
-
-                    $task[$attribute] = $id;
-
-                    continue;
-                }
-
-                if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
-                    if (!isset($configTask[$attribute])) {
-                        $task[$attribute] = StatusInterface::STATUS_ACTIVE;
-                    } else {
-                        $task[$attribute] = $configTask[$attribute];
-                    }
-
-                    continue;
-                }
-
-                if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
-                    $task[$attribute] = ResourceInterface::RESOURCE_CONFIG;
-
-                    continue;
-                }
-
-                $task[$attribute] = $configTask[$attribute] ?? null;
-            }
+            $task = $this->createTaskFromConfiguration($configTask);
 
             // Filter by status
             if (null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS]) {
@@ -78,5 +48,42 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
     public function supports(?string $resource): bool
     {
         return null === $resource || $resource === ResourceInterface::RESOURCE_CONFIG;
+    }
+
+    private function createTaskFromConfiguration(mixed $configTask): array
+    {
+        $task = [];
+        foreach (AttributeInterface::ATTRIBUTES as $attribute) {
+            if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
+                // Generate Id.
+                $id = HashHelper::generateIdFromProps(
+                    ArrayUtils::only($configTask, HashHelper::GENERATED_PROPS)
+                );
+
+                $task[$attribute] = $id;
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_STATUS == $attribute) {
+                if (!isset($configTask[$attribute])) {
+                    $task[$attribute] = StatusInterface::STATUS_ACTIVE;
+                } else {
+                    $task[$attribute] = $configTask[$attribute];
+                }
+
+                continue;
+            }
+
+            if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
+                $task[$attribute] = ResourceInterface::RESOURCE_CONFIG;
+
+                continue;
+            }
+
+            $task[$attribute] = $configTask[$attribute] ?? null;
+        }
+
+        return $task;
     }
 }
