@@ -12,13 +12,14 @@ use Goksagun\SchedulerBundle\Utils\DateHelper;
 class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private iterable $tasks = [];
+
     public function load(?string $status = null, ?string $resource = null): array
     {
         if (!$this->supports($resource)) {
             return [];
         }
 
-        $tasks = [];
         foreach ($this->getTasks() as $database) {
             $databaseTask = $database->toArray();
 
@@ -63,10 +64,10 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
                 $task = ArrayUtils::only($task, $this->props);
             }
 
-            $tasks[] = $task;
+            $this->tasks[] = $task;
         }
 
-        return $tasks;
+        return $this->tasks;
     }
 
     public function getTasks(): array
