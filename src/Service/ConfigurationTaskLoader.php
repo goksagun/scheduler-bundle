@@ -55,12 +55,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attribute) {
             if (AttributeInterface::ATTRIBUTE_ID == $attribute) {
-                // Generate Id.
-                $id = HashHelper::generateIdFromProps(
-                    ArrayUtils::only($configTask, HashHelper::GENERATED_PROPS)
-                );
-
-                $task[$attribute] = $id;
+                $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($configTask);
 
                 continue;
             }
@@ -85,5 +80,10 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
         }
 
         return $task;
+    }
+
+    private function generateTaskId(array $configTask): string
+    {
+        return HashHelper::generateIdFromProps(ArrayUtils::only($configTask, HashHelper::GENERATED_PROPS));
     }
 }
