@@ -73,25 +73,20 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
 
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
-            if (AttributeInterface::ATTRIBUTE_ID === $attr) {
-                $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($attributeTask);
-
-                continue;
+            switch ($attr) {
+                case AttributeInterface::ATTRIBUTE_ID:
+                    $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($attributeTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_STATUS:
+                    $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($attributeTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_RESOURCE:
+                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ATTRIBUTE;
+                    break;
+                default:
+                    $task[$attr] = $attributeTask[$attr] ?? null;
+                    break;
             }
-
-            if (AttributeInterface::ATTRIBUTE_STATUS === $attr) {
-                $task[AttributeInterface::ATTRIBUTE_STATUS] = $this->getTaskStatus($attributeTask);
-
-                continue;
-            }
-
-            if (AttributeInterface::ATTRIBUTE_RESOURCE === $attr) {
-                $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ATTRIBUTE;
-
-                continue;
-            }
-
-            $task[$attr] = $attributeTask[$attr] ?? null;
         }
         return $task;
     }
