@@ -13,7 +13,6 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
 {
 
     protected const RESOURCE = ResourceInterface::RESOURCE_DATABASE;
-    private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
     {

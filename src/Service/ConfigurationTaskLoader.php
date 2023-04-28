@@ -11,7 +11,6 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
 {
 
     protected const RESOURCE = ResourceInterface::RESOURCE_CONFIG;
-    private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
     {

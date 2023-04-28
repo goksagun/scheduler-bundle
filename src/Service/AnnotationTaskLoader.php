@@ -15,7 +15,6 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
 
     protected const RESOURCE = ResourceInterface::RESOURCE_ANNOTATION;
     private AnnotationReader $reader;
-    private iterable $tasks = [];
 
     public function __construct(ScheduledTaskService $service)
     {

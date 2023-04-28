@@ -13,7 +13,6 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
 {
 
     protected const RESOURCE = ResourceInterface::RESOURCE_ATTRIBUTE;
-    private iterable $tasks = [];
 
     public function load(?string $status = null, ?string $resource = null): array
     {
