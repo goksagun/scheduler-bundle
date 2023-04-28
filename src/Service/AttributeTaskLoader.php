@@ -10,6 +10,7 @@ use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\HashHelper;
+use Symfony\Component\Console\Command\Command;
 
 class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
@@ -41,7 +42,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         return $this->getApplication()->all();
     }
 
-    private function getScheduleAttributes(mixed $command): array
+    private function getScheduleAttributes(Command $command): array
     {
         $attributes = (new \ReflectionObject($command))->getAttributes();
 

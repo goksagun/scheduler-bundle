@@ -11,6 +11,7 @@ use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Utils\ArrayUtils;
 use Goksagun\SchedulerBundle\Utils\HashHelper;
+use Symfony\Component\Console\Command\Command;
 
 class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
@@ -51,9 +52,9 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         return $this->getApplication()->all();
     }
 
-    private function getScheduleAnnotations(mixed $command): array
+    private function getScheduleAnnotations(Command $command): array
     {
-        $annotations = $this->reader->getClassAnnotations(new \ReflectionClass(get_class($command)));
+        $annotations = $this->reader->getClassAnnotations(new \ReflectionObject($command));
 
         return array_filter($annotations, fn($annotation) => $annotation instanceof Schedule);
     }
