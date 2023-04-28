@@ -82,9 +82,4 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
 
         return null;
     }
-
-    private function shouldFilterByStatus(?string $status, array $task): bool
-    {
-        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
-    }
 }

@@ -47,4 +47,9 @@ abstract class AbstractTaskLoader
 
         return $task;
     }
+
+    protected function shouldFilterByStatus(?string $status, array $task): bool
+    {
+        return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
+    }
 }
