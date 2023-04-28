@@ -25,10 +25,6 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         foreach ($this->getCommands() as $command) {
             if ($attributes = $this->getScheduleAttributes($command)) {
                 foreach ($attributes as $attribute) {
-                    if ($attribute->getName() !== Schedule::class) {
-                        continue;
-                    }
-
                     $attributeTask = $attribute->getArguments();
 
                     $task = [];
@@ -94,6 +90,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
     private function getScheduleAttributes(mixed $command): array
     {
         $attributes = (new \ReflectionObject($command))->getAttributes();
-        return $attributes;
+
+        return array_filter($attributes, fn($attribute) => $attribute->getName() === Schedule::class);
     }
 }
