@@ -14,7 +14,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
 
     public function load(?string $status = null, ?string $resource = null): array
     {
-        if (null !== $resource && $resource !== ResourceInterface::RESOURCE_DATABASE) {
+        if (!$this->supports($resource)) {
             return [];
         }
 
@@ -72,5 +72,10 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
     public function getTasks(): array
     {
         return $this->service->getScheduledTasks();
+    }
+
+    public function supports(?string $resource): bool
+    {
+        return null === $resource || $resource === ResourceInterface::RESOURCE_DATABASE;
     }
 }

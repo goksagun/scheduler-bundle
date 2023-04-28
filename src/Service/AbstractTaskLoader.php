@@ -4,7 +4,7 @@ namespace Goksagun\SchedulerBundle\Service;
 
 use Symfony\Component\Console\Application;
 
-class AbstractTaskLoader
+abstract class AbstractTaskLoader
 {
     protected ScheduledTaskService $service;
 
@@ -14,6 +14,8 @@ class AbstractTaskLoader
     {
         $this->service = $service;
     }
+
+    public abstract function supports(?string $resource): bool;
 
     protected function getApplication(): ?Application
     {

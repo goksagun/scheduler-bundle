@@ -15,7 +15,7 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
 
     public function load(?string $status = null, ?string $resource = null): array
     {
-        if (null !== $resource && $resource !== ResourceInterface::RESOURCE_CONFIG) {
+        if (!$this->supports($resource)) {
             return [];
         }
 
@@ -72,5 +72,10 @@ class ConfigurationTaskLoader extends AbstractTaskLoader implements TaskLoaderIn
     private function getTasks(): array
     {
         return $this->service->getConfig()['tasks'];
+    }
+
+    public function supports(?string $resource): bool
+    {
+        return null === $resource || $resource === ResourceInterface::RESOURCE_CONFIG;
     }
 }

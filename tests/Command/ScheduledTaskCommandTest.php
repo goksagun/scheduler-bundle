@@ -581,21 +581,16 @@ class ScheduledTaskCommandTest extends KernelTestCase
     {
         $config = $this->createConfigMock();
         $application = $this->getApplication();
-        $entityManager = $this->createEntityManagerMock([
+        $data = [
             [
                 'name' => 'schedule:database',
                 'expression' => '* * * * *',
                 'resource' => 'database',
             ],
-        ]);
+        ];
+        $entityManager = $this->createEntityManagerMock($data);
         $scheduledTaskService = $this->createScheduledTaskService(
-            [
-                [
-                    'name' => 'schedule:database',
-                    'expression' => '* * * * *',
-                    'resource' => 'database',
-                ],
-            ],
+            $data,
             $config,
             $application
         );

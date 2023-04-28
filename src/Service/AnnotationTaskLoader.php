@@ -41,7 +41,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         return $this->tasks;
     }
 
-    private function supports(?string $resource): bool
+    public function supports(?string $resource): bool
     {
         return null === $resource || $resource === ResourceInterface::RESOURCE_ANNOTATION;
     }

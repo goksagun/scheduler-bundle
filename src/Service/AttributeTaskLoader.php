@@ -16,7 +16,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
 
     public function load(?string $status = null, ?string $resource = null): array
     {
-        if (null !== $resource && $resource !== ResourceInterface::RESOURCE_ATTRIBUTE) {
+        if (!$this->supports($resource)) {
             return [];
         }
 
@@ -88,5 +88,10 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         }
 
         return $tasks;
+    }
+
+    public function supports(?string $resource): bool
+    {
+        return null === $resource || $resource === ResourceInterface::RESOURCE_ATTRIBUTE;
     }
 }
