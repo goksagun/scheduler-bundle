@@ -37,6 +37,9 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         return null === $resource || $resource === ResourceInterface::RESOURCE_ATTRIBUTE;
     }
 
+    /**
+     * @return array<int, Command>
+     */
     private function getCommands(): array
     {
         return $this->getApplication()->all();
@@ -89,7 +92,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         return HashHelper::generateIdFromProps(ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS));
     }
 
-    private function getTaskStatus($attributeTask): string
+    private function getTaskStatus(array $attributeTask): string
     {
         return $attributeTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }

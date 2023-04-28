@@ -47,6 +47,9 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         return null === $resource || $resource === ResourceInterface::RESOURCE_ANNOTATION;
     }
 
+    /**
+     * @return array<int, Command>
+     */
     private function getCommands(): array
     {
         return $this->getApplication()->all();
@@ -105,7 +108,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         return $annotationTask[AttributeInterface::ATTRIBUTE_STATUS] ?? StatusInterface::STATUS_ACTIVE;
     }
 
-    private function shouldFilterByStatus(?string $status, $task): bool
+    private function shouldFilterByStatus(?string $status, array $task): bool
     {
         return null !== $status && $status !== $task[AttributeInterface::ATTRIBUTE_STATUS];
     }
