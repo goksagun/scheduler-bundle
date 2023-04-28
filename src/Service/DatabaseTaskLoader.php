@@ -50,8 +50,8 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
         $databaseTask = $database->toArray();
 
         $task = [];
-        foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-            switch ($attribute) {
+        foreach (AttributeInterface::ATTRIBUTES as $attr) {
+            switch ($attr) {
                 case AttributeInterface::ATTRIBUTE_RESOURCE:
                     $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_DATABASE;
                     break;
@@ -62,7 +62,7 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
                     $task[AttributeInterface::ATTRIBUTE_STOP] = $this->getTaskStopTime($databaseTask);
                     break;
                 default:
-                    $task[$attribute] = $databaseTask[$attribute] ?? null;
+                    $task[$attr] = $databaseTask[$attr] ?? null;
                     break;
             }
         }

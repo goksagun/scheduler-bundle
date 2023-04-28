@@ -78,8 +78,8 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
         $annotationTask = $annotation->toArray();
 
         $task = [];
-        foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-            switch ($attribute) {
+        foreach (AttributeInterface::ATTRIBUTES as $attr) {
+            switch ($attr) {
                 case AttributeInterface::ATTRIBUTE_ID:
                     $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($annotationTask);
                     break;
@@ -90,7 +90,7 @@ class AnnotationTaskLoader extends AbstractTaskLoader implements TaskLoaderInter
                     $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_ANNOTATION;
                     break;
                 default:
-                    $task[$attribute] = $annotationTask[$attribute] ?? null;
+                    $task[$attr] = $annotationTask[$attr] ?? null;
                     break;
             }
         }
