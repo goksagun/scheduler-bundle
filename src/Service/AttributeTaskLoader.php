@@ -80,6 +80,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
                     break;
             }
         }
+
         return $task;
     }
 
