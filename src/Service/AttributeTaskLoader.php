@@ -74,12 +74,7 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attr) {
             if (AttributeInterface::ATTRIBUTE_ID === $attr) {
-                // Generate Id.
-                $id = HashHelper::generateIdFromProps(
-                    ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS)
-                );
-
-                $task[$attr] = $id;
+                $task[AttributeInterface::ATTRIBUTE_ID] = $this->generateTaskId($attributeTask);
 
                 continue;
             }
@@ -103,5 +98,10 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
             $task[$attr] = $attributeTask[$attr] ?? null;
         }
         return $task;
+    }
+
+    private function generateTaskId(array $attributeTask): string
+    {
+        return HashHelper::generateIdFromProps(ArrayUtils::only($attributeTask, HashHelper::GENERATED_PROPS));
     }
 }
