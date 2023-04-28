@@ -59,34 +59,40 @@ class DatabaseTaskLoader extends AbstractTaskLoader implements TaskLoaderInterfa
 
         $task = [];
         foreach (AttributeInterface::ATTRIBUTES as $attribute) {
-            if (AttributeInterface::ATTRIBUTE_RESOURCE == $attribute) {
-                $task[$attribute] = ResourceInterface::RESOURCE_DATABASE;
-
-                continue;
+            switch ($attribute) {
+                case AttributeInterface::ATTRIBUTE_RESOURCE:
+                    $task[AttributeInterface::ATTRIBUTE_RESOURCE] = ResourceInterface::RESOURCE_DATABASE;
+                    break;
+                case AttributeInterface::ATTRIBUTE_START:
+                    $task[AttributeInterface::ATTRIBUTE_START] = $this->getTaskStartTime($databaseTask);
+                    break;
+                case AttributeInterface::ATTRIBUTE_STOP:
+                    $task[AttributeInterface::ATTRIBUTE_STOP] = $this->getTaskStopTime($databaseTask);
+                    break;
+                default:
+                    $task[$attribute] = $databaseTask[$attribute] ?? null;
+                    break;
             }
-
-            if (AttributeInterface::ATTRIBUTE_START == $attribute
-                && $databaseTask[AttributeInterface::ATTRIBUTE_START] instanceof \DateTimeInterface
-            ) {
-                $task[AttributeInterface::ATTRIBUTE_START] = $databaseTask[AttributeInterface::ATTRIBUTE_START]->format(
-                    DateHelper::DATETIME_FORMAT
-                );
-
-                continue;
-            }
-
-            if (AttributeInterface::ATTRIBUTE_STOP == $attribute
-                && $databaseTask[AttributeInterface::ATTRIBUTE_STOP] instanceof \DateTimeInterface
-            ) {
-                $task[AttributeInterface::ATTRIBUTE_STOP] = $databaseTask[AttributeInterface::ATTRIBUTE_STOP]->format(
-                    DateHelper::DATETIME_FORMAT
-                );
-
-                continue;
-            }
-
-            $task[$attribute] = $databaseTask[$attribute] ?? null;
         }
+
         return $task;
+    }
+
+    private function getTaskStartTime(array $databaseTask): ?string
+    {
+        if ($databaseTask[AttributeInterface::ATTRIBUTE_START] instanceof \DateTimeInterface) {
+            return $databaseTask[AttributeInterface::ATTRIBUTE_START]->format(DateHelper::DATETIME_FORMAT);
+        }
+
+        return null;
+    }
+
+    private function getTaskStopTime(array $databaseTask): ?string
+    {
+        if ($databaseTask[AttributeInterface::ATTRIBUTE_STOP] instanceof \DateTimeInterface) {
+            return $databaseTask[AttributeInterface::ATTRIBUTE_STOP]->format(DateHelper::DATETIME_FORMAT);
+        }
+
+        return null;
     }
 }

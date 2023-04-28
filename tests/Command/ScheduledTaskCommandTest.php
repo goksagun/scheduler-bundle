@@ -586,6 +586,9 @@ class ScheduledTaskCommandTest extends KernelTestCase
                 'name' => 'schedule:database',
                 'expression' => '* * * * *',
                 'resource' => 'database',
+                'start' => null,
+                'stop' => null,
+                'times' => null,
             ],
         ];
         $entityManager = $this->createEntityManagerMock($data);
