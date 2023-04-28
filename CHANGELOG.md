@@ -1,3 +1,6 @@
+## 2.3.0 (April 28, 2023)
+  - Refactor task loader (#24)
+
 ## 2.2.0 (April 26, 2023)
   - Implement Attribute schedule options (#23)
 
