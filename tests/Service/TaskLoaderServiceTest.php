@@ -2,18 +2,18 @@
 
 namespace Goksagun\SchedulerBundle\Tests\Service;
 
-use Goksagun\SchedulerBundle\Service\TaskLoader;
+use Goksagun\SchedulerBundle\Service\TaskLoaderService;
 use Goksagun\SchedulerBundle\Service\TaskLoaderInterface;
 use Goksagun\SchedulerBundle\Tests\Service\Fixtures\BarTaskLoader;
 use Goksagun\SchedulerBundle\Tests\Service\Fixtures\FooTaskLoader;
 use Goksagun\SchedulerBundle\Tests\Service\Fixtures\UnsupportedTaskLoader;
 use PHPUnit\Framework\TestCase;
 
-class TaskLoaderTest extends TestCase
+class TaskLoaderServiceTest extends TestCase
 {
     public function testTaskLoaderInstanceOf()
     {
-        $taskLoader = new TaskLoader([
+        $taskLoader = new TaskLoaderService([
             new FooTaskLoader(),
         ]);
 
@@ -24,7 +24,7 @@ class TaskLoaderTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $taskLoader = new TaskLoader([
+        $taskLoader = new TaskLoaderService([
             new UnsupportedTaskLoader(),
         ]);
 
@@ -33,7 +33,7 @@ class TaskLoaderTest extends TestCase
 
     public function testTaskLoaderHasMultipleLoaders()
     {
-        $taskLoader = new TaskLoader([
+        $taskLoader = new TaskLoaderService([
             new FooTaskLoader(),
             new BarTaskLoader(),
         ]);

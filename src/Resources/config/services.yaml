@@ -101,6 +101,6 @@ services:
         tags: [ 'scheduler.task_loader' ]
 
     scheduler.loader.task_loader:
-        class: Goksagun\SchedulerBundle\Service\TaskLoader
+        class: Goksagun\SchedulerBundle\Service\TaskLoaderService
         arguments:
             - !tagged_iterator scheduler.task_loader

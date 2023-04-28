@@ -14,7 +14,7 @@ use Goksagun\SchedulerBundle\Service\ConfigurationTaskLoader;
 use Goksagun\SchedulerBundle\Service\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
-use Goksagun\SchedulerBundle\Service\TaskLoader;
+use Goksagun\SchedulerBundle\Service\TaskLoaderService;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayOptionCommand;
@@ -850,9 +850,9 @@ class ScheduledTaskCommandTest extends KernelTestCase
         return $scheduledTaskLogService;
     }
 
-    private function getTaskLoader(ScheduledTaskService $scheduledTaskService): TaskLoader
+    private function getTaskLoader(ScheduledTaskService $scheduledTaskService): TaskLoaderService
     {
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($scheduledTaskService),
                 new AttributeTaskLoader($scheduledTaskService),

@@ -11,7 +11,7 @@ use Goksagun\SchedulerBundle\Enum\ResourceInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
-use Goksagun\SchedulerBundle\Service\TaskLoader;
+use Goksagun\SchedulerBundle\Service\TaskLoaderService;
 use Goksagun\SchedulerBundle\Utils\TaskHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\RuntimeException;
@@ -54,7 +54,7 @@ class ScheduledTaskCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly ScheduledTaskService $service,
         private readonly ScheduledTaskLogService $logService,
-        private readonly TaskLoader $loader,
+        private readonly TaskLoaderService $loader,
     ) {
         parent::__construct();
     }

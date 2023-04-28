@@ -2,7 +2,7 @@
 
 namespace Goksagun\SchedulerBundle\Service;
 
-class TaskLoader implements TaskLoaderInterface
+class TaskLoaderService implements TaskLoaderInterface
 {
     /**
      * @var iterable <int, TaskLoaderInterface>

@@ -10,7 +10,7 @@ use Goksagun\SchedulerBundle\Service\AttributeTaskLoader;
 use Goksagun\SchedulerBundle\Service\ConfigurationTaskLoader;
 use Goksagun\SchedulerBundle\Service\DatabaseTaskLoader;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
-use Goksagun\SchedulerBundle\Service\TaskLoader;
+use Goksagun\SchedulerBundle\Service\TaskLoaderService;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\AnnotatedCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\ArrayArgumentCommand;
 use Goksagun\SchedulerBundle\Tests\Fixtures\FooBundle\Command\AttributeCommand;
@@ -33,7 +33,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         );
         $application = $this->getApplication();
         $service = $this->createScheduledTaskService(config: $config, application: $application);
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($service),
                 new AttributeTaskLoader($service),
@@ -85,7 +85,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         ];
         $application = $this->getApplication();
         $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($service),
                 new AttributeTaskLoader($service),
@@ -141,7 +141,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         ];
         $application = $this->getApplication();
         $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($service),
                 new AttributeTaskLoader($service),
@@ -197,7 +197,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         ];
         $application = $this->getApplication();
         $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($service),
                 new AttributeTaskLoader($service),
@@ -253,7 +253,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         ];
         $application = $this->getApplication();
         $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($service),
                 new AttributeTaskLoader($service),
@@ -311,7 +311,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         ];
         $application = $this->getApplication();
         $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($service),
                 new AttributeTaskLoader($service),
@@ -365,7 +365,7 @@ class ScheduledTaskListCommandTest extends KernelTestCase
         ];
         $application = $this->getApplication();
         $service = $this->createScheduledTaskService(config: $config, data: $data, application: $application);
-        $taskLoader = new TaskLoader(
+        $taskLoader = new TaskLoaderService(
             [
                 new DatabaseTaskLoader($service),
                 new AttributeTaskLoader($service),
