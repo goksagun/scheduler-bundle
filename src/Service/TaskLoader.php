@@ -5,11 +5,11 @@ namespace Goksagun\SchedulerBundle\Service;
 class TaskLoader implements TaskLoaderInterface
 {
     /**
-     * @var array <int, TaskLoaderInterface>
+     * @var iterable <int, TaskLoaderInterface>
      */
-    private array $loaders;
+    private iterable $loaders;
 
-    public function __construct(array $loaders)
+    public function __construct(iterable $loaders)
     {
         $this->loaders = $loaders;
     }
@@ -19,7 +19,13 @@ class TaskLoader implements TaskLoaderInterface
         $tasks = [];
         foreach ($this->loaders as $loader) {
             if (!$loader instanceof TaskLoaderInterface) {
-                throw new \InvalidArgumentException();
+                throw new \InvalidArgumentException(
+                    sprintf(
+                        'The loaders should be implement "%s". You provided "%s"',
+                        TaskLoaderInterface::class,
+                        gettype($loader)
+                    )
+                );
             }
 
             $tasks = [...$tasks, ...$loader->load($status, $resource)];

@@ -103,4 +103,4 @@ services:
     scheduler.loader.task_loader:
         class: Goksagun\SchedulerBundle\Service\TaskLoader
         arguments:
-            - [ '@scheduler.loader.attribute_task_loader', '@scheduler.loader.annotation_task_loader', '@scheduler.loader.configuration_task_loader', '@scheduler.loader.database_task_loader' ]
+            - !tagged_iterator scheduler.task_loader
