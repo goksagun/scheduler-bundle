@@ -14,6 +14,8 @@ use Goksagun\SchedulerBundle\Utils\HashHelper;
 class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterface
 {
 
+    private iterable $tasks = [];
+
     public function load(?string $status = null, ?string $resource = null): array
     {
         if (!$this->supports($resource)) {
@@ -26,7 +28,6 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
             return [];
         }
 
-        $tasks = [];
         foreach ($commands as $command) {
             $attributes = (new \ReflectionObject($command))->getAttributes();
 
@@ -83,11 +84,11 @@ class AttributeTaskLoader extends AbstractTaskLoader implements TaskLoaderInterf
                     $task = ArrayUtils::only($task, $this->props);
                 }
 
-                $tasks[] = $task;
+                $this->tasks[] = $task;
             }
         }
 
-        return $tasks;
+        return $this->tasks;
     }
 
     public function supports(?string $resource): bool
