@@ -1,3 +1,6 @@
+## 2.3.1 (February 01, 2024)
+  - Add doctrine/annotations version 2 support
+
 ## 2.3.0 (April 28, 2023)
   - Refactor task loader (#24)
 
