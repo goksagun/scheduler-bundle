@@ -182,6 +182,52 @@ class ScheduledTaskCommandTest extends KernelTestCase
         $this->assertEquals("The 'no:output' completed!\n", $output);
     }
 
+    public function testInactiveTaskCommand()
+    {
+        $config = $this->createConfigMock(
+            true,
+            false,
+            false,
+            [
+                [
+                    'name' => 'no:output',
+                    'expression' => '* * * * *',
+                    'start' => null,
+                    'stop' => null,
+                    'times' => null,
+                    'status' => StatusInterface::STATUS_INACTIVE,
+                ],
+            ]
+        );
+        $application = $this->getApplication();
+        $entityManager = $this->createEntityManagerMock();
+        $scheduledTaskService = $this->createScheduledTaskService([], $config, $application);
+        $scheduledTaskLogService = $this->createScheduledTaskLogService();
+        $taskLoader = $this->getTaskLoader($scheduledTaskService);
+
+        $application->add(new NoOutputCommand());
+        $application->add(
+            new ScheduledTaskCommand(
+                $entityManager,
+                $scheduledTaskService,
+                $scheduledTaskLogService,
+                $taskLoader
+            )
+        );
+
+        $command = $application->find('scheduler:run');
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(
+            [
+                'command' => $command->getName(),
+            ]
+        );
+
+        $output = $commandTester->getDisplay();
+
+        $this->assertEquals("", $output);
+    }
+
     public function testGreetingSayHelloWithArgumentTaskCommand()
     {
         $config = $this->createConfigMock(
