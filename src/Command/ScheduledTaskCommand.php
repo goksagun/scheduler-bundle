@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Goksagun\SchedulerBundle\Command\Utils\TaskValidator;
 use Goksagun\SchedulerBundle\Entity\ScheduledTaskLog;
 use Goksagun\SchedulerBundle\Enum\ResourceInterface;
+use Goksagun\SchedulerBundle\Enum\StatusInterface;
 use Goksagun\SchedulerBundle\Process\ProcessInfo;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskLogService;
 use Goksagun\SchedulerBundle\Service\ScheduledTaskService;
@@ -268,6 +269,10 @@ class ScheduledTaskCommand extends Command
     private function getTasks(): \Generator
     {
         foreach ($this->tasks as $task) {
+            if ($task['status'] === StatusInterface::STATUS_INACTIVE) {
+                continue;
+            }
+
             yield $task;
         }
     }
