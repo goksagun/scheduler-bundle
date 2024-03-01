@@ -1,3 +1,6 @@
+## 2.3.3 (March 01, 2024)
+  - Fix read tasks bug
+
 ## 2.3.2 (March 01, 2024)
   - Fix an inactive task to process
 

@@ -47,6 +47,17 @@ class ScheduledTaskService
         return $scheduledTask;
     }
 
+    public function read(string $id): ScheduledTask
+    {
+        $scheduledTask = $this->repository->find($id);
+
+        if (!$scheduledTask instanceof ScheduledTask) {
+            throw new NotFoundHttpException(sprintf('The task by id "%s" is not found', $id));
+        }
+
+        return $scheduledTask;
+    }
+
     public function update(
         $id,
         $name,
