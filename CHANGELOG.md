@@ -1,3 +1,6 @@
+## 2.3.4 (September 03, 2024)
+  - Add dragonmantank/cron-expression v3.x support (#25)
+
 ## 2.3.3 (March 01, 2024)
   - Fix read tasks bug
 
